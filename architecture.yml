@@ -1,0 +1,59 @@
+elements:
+  - name: Pippy
+    kind: actor
+  - name: house
+    children:
+      - plug
+      - router
+      - ups
+  - name: system
+    children:
+      - name: sensor
+        children:
+          - name: zero_ups
+          - name: raspberry_pi
+            children:
+              - edge_app
+      - name: dashboard
+      - name: server
+        tags: [software]
+        children:
+          - database
+          - name: consumer
+            tags: [lambda]
+          - name: api
+            tags: [lambda]
+          - name: broker
+            chilren:
+              - alive_queue
+              - status_queue
+associations:
+  - source: house/plug
+    destination: house/ups
+    tag: power
+  - source: house/ups
+    destination: house/router
+    tag: power
+  - source: system/sensor/raspberry_pi
+    destination: house/router
+    tag: wifi
+  - source: system/sensor/zero_ups
+    destination: system/sensor/raspberry_pi/edge_app
+    tag: status
+  - source: system/sensor/zero_ups
+    destination: system/sensor/raspberry_pi
+    tag: power
+  - source: system/sensor/raspberry_pi/edge_app
+    destination: system/server/broker
+    tag: status
+  - source: system/sensor/raspberry_pi/edge_app
+    destination: system/server/broker
+    tag: alive
+  - source: system/server/broker
+    destination: system/server/consumer
+  - source: system/server/consumer
+    destination: system/server/database
+  - source: system/server/database
+    destination: system/server/api
+  - source: system/server/api
+    destination: system/dashboard
