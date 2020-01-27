@@ -17,7 +17,7 @@ package cmd
 
 import (
 	"fmt"
-	edge "github.com/briggysmalls/detectordag/edge/internal"
+	"github.com/briggysmalls/detectordag/shared"
 	"log"
 
 	ui "github.com/gizak/termui/v3"
@@ -48,14 +48,14 @@ func init() {
 
 type dashboard struct {
 	powerState bool
-	messenger  edge.Messenger
+	messenger  shared.Messenger
 	messages   *widgets.List
 	commands   *widgets.List
 }
 
 func run(cmd *cobra.Command, args []string) {
 	// Create messenger
-	messenger := edge.NewMessenger()
+	messenger := shared.NewMessenger()
 	if err := messenger.Connect("amqp://guest:guest@localhost:5672/"); err != nil {
 		log.Fatalf("Failed to connect to AMQP: %v", err)
 	}
