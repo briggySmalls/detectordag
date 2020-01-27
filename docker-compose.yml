@@ -1,11 +1,12 @@
 version: '3'
 services:
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:management
     ports:
       - "5672:5672"
+      - "8080:15672"
   database:
-    image: mariadb:10
+    image: mysql:8
     environment:
       - MYSQL_ROOT_PASSWORD
       - MYSQL_DATABASE
