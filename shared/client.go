@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/denisbrodbeck/machineid"
 	"github.com/streadway/amqp"
+	"log"
 	"time"
 )
 
@@ -35,18 +36,21 @@ func NewReceiver() Receiver {
 
 func (c *client) Connect(address string) error {
 	// Create a connection
+	log.Print("Connecting to AMQP server...")
 	conn, err := amqp.Dial(address)
 	if err != nil {
 		return WrapError(err, "Failed to connect to RabbitMQ")
 	}
 	c.connection = conn
 	// Create a channel
+	log.Print("Creating AMQP channel...")
 	ch, err := conn.Channel()
 	if err != nil {
 		return WrapError(err, "Failed to open a channel")
 	}
 	c.channel = ch
 	// Declare a queue
+	log.Print("Declaring power_status queue...")
 	q, err := ch.QueueDeclare(
 		"power_status", // name
 		false,          // durable
