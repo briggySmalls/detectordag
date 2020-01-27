@@ -4,10 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"github.com/briggysmalls/detectordag/shared"
-	// "github.com/satori/go.uuid"
 	"github.com/streadway/amqp"
 	"log"
-	// "strings"
+	"strings"
 )
 
 var QUERY string = `
@@ -98,26 +97,22 @@ func handleMessage(m amqp.Delivery, stmt *sql.Stmt) {
 		log.Fatalf("Failed to parse JSON: %v", err)
 	}
 	// Query the emails associated with the device
-	// id, err := uuid.FromString(data.DeviceID)
-	// if err != nil {
-	// 	log.Fatalf("Failed to parse device UUID: %v", err)
-	// }
-	// rows, err := stmt.Query(id.Bytes())
-	// if err != nil {
-	// 	log.Fatalf("Failed to execute query: %v", err)
-	// }
-	// defer rows.Close()
-	// // Iterate through the emails
-	// var emails []string
-	// for rows.Next() {
-	// 	// Obtain the email
-	// 	var email string
-	// 	err := rows.Scan(&email)
-	// 	if err != nil {
-	// 		log.Fatalf("Failed to scan row: %v", err)
-	// 	}
-	// 	emails = append(emails, email)
-	// }
-	// // Print the emails
-	// log.Printf("Emails to send: %s", strings.Join(emails, ", "))
+	rows, err := stmt.Query(data.DeviceID)
+	if err != nil {
+		log.Fatalf("Failed to execute query: %v", err)
+	}
+	defer rows.Close()
+	// Iterate through the emails
+	var emails []string
+	for rows.Next() {
+		// Obtain the email
+		var email string
+		err := rows.Scan(&email)
+		if err != nil {
+			log.Fatalf("Failed to scan row: %v", err)
+		}
+		emails = append(emails, email)
+	}
+	// Print the emails
+	log.Printf("Emails to send: %s", strings.Join(emails, ", "))
 }
