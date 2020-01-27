@@ -1,9 +1,9 @@
 package main
 
 import (
-	"log"
-
+	"github.com/briggysmalls/detectordag/messages"
 	"github.com/streadway/amqp"
+	"log"
 )
 
 func failOnError(err error, msg string) {
@@ -22,12 +22,12 @@ func main() {
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		"hello", // name
-		false,   // durable
-		false,   // delete when unused
-		false,   // exclusive
-		false,   // no-wait
-		nil,     // arguments
+		"power_status", // name
+		false,          // durable
+		false,          // delete when unused
+		false,          // exclusive
+		false,          // no-wait
+		nil,            // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 
@@ -44,12 +44,24 @@ func main() {
 
 	forever := make(chan bool)
 
+	// Listen for messages until we're told to stop
 	go func() {
 		for d := range msgs {
-			log.Printf("Received a message: %s", d.Body)
+			handleMessage(d)
 		}
 	}()
 
+	// Wait for user to indicate we should quit
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
 	<-forever
+}
+
+func listen(d Delivery) {
+	// Get the message body
+	body := d.Body
+	log.Printf("Message received: %s", data)
+	// Deserialise the JSON
+	if data, err := ; err != nil {
+		log.Fatalf("Failed to parse JSON: %v", err)
+	}
 }

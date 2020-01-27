@@ -84,7 +84,7 @@ func run(cmd *cobra.Command, args []string) {
 		select e.ID {
 		case "p": // Toggle power status
 			powerState = !powerState
-			messenger.StatusUpdate(powerState)
+			messenger.PowerStatusChanged(powerState)
 		case "q": // Quit
 			return
 		}
