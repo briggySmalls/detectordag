@@ -87,9 +87,10 @@ func run(cmd *cobra.Command, args []string) {
 
 	// Add the widgets to the grid
 	grid.Set(
-		ui.NewRow(1.0/2, paragraph),
-		ui.NewRow(1.0/2, list),
-	)
+		ui.NewRow(
+			1,
+			ui.NewCol(0.8, paragraph),
+			ui.NewCol(0.2, list)))
 
 	// Draw the UI
 	ui.Render(grid)
