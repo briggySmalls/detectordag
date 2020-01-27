@@ -19,7 +19,7 @@ WHERE accounts.id = (
     FROM accounts
     INNER JOIN devices
     ON accounts.id = devices.account_id
-    WHERE devices.id = UUID_TO_BIN(?)
+    WHERE devices.id = UUID_TO_BIN(?, true)
 )
 `
 
@@ -103,7 +103,7 @@ func handleMessage(m amqp.Delivery, stmt *sql.Stmt) {
 	}
 	defer rows.Close()
 	// Iterate through the emails
-	var emails []string
+	emails := make([]string, 0)
 	for rows.Next() {
 		// Obtain the email
 		var email string
