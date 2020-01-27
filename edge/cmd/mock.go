@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	edge "github.com/briggysmalls/detectordag/edge/internal"
 	"log"
 
@@ -45,6 +46,13 @@ func init() {
 	// mockCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
+type dashboard struct {
+	powerState bool
+	messenger  edge.Messenger
+	paragraph  *widgets.Paragraph
+	list       *widgets.List
+}
+
 func run(cmd *cobra.Command, args []string) {
 	// Create messenger
 	messenger := edge.NewMessenger()
@@ -60,41 +68,57 @@ func run(cmd *cobra.Command, args []string) {
 
 	// Create a prompt
 	paragraph := widgets.NewParagraph()
-	paragraph.Text = "Mock dag-edge"
-	paragraph.SetRect(0, 0, 25, 5)
+	paragraph.Title = "Mock dag-edge"
 
 	// Create a list of controls
 	list := widgets.NewList()
-	list.Title = "List"
+	list.Title = "Key commands"
 	list.Rows = []string{
 		"[p] power",
 		"[q] quit",
 	}
 	list.TextStyle = ui.NewStyle(ui.ColorYellow)
 	list.WrapText = false
-	list.SetRect(0, 0, 25, 8)
 
 	// Create a grid layout
 	grid := ui.NewGrid()
 	termWidth, termHeight := ui.TerminalDimensions()
 	grid.SetRect(0, 0, termWidth, termHeight)
 
+	// Add the widgets to the grid
 	grid.Set(
 		ui.NewRow(1.0/2, paragraph),
 		ui.NewRow(1.0/2, list),
 	)
 
+	// Draw the UI
 	ui.Render(grid)
 
 	// Listen for keyboard events
-	powerState := true
+	d := dashboard{
+		messenger: messenger,
+		list:      list,
+		paragraph: paragraph,
+	}
 	for e := range ui.PollEvents() {
 		switch e.ID {
 		case "p": // Toggle power status
-			powerState = !powerState
-			messenger.PowerStatusChanged(powerState)
+			d.togglePowerStatus()
 		case "q": // Quit
 			return
 		}
 	}
+}
+
+func (d *dashboard) togglePowerStatus() {
+	// Toggle the state
+	d.powerState = !d.powerState
+	// Send a new message
+	if err := d.messenger.PowerStatusChanged(d.powerState); err != nil {
+		d.paragraph.Text += fmt.Sprintf("Error sending power status: %v\n", err)
+	} else {
+		d.paragraph.Text += fmt.Sprintf("Power status message sent: %v\n", d.powerState)
+	}
+	// Update the ui
+	ui.Render(d.paragraph)
 }
