@@ -4,3 +4,15 @@ services:
     image: rabbitmq
     ports:
       - "5672:5672"
+  database:
+    image: mariadb:10
+    environment:
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE
+    volumes:
+      - ./db/:/docker-entrypoint-initdb.d/
+    expose:
+      - "3306"
+    ports:
+      # For development work
+      - "3306:3306"
