@@ -13,7 +13,7 @@ CREATE TABLE `accounts` (
 # Devices
 CREATE TABLE `devices` (
   `id` BINARY(16) NOT NULL,
-  `account_id` INT(11)
+  `account_id` INT(11),
   PRIMARY KEY (id),
   FOREIGN KEY (account_id) REFERENCES accounts(id)
 );
