@@ -62,7 +62,6 @@ func setupAMQP(address string) (shared.Receiver, <-chan amqp.Delivery, error) {
 	if err := r.Connect(address); err != nil {
 		return nil, nil, err
 	}
-	defer r.Close()
 
 	// Obtain the consumer
 	c, err := r.PowerStatusConsumer()
