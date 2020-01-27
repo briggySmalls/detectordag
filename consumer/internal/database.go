@@ -1,56 +1,54 @@
 package internal
 
 import (
+    "database/sql"
     "fmt"
+    "github.com/briggysmalls/detectordag/shared"
     _ "github.com/go-sql-driver/mysql"
-    "github.com/jinzhu/gorm"
+    "log"
 )
 
-type Account struct {
-    gorm.Model
+type DbParams struct {
+    Host     string
+    Port     int32
+    Database string
     Username string
     Password string
-    Emails   []Email
-    Devices  []Device
-}
-
-type Device struct {
-    gorm.Model
-    ID byte `gorm:"type:BINARY(16)"`
-}
-
-type Email struct {
-    gorm.Model
-    Email string
 }
 
 type Database interface {
-    Connect(host, port, database, username, password string) error
-    Db() *gorm.DB
+    Connect(params DbParams) error
+    DB() *sql.DB
     Close() error
 }
 
 type database struct {
-    db *gorm.DB
+    db *sql.DB
 }
 
-func NewDatabase() {
+func NewDatabase() Database {
     return &database{}
 }
 
-func Connect(host, port, database, username, password string) error {
+func (d *database) Connect(params DbParams) error {
     connectionString := fmt.Sprintf(
-        "%s:%s@(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
-        username,
-        password,
-        database,
-        host,
-        port)
-    db, err := gorm.Open("mysql", connectionString)
+        "%s:%s@(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
+        params.Username,
+        params.Password,
+        params.Host,
+        params.Port,
+        params.Database)
+    log.Printf("Connecting to database: %s", connectionString)
+    db, err := sql.Open("mysql", connectionString)
     if err != nil {
         return shared.WrapError(err, "Failed to connect to database")
     }
+    d.db = db
     return nil
+}
+
+func (d *database) DB() *sql.DB {
+    return d.db
 }
 
 func (d *database) Close() error {

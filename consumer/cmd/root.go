@@ -33,7 +33,14 @@ var rootCmd = &cobra.Command{
   // Uncomment the following line if your bare application
   // has an action associated with it:
   Run: func(cmd *cobra.Command, args []string) {
-    if err := consumer.Run("amqp://guest:guest@localhost:5672/"); err != nil {
+    params := consumer.DbParams{
+      Host:     "127.0.0.1",
+      Port:     3306,
+      Database: "detectordag",
+      Username: "root",
+      Password: "password",
+    }
+    if err := consumer.Run("amqp://guest:guest@localhost:5672/", params); err != nil {
       fmt.Println(err)
     }
   },
