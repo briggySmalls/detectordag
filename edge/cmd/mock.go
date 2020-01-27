@@ -16,9 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"log"
 	edge "github.com/briggysmalls/detectordag/edge/internal"
+	"log"
 
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
@@ -60,28 +59,37 @@ func run(cmd *cobra.Command, args []string) {
 	defer ui.Close()
 
 	// Create a prompt
-	p := widgets.NewParagraph()
-	p.Text = "Mock dag-edge"
-	p.SetRect(0, 0, 25, 5)
+	paragraph := widgets.NewParagraph()
+	paragraph.Text = "Mock dag-edge"
+	paragraph.SetRect(0, 0, 25, 5)
 
 	// Create a list of controls
-	l := widgets.NewList()
-	l.Title = "List"
-	l.Rows = []string{
+	list := widgets.NewList()
+	list.Title = "List"
+	list.Rows = []string{
 		"[p] power",
 		"[q] quit",
 	}
-	l.TextStyle = ui.NewStyle(ui.ColorYellow)
-	l.WrapText = false
-	l.SetRect(0, 0, 25, 8)
+	list.TextStyle = ui.NewStyle(ui.ColorYellow)
+	list.WrapText = false
+	list.SetRect(0, 0, 25, 8)
 
-	// Render the UI
-	ui.Render(p)
+	// Create a grid layout
+	grid := ui.NewGrid()
+	termWidth, termHeight := ui.TerminalDimensions()
+	grid.SetRect(0, 0, termWidth, termHeight)
+
+	grid.Set(
+		ui.NewRow(1.0/2, paragraph),
+		ui.NewRow(1.0/2, list),
+	)
+
+	ui.Render(grid)
 
 	// Listen for keyboard events
 	powerState := true
 	for e := range ui.PollEvents() {
-		select e.ID {
+		switch e.ID {
 		case "p": // Toggle power status
 			powerState = !powerState
 			messenger.PowerStatusChanged(powerState)
