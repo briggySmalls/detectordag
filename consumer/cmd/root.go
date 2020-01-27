@@ -33,7 +33,9 @@ var rootCmd = &cobra.Command{
   // Uncomment the following line if your bare application
   // has an action associated with it:
   Run: func(cmd *cobra.Command, args []string) {
-    consumer.Run("amqp://guest:guest@localhost:5672/")
+    if err := consumer.Run("amqp://guest:guest@localhost:5672/"); err != nil {
+      fmt.Println(err)
+    }
   },
 }
 

@@ -7,20 +7,20 @@ import (
 	"log"
 )
 
-func Run(address string) {
+func Run(address string) error {
 	// Create a receiver
 	r := shared.NewReceiver()
 
 	// Connect
 	if err := r.Connect(address); err != nil {
-		shared.WrapError(err, "Failed to create receiver")
+		return shared.WrapError(err, "Failed to create receiver")
 	}
 	defer r.Close()
 
 	// Obtain the consumer
 	c, err := r.PowerStatusConsumer()
 	if err != nil {
-		shared.WrapError(err, "Failed to create consumer")
+		return shared.WrapError(err, "Failed to create consumer")
 	}
 
 	forever := make(chan bool)
@@ -34,6 +34,7 @@ func Run(address string) {
 	// Wait for user to indicate we should quit
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
 	<-forever
+	return nil
 }
 
 func handleMessage(d amqp.Delivery) {
