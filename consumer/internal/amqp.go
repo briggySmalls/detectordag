@@ -12,10 +12,10 @@ func Run(address string) {
 	r := shared.NewReceiver()
 
 	// Connect
-	err := r.Connect(address)
-	if err != nil {
+	if err := r.Connect(address); err != nil {
 		shared.WrapError(err, "Failed to create receiver")
 	}
+	defer r.Close()
 
 	// Obtain the consumer
 	c, err := r.PowerStatusConsumer()

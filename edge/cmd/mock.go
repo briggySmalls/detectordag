@@ -59,6 +59,7 @@ func run(cmd *cobra.Command, args []string) {
 	if err := messenger.Connect("amqp://guest:guest@localhost:5672/"); err != nil {
 		log.Fatalf("Failed to connect to AMQP: %v", err)
 	}
+	defer messenger.Close()
 
 	// Initialise terminal
 	if err := ui.Init(); err != nil {

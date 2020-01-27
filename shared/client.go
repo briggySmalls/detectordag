@@ -10,11 +10,13 @@ import (
 type Messenger interface {
 	Connect(address string) error
 	PowerStatusChanged(status bool) error
+	Close()
 }
 
 type Receiver interface {
 	Connect(address string) error
 	PowerStatusConsumer() (<-chan amqp.Delivery, error)
+	Close()
 }
 
 type client struct {
@@ -90,6 +92,11 @@ func (c *client) PowerStatusConsumer() (<-chan amqp.Delivery, error) {
 		return nil, WrapError(err, "Failed to register consumer")
 	}
 	return msgs, nil
+}
+
+func (c *client) Close() {
+	c.channel.Close()
+	c.connection.Close()
 }
 
 func (c *client) sendMessage(queue amqp.Queue, body []byte) error {
