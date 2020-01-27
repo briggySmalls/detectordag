@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/briggysmalls/detectordag/messages"
+	"encoding/json"
+	"github.com/briggysmalls/detectordag/shared"
 	"github.com/streadway/amqp"
 	"log"
 )
@@ -56,12 +57,13 @@ func main() {
 	<-forever
 }
 
-func listen(d Delivery) {
+func handleMessage(d amqp.Delivery) {
 	// Get the message body
 	body := d.Body
-	log.Printf("Message received: %s", data)
+	log.Printf("Message received: %s", body)
 	// Deserialise the JSON
-	if data, err := ; err != nil {
+	var data shared.PowerStatusChangedV1
+	if err := json.Unmarshal(body, &data); err != nil {
 		log.Fatalf("Failed to parse JSON: %v", err)
 	}
 }

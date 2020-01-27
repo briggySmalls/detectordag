@@ -49,8 +49,8 @@ func init() {
 type dashboard struct {
 	powerState bool
 	messenger  edge.Messenger
-	paragraph  *widgets.Paragraph
-	list       *widgets.List
+	messages   *widgets.List
+	commands   *widgets.List
 }
 
 func run(cmd *cobra.Command, args []string) {
@@ -67,18 +67,19 @@ func run(cmd *cobra.Command, args []string) {
 	defer ui.Close()
 
 	// Create a prompt
-	paragraph := widgets.NewParagraph()
-	paragraph.Title = "Mock dag-edge"
+	messageList := widgets.NewList()
+	messageList.Title = "Mock dag-edge"
+	messageList.Rows = []string{}
 
 	// Create a list of controls
-	list := widgets.NewList()
-	list.Title = "Key commands"
-	list.Rows = []string{
+	commandList := widgets.NewList()
+	commandList.Title = "Key commands"
+	commandList.Rows = []string{
 		"[p] power",
 		"[q] quit",
 	}
-	list.TextStyle = ui.NewStyle(ui.ColorYellow)
-	list.WrapText = false
+	commandList.TextStyle = ui.NewStyle(ui.ColorYellow)
+	commandList.WrapText = false
 
 	// Create a grid layout
 	grid := ui.NewGrid()
@@ -89,8 +90,8 @@ func run(cmd *cobra.Command, args []string) {
 	grid.Set(
 		ui.NewRow(
 			1,
-			ui.NewCol(0.8, paragraph),
-			ui.NewCol(0.2, list)))
+			ui.NewCol(0.8, messageList),
+			ui.NewCol(0.2, commandList)))
 
 	// Draw the UI
 	ui.Render(grid)
@@ -98,8 +99,8 @@ func run(cmd *cobra.Command, args []string) {
 	// Listen for keyboard events
 	d := dashboard{
 		messenger: messenger,
-		list:      list,
-		paragraph: paragraph,
+		commands:  commandList,
+		messages:  messageList,
 	}
 	for e := range ui.PollEvents() {
 		switch e.ID {
@@ -115,11 +116,14 @@ func (d *dashboard) togglePowerStatus() {
 	// Toggle the state
 	d.powerState = !d.powerState
 	// Send a new message
+	var message string
 	if err := d.messenger.PowerStatusChanged(d.powerState); err != nil {
-		d.paragraph.Text += fmt.Sprintf("Error sending power status: %v\n", err)
+		message = fmt.Sprintf("Error sending power status: %v", err)
 	} else {
-		d.paragraph.Text += fmt.Sprintf("Power status message sent: %v\n", d.powerState)
+		message = fmt.Sprintf("Power status message sent: %v", d.powerState)
 	}
+	d.messages.Rows = append(d.messages.Rows, message)
+	d.messages.ScrollBottom()
 	// Update the ui
-	ui.Render(d.paragraph)
+	ui.Render(d.messages)
 }

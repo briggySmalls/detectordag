@@ -69,14 +69,14 @@ func (m *messenger) sendMessage(queue amqp.Queue, body []byte) error {
 	return nil
 }
 
-func newStatusMessage(status bool) (*shared.StatusMessageV1, error) {
+func newStatusMessage(status bool) (*shared.PowerStatusChangedV1, error) {
 	// Get machine ID
 	id, err := machineid.ID()
 	if err != nil {
 		return nil, shared.WrapError(err, "Failed to get machine ID")
 	}
 	// Create the message data
-	return &shared.StatusMessageV1{
+	return &shared.PowerStatusChangedV1{
 		Version:   "0.1.0",
 		Status:    status,
 		Timestamp: time.Now(),

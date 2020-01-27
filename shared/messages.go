@@ -9,7 +9,7 @@ type Message struct {
 	Payload interface{} `json:""`
 }
 
-type StatusMessageV1 struct {
+type PowerStatusChangedV1 struct {
 	Version   string    `json:""`
 	Status    bool      `json:""`
 	Timestamp time.Time `json:""`
