@@ -25,10 +25,6 @@ elements:
         tags: [lambda]
       - name: api
         tags: [lambda]
-      - name: broker
-        chilren:
-          - alive_queue
-          - status_queue
 associations:
   - source: plug
     destination: system/sensor/zero_ups
@@ -41,39 +37,34 @@ associations:
     tag: power
   - source: system/sensor/raspberry_pi
     destination: system/sensor/dongle
-    tag: update.power
+    tag: (update.power)
   - source: system/sensor/raspberry_pi
     destination: system/sensor/dongle
-    tag: update.alive
+    tag: (update.alive)
   - source: system/sensor/dongle
-    destination: system/broker
-    tag: update.power
+    destination: system/consumer
+    tag: (update.power)
   - source: system/sensor/dongle
-    destination: system/broker
-    tag: update.alive
-  - source: system/broker
     destination: system/consumer
-    tag: update.power
-  - source: system/broker
-    destination: system/consumer
-    tag: update.alive
+    tag: (update.alive)
   - source: system/consumer
     destination: system/database
     tag: record-power-changed
+  - source: system/database
+    destination: system/consumer
+    tag: emails
   - source: system/consumer
     destination: system/database
     tag: record-alive
   - source: system/consumer
-    destination: system/broker
-    tag: email.power
+    destination: system/emailer
+    tag: (email.power)
   - source: system/database
     destination: system/db-cron
+    tag: last-seen
   - source: system/db-cron
-    destination: system/broker
-    tag: email.lost
-  - source: system/broker
     destination: system/emailer
-    tag: email.*
+    tag: (email.lost)
   - source: system/emailer
     destination: email-client
     tag: email
