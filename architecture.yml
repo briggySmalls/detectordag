@@ -1,6 +1,7 @@
 elements:
   - name: Pippy
     kind: actor
+  - name: email-client
   - name: house
     children:
       - plug
@@ -15,18 +16,19 @@ elements:
             children:
               - edge_app
       - name: dashboard
-      - name: server
-        tags: [software]
-        children:
-          - database
-          - name: consumer
-            tags: [lambda]
-          - name: api
-            tags: [lambda]
-          - name: broker
-            chilren:
-              - alive_queue
-              - status_queue
+      - database
+      - name: consumer
+        tags: [lambda]
+      - name: emailer
+        tags: [lambda]
+      - name: db-cron
+        tags: [lambda]
+      - name: api
+        tags: [lambda]
+      - name: broker
+        chilren:
+          - alive_queue
+          - status_queue
 associations:
   - source: house/plug
     destination: house/ups
@@ -44,16 +46,42 @@ associations:
     destination: system/sensor/raspberry_pi
     tag: power
   - source: system/sensor/raspberry_pi/edge_app
-    destination: system/server/broker
-    tag: status
+    destination: system/broker
+    tag: update.power
   - source: system/sensor/raspberry_pi/edge_app
-    destination: system/server/broker
-    tag: alive
-  - source: system/server/broker
-    destination: system/server/consumer
-  - source: system/server/consumer
-    destination: system/server/database
-  - source: system/server/database
-    destination: system/server/api
-  - source: system/server/api
+    destination: system/broker
+    tag: update.alive
+  - source: system/broker
+    destination: system/consumer
+    tag: update.power
+  - source: system/broker
+    destination: system/consumer
+    tag: update.alive
+  - source: system/consumer
+    destination: system/database
+    tag: record-power-changed
+  - source: system/consumer
+    destination: system/database
+    tag: record-alive
+  - source: system/consumer
+    destination: system/broker
+    tag: email.power
+  - source: system/database
+    destination: system/db-cron
+  - source: system/db-cron
+    destination: system/broker
+    tag: email.lost
+  - source: system/broker
+    destination: system/emailer
+    tag: email.*
+  - source: system/emailer
+    destination: email-client
+    tag: email
+  - source: email-client
+    destination: Pippy
+  - source: system/database
+    destination: system/api
+  - source: system/api
     destination: system/dashboard
+  - source: system/dashboard
+    destination: Pippy
