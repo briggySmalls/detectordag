@@ -1,5 +1,5 @@
 elements:
-  - name: Pippy
+  - name: Nor
     kind: actor
   - name: email-client
   - name: plug
@@ -69,10 +69,10 @@ associations:
     destination: email-client
     tag: email
   - source: email-client
-    destination: Pippy
+    destination: Nor
   - source: system/database
     destination: system/api
   - source: system/api
     destination: system/dashboard
   - source: system/dashboard
-    destination: Pippy
+    destination: Nor
