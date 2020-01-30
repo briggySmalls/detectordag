@@ -2,16 +2,16 @@ elements:
   - name: Pippy
     kind: actor
   - name: email-client
-  - name: house
-    children:
-      - plug
-      - router
-      - ups
+  - name: plug
   - name: system
     children:
       - name: sensor
         children:
-          - name: zero_ups
+          - zero_ups
+          - name: dongle
+            children:
+              - hardware
+              - sim
           - name: raspberry_pi
             children:
               - edge_app
@@ -30,25 +30,25 @@ elements:
           - alive_queue
           - status_queue
 associations:
-  - source: house/plug
-    destination: house/ups
+  - source: plug
+    destination: system/sensor/zero_ups
     tag: power
-  - source: house/ups
-    destination: house/router
-    tag: power
-  - source: system/sensor/raspberry_pi
-    destination: house/router
-    tag: wifi
   - source: system/sensor/zero_ups
     destination: system/sensor/raspberry_pi/edge_app
     tag: status
   - source: system/sensor/zero_ups
     destination: system/sensor/raspberry_pi
     tag: power
-  - source: system/sensor/raspberry_pi/edge_app
+  - source: system/sensor/raspberry_pi
+    destination: system/sensor/dongle
+    tag: update.power
+  - source: system/sensor/raspberry_pi
+    destination: system/sensor/dongle
+    tag: update.alive
+  - source: system/sensor/dongle
     destination: system/broker
     tag: update.power
-  - source: system/sensor/raspberry_pi/edge_app
+  - source: system/sensor/dongle
     destination: system/broker
     tag: update.alive
   - source: system/broker
