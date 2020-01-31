@@ -1,78 +1,83 @@
-elements:
-  - name: Nor
-    kind: actor
-  - name: email-client
-  - name: plug
-  - name: system
-    children:
-      - name: sensor
-        children:
-          - zero_ups
-          - name: dongle
-            children:
-              - hardware
-              - sim
-          - name: raspberry_pi
-            children:
-              - edge_app
-      - name: dashboard
-      - database
-      - name: consumer
-        tags: [lambda]
-      - name: emailer
-        tags: [lambda]
-      - name: db-cron
-        tags: [lambda]
-      - name: api
-        tags: [lambda]
-associations:
-  - source: plug
-    destination: system/sensor/zero_ups
-    tag: power
-  - source: system/sensor/zero_ups
-    destination: system/sensor/raspberry_pi/edge_app
-    tag: status
-  - source: system/sensor/zero_ups
-    destination: system/sensor/raspberry_pi
-    tag: power
-  - source: system/sensor/raspberry_pi
-    destination: system/sensor/dongle
-    tag: (update.power)
-  - source: system/sensor/raspberry_pi
-    destination: system/sensor/dongle
-    tag: (update.alive)
-  - source: system/sensor/dongle
-    destination: system/consumer
-    tag: (update.power)
-  - source: system/sensor/dongle
-    destination: system/consumer
-    tag: (update.alive)
-  - source: system/consumer
-    destination: system/database
-    tag: record-power-changed
-  - source: system/database
-    destination: system/consumer
-    tag: emails
-  - source: system/consumer
-    destination: system/database
-    tag: record-alive
-  - source: system/consumer
-    destination: system/emailer
-    tag: (email.power)
-  - source: system/database
-    destination: system/db-cron
-    tag: last-seen
-  - source: system/db-cron
-    destination: system/emailer
-    tag: (email.lost)
-  - source: system/emailer
-    destination: email-client
-    tag: email
-  - source: email-client
-    destination: Nor
-  - source: system/database
-    destination: system/api
-  - source: system/api
-    destination: system/dashboard
-  - source: system/dashboard
-    destination: Nor
+config:
+  footer: |
+    skinparam nodesep 10
+    skinparam ranksep 20
+model:
+  elements:
+    - name: Nor
+      kind: actor
+    - name: email-client
+    - name: plug
+    - name: system
+      children:
+        - name: sensor
+          children:
+            - zero_ups
+            - name: dongle
+              children:
+                - hardware
+                - sim
+            - name: raspberry_pi
+              children:
+                - edge_app
+        - name: dashboard
+        - database
+        - name: consumer
+          tags: [lambda]
+        - name: emailer
+          tags: [lambda]
+        - name: db-cron
+          tags: [lambda]
+        - name: api
+          tags: [lambda]
+  associations:
+    - source: plug
+      destination: system/sensor/zero_ups
+      tag: power
+    - source: system/sensor/zero_ups
+      destination: system/sensor/raspberry_pi/edge_app
+      tag: status
+    - source: system/sensor/zero_ups
+      destination: system/sensor/raspberry_pi
+      tag: power
+    - source: system/sensor/raspberry_pi
+      destination: system/sensor/dongle
+      tag: (update.power)
+    - source: system/sensor/raspberry_pi
+      destination: system/sensor/dongle
+      tag: (update.alive)
+    - source: system/sensor/dongle
+      destination: system/consumer
+      tag: (update.power)
+    - source: system/sensor/dongle
+      destination: system/consumer
+      tag: (update.alive)
+    - source: system/consumer
+      destination: system/database
+      tag: record-power-changed
+    - source: system/database
+      destination: system/consumer
+      tag: emails
+    - source: system/consumer
+      destination: system/database
+      tag: record-alive
+    - source: system/consumer
+      destination: system/emailer
+      tag: (email.power)
+    - source: system/database
+      destination: system/db-cron
+      tag: last-seen
+    - source: system/db-cron
+      destination: system/emailer
+      tag: (email.lost)
+    - source: system/emailer
+      destination: email-client
+      tag: email
+    - source: email-client
+      destination: Nor
+    - source: system/database
+      destination: system/api
+    - source: system/api
+      destination: system/dashboard
+    - source: system/dashboard
+      destination: Nor
