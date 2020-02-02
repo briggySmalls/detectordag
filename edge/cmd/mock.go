@@ -48,14 +48,14 @@ func init() {
 
 type dashboard struct {
 	powerState bool
-	messenger  shared.Messenger
+	messenger  shared.SensingMessenger
 	messages   *widgets.List
 	commands   *widgets.List
 }
 
 func run(cmd *cobra.Command, args []string) {
 	// Create messenger
-	messenger := shared.NewMessenger()
+	messenger := shared.NewSensingMessenger()
 	if err := messenger.Connect("amqp://guest:guest@localhost:5672/"); err != nil {
 		log.Fatalf("Failed to connect to AMQP: %v", err)
 	}

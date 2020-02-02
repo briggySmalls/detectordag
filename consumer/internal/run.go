@@ -53,9 +53,9 @@ func Run(address string, params DbParams) error {
 	return nil
 }
 
-func setupAMQP(address string) (shared.Receiver, <-chan amqp.Delivery, error) {
+func setupAMQP(address string) (shared.SensingReceiver, <-chan amqp.Delivery, error) {
 	// Create a receiver
-	r := shared.NewReceiver()
+	r := shared.NewSensingReceiver()
 
 	// Connect
 	if err := r.Connect(address); err != nil {
