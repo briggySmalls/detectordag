@@ -7,11 +7,13 @@
     - include_role:
         name: mikolak-net.raspi_config
       vars:
+        raspi_config_update_packages: no
         raspi_config_locale: en_GB.UTF-8
         raspi_config_timezone: Europe/London
         raspi_config_replace_user:
-          name: "{{ user }}"
-          path_to_ssh_key: "~/.ssh/my_pub_key_id_rsa.pub"
+          name: "{{ ssh_user.name }}"
+          path_to_ssh_key: "{{ ssh_user.key }}"
+        raspi_config_fail_on_auth_test: no
     - name: Connect to wifi
       include_role:
         name: layereight.wifi
@@ -26,5 +28,5 @@
           - fish
     - name: Set fish as the default shell
       user:
-        name: "{{ user }}"
+        name: "{{ ssh_user.name }}"
         shell: /usr/bin/fish
