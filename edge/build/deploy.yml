@@ -1,0 +1,30 @@
+---
+- hosts: raspberrypi.local
+  become: yes
+  vars_files:
+    - vault.yml
+  tasks:
+    - include_role:
+        name: mikolak-net.raspi_config
+      vars:
+        raspi_config_locale: en_GB.UTF-8
+        raspi_config_timezone: Europe/London
+        raspi_config_replace_user:
+          name: "{{ user }}"
+          path_to_ssh_key: "~/.ssh/my_pub_key_id_rsa.pub"
+    - name: Connect to wifi
+      include_role:
+        name: layereight.wifi
+      vars:
+        wifi_ssid: "{{ wifi.ssid }}"
+        wifi_psk: "{{ wifi.password }}"
+    - name: Install tools
+      apt:
+        name: "{{ packages }}"
+      vars:
+        packages:
+          - fish
+    - name: Set fish as the default shell
+      user:
+        name: "{{ user }}"
+        shell: /usr/bin/fish

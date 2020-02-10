@@ -1,0 +1,5 @@
+all:
+  hosts:
+    raspberrypi.local:
+      ansible_ssh_user: pi
+      ansible_ssh_pass: raspberry
