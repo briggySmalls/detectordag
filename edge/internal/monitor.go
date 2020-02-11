@@ -28,9 +28,9 @@ func Monitor() error {
       // Read the new state
       state := pin.Read()
       if state == rpio.Low {
-        log.Print("Power back!")
-      } else if state == rpio.High {
         log.Print("Power gone!")
+      } else if state == rpio.High {
+        log.Print("Power back!")
       } else {
         log.Print("Unexpected state %i", state)
       }
