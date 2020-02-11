@@ -1,32 +1,40 @@
 package internal
 
 import (
-  "github.com/stianeikeland/go-rpio/v4"
+  rpio "github.com/stianeikeland/go-rpio/v4"
   "log"
+  "time"
 )
 
 const POWER_DETECT_PIN = 4
 
-func monitor() {
+func Monitor() error {
   // Initialise pins
+  log.Print("Initialising GPIO")
   err := rpio.Open()
+  if err != nil {
+    return err
+  }
   defer rpio.Close()
   // Configure pin as detecting input changes
+  log.Print("Configuring pin")
   pin := rpio.Pin(POWER_DETECT_PIN)
   pin.Input()
   pin.Detect(rpio.AnyEdge)
   // Listen for changes
+  log.Print("Listening...")
   for {
     if pin.EdgeDetected() {
       // Read the new state
       state := pin.Read()
-      if state == gpio.Low {
+      if state == rpio.Low {
         log.Print("Power back!")
-      } else if state == gpio.High {
+      } else if state == rpio.High {
         log.Print("Power gone!")
       } else {
-        log.Errorf("Unexpected state %i", state)
+        log.Print("Unexpected state %i", state)
       }
+      time.Sleep(time.Second / 10)
     }
   }
 }

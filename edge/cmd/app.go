@@ -16,10 +16,9 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
-	edge "github.com/briggysmalls/edge/internal"
+	edge "github.com/briggysmalls/detectordag/edge/internal"
 	"github.com/spf13/cobra"
+	"log"
 )
 
 // appCmd represents the app command
@@ -28,13 +27,19 @@ var appCmd = &cobra.Command{
 	Short: "Run the power detection application",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Create a channel for waiting on
+		log.Print("Creating a channel for waiting on")
 		forever := make(chan bool)
 		// Run monitoring
-		go edge.monitor()
+		log.Print("Run monitoring")
+		go func() {
+			err := edge.Monitor()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}()
 		// Wait for user to indicate we should quit
-		log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
+		log.Print(" [*] Waiting for messages. To exit press CTRL+C")
 		<-forever
-		return nil
 	},
 }
 
