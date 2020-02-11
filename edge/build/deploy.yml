@@ -14,6 +14,7 @@
           name: "{{ ssh_user.name }}"
           path_to_ssh_key: "{{ ssh_user.key }}"
         raspi_config_fail_on_auth_test: no
+        raspi_config_reboot_max_wait_time: 600
     - name: Ensure ssh is enabled
       systemd:
         name: ssh
