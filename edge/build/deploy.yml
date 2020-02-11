@@ -14,6 +14,14 @@
           name: "{{ ssh_user.name }}"
           path_to_ssh_key: "{{ ssh_user.key }}"
         raspi_config_fail_on_auth_test: no
+    - name: Ensure ssh is enabled
+      systemd:
+        name: ssh
+        enabled: yes
+    - name: Ensure ssh is started
+      systemd:
+        name: ssh
+        state: started
     - name: Connect to wifi
       include_role:
         name: layereight.wifi
