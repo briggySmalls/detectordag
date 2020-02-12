@@ -8,9 +8,6 @@ from setuptools import setup, find_packages
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
-    history = history_file.read()
-
 requirements = ['Click>=6.0', ]
 
 setup_requirements = ['pytest-runner', ]
@@ -36,20 +33,20 @@ setup(
     description="Software for edge device in detectordag system",
     entry_points={
         'console_scripts': [
-            'detectordag_edge=detectordag_edge.cli:main',
+            'edge=edge.cli:main',
         ],
     },
     install_requires=requirements,
     license="MIT license",
-    long_description=readme + '\n\n' + history,
+    long_description=readme,
     include_package_data=True,
     keywords='detectordag_edge',
     name='detectordag_edge',
-    packages=find_packages(include=['detectordag_edge']),
+    packages=find_packages(include=['edge']),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/briggySmalls/detectordag_edge',
+    url='https://github.com/briggySmalls/edge',
     version='0.1.0',
     zip_safe=False,
 )
