@@ -1,16 +1,14 @@
-# -*- coding: utf-8 -*-
-
-"""Console script for detectordag_edge."""
+"""Console script for edge."""
 import sys
 import click
 
 
 @click.command()
-def main(args=None):
-    """Console script for detectordag_edge."""
+def main():
+    """Console script for edge."""
     click.echo("Replace this message by putting your code into "
-               "detectordag_edge.cli.main")
-    click.echo("See click documentation at http://click.pocoo.org/")
+               "edge.cli.main")
+    click.echo("See click documentation at https://click.palletsprojects.com/")
     return 0
 
 

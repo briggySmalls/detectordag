@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-
-"""Top-level package for detectordag edge."""
+"""Top-level package for detectordag-edge."""
 
 __author__ = """Sam Briggs"""
 __email__ = 'briggySmalls90@gmail.com'
