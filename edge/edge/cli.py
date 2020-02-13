@@ -1,14 +1,13 @@
 """Console script for edge."""
 import sys
 import click
+from edge import run
 
 
 @click.command()
 def main():
     """Console script for edge."""
-    click.echo("Replace this message by putting your code into "
-               "edge.cli.main")
-    click.echo("See click documentation at https://click.palletsprojects.com/")
+    run()
     return 0
 
 
