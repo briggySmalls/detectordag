@@ -9,7 +9,7 @@ from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 
 logger = logging.getLogger(__name__)
 
-CERT_ROOT_PATH = Path('/app/certs')
+CERT_ROOT_PATH = Path(__file__).parent / 'certs'
 
 
 def payload_report(self, params, packet):
@@ -54,7 +54,7 @@ def setup_mqtt():
     device_uuid = os.getenv("BALENA_DEVICE_UUID")
 
     # Save credential files
-    CERT_ROOT_PATH.mkdir(exist_ok=True)
+    CERT_ROOT_PATH.mkdir(parents=True, exist_ok=True)
     set_cred("AWS_ROOT_CERT", "root-CA.crt")
     set_cred("AWS_THING_CERT", "thing.cert.pem")
     set_cred("AWS_PRIVATE_CERT", "thing.private.key")
