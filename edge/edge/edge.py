@@ -1,18 +1,23 @@
 """Main module."""
-import time
 import os
 import base64
+import logging
+from pathlib import Path
 
 from time import sleep
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 
-### Functions
+logger = logging.getLogger(__name__)
+
+CERT_ROOT_PATH = Path('/usr/src/app/')
+
 
 def payload_report(self, params, packet):
-    print("----- New Payload -----")
-    print("Topic: ", packet.topic)
-    print("Message: ", packet.payload)
-    print("-----------------------")
+    logger.info("----- New Payload -----")
+    logger.info("Topic: ", packet.topic)
+    logger.info("Message: ", packet.payload)
+    logger.info("-----------------------")
+
 
 def set_cred(env_name, file_name):
     #Turn base64 encoded environmental variable into a certificate file
@@ -20,49 +25,57 @@ def set_cred(env_name, file_name):
     with open(file_name, "wb") as output_file:
         output_file.write(base64.b64decode(env))
 
-### MQTT Setup
-certRootPath = '/usr/src/app/'
-print("MQTT Thing Starting...")
 
-aws_endpoint = os.getenv("AWS_ENDPOINT", "data.iot.us-east-1.amazonaws.com")
-aws_port = os.getenv("AWS_PORT", 8883)
-device_uuid = os.getenv("BALENA_DEVICE_UUID")
+def run():
+    """Runs the application"""
+    logger.debug("MQTT Thing Starting...")
 
-# Save credential files
-set_cred("AWS_ROOT_CERT","root-CA.crt")
-set_cred("AWS_THING_CERT","thing.cert.pem")
-set_cred("AWS_PRIVATE_CERT","thing.private.key")
+    # Configure the client
+    client = setup_mqtt()
 
-# Unique ID. If another connection using the same key is opened the previous one is auto closed by AWS IOT
-mqtt_client = AWSIoTMQTTClient(device_uuid)
+    # Subscribe to the desired topic and register a callback.
+    client.subscribe("balena/payload_test", 1, payload_report)
 
-#Used to configure the host name and port number the underneath AWS IoT MQTT Client tries to connect to.
-mqtt_client.configureEndpoint(aws_endpoint, aws_port)
+    # Send messages too
+    i = 0
+    while True:
+        i += 1
+        print('Publishing to "balena/payload_write_test" the value: ', i)
+        client.publish("balena/payload_write_test", i, 0)
+        sleep(5)
 
-# Used to configure the rootCA, private key and certificate files. configureCredentials(CAFilePath, KeyPath='', CertificatePath='')
-mqtt_client.configureCredentials(certRootPath+"root-CA.crt", certRootPath+"thing.private.key", certRootPath+"thing.cert.pem")
 
-# Configure the offline queue for publish requests to be 20 in size and drop the oldest
-mqtt_client.configureOfflinePublishQueueing(-1)
+def setup_mqtt():
+    """
+    Configure MQTT
+    """
+    aws_endpoint = os.getenv("AWS_ENDPOINT", "data.iot.us-east-1.amazonaws.com")
+    aws_port = os.getenv("AWS_PORT", 8883)
+    device_uuid = os.getenv("BALENA_DEVICE_UUID")
 
-# Used to configure the draining speed to clear up the queued requests when the connection is back. (frequencyInHz)
-mqtt_client.configureDrainingFrequency(2)
+    # Save credential files
+    set_cred("AWS_ROOT_CERT", "root-CA.crt")
+    set_cred("AWS_THING_CERT", "thing.cert.pem")
+    set_cred("AWS_PRIVATE_CERT", "thing.private.key")
 
-# Configure connect/disconnect timeout to be 10 seconds
-mqtt_client.configureConnectDisconnectTimeout(10)
+    # Unique ID. If another connection using the same key is opened the previous one is auto closed by AWS IOT
+    client = AWSIoTMQTTClient(device_uuid)
+    #Used to configure the host name and port number the underneath AWS IoT MQTT Client tries to connect to.
+    client.configureEndpoint(aws_endpoint, aws_port)
+    # Used to configure the rootCA, private key and certificate files. configureCredentials(CAFilePath, KeyPath='', CertificatePath='')
+    client.configureCredentials(
+        CERT_ROOT_PATH / "root-CA.crt",
+        CERT_ROOT_PATH / "thing.private.key",
+        CERT_ROOT_PATH / "thing.cert.pem")
+    # Configure the offline queue for publish requests to be 20 in size and drop the oldest
+    client.configureOfflinePublishQueueing(-1)
+    # Used to configure the draining speed to clear up the queued requests when the connection is back. (frequencyInHz)
+    client.configureDrainingFrequency(2)
+    # Configure connect/disconnect timeout to be 10 seconds
+    client.configureConnectDisconnectTimeout(10)
+    # Configure MQTT operation timeout to be 5 seconds
+    client.configureMQTTOperationTimeout(5)
+    # Connect to AWS IoT with default keepalive set to 600 seconds
+    client.connect()
 
-# Configure MQTT operation timeout to be 5 seconds
-mqtt_client.configureMQTTOperationTimeout(5)
-
-# Connect to AWS IoT with default keepalive set to 600 seconds
-mqtt_client.connect()
-
-# Subscribe to the desired topic and register a callback.
-mqtt_client.subscribe("balena/payload_test", 1, payload_report)
-
-i=0
-while True:
-    i=i+1
-    print('Publishing to "balena/payload_write_test" the value: ', i)
-    mqtt_client.publish("balena/payload_write_test", i, 0)
-    sleep(5)
+    return client
