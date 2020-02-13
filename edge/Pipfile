@@ -16,6 +16,7 @@ pylint = "*"
 pytest = "*"
 isort = "*"
 yapf = "*"
+mypy = "*"
 
 [packages]
-edge = {path = ".", editable = true}
+edge = {path = ".",editable = true}
