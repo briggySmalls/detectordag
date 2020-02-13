@@ -1,7 +1,7 @@
 """Console script for edge."""
 import sys
 import click
-from edge import run
+from edge.edge import run
 
 
 @click.command()

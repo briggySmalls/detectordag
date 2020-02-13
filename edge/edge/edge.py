@@ -64,9 +64,9 @@ def setup_mqtt():
     client.configureEndpoint(aws_endpoint, aws_port)
     # Used to configure the rootCA, private key and certificate files. configureCredentials(CAFilePath, KeyPath='', CertificatePath='')
     client.configureCredentials(
-        CERT_ROOT_PATH / "root-CA.crt",
-        CERT_ROOT_PATH / "thing.private.key",
-        CERT_ROOT_PATH / "thing.cert.pem")
+        (CERT_ROOT_PATH / "root-CA.crt").resolve(),
+        (CERT_ROOT_PATH / "thing.private.key").resolve(),
+        (CERT_ROOT_PATH / "thing.cert.pem").resolve())
     # Configure the offline queue for publish requests to be 20 in size and drop the oldest
     client.configureOfflinePublishQueueing(-1)
     # Used to configure the draining speed to clear up the queued requests when the connection is back. (frequencyInHz)
