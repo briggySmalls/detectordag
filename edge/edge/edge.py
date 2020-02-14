@@ -14,8 +14,8 @@ CERT_ROOT_PATH = Path(__file__).parent / 'certs'
 
 def payload_report(self, params, packet):
     logger.info("----- New Payload -----")
-    logger.info("Topic: ", packet.topic)
-    logger.info("Message: ", packet.payload)
+    logger.info("Topic: %s", packet.topic)
+    logger.info("Message: %s", packet.payload)
     logger.info("-----------------------")
 
 
@@ -40,7 +40,7 @@ def run():
     i = 0
     while True:
         i += 1
-        print('Publishing to "balena/payload_write_test" the value: ', i)
+        logger.info('Publishing to "balena/payload_write_test" the value: %i', i)
         client.publish("balena/payload_write_test", i, 0)
         sleep(5)
 
