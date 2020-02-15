@@ -7,6 +7,7 @@ from setuptools import setup, find_packages
 requirements = [
     'Click>=7.0',
     'AWSIoTPythonSDK',
+    'rpi.gpio; platform_machine=="armv6l"',
     'gpiozero; platform_machine=="armv6l"',
 ]
 
