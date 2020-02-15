@@ -3,12 +3,17 @@ import base64
 import logging
 import os
 from pathlib import Path
-from time import sleep
 
 from edge.aws import ClientConfig, CloudClient
+try:
+    from gpiozero import DigitalInputDevice
+except ImportError:
+    # We are not on the raspberry pi
+    from mocks import MockDigitalInputDevice as DigitalInputDevice
 
-logger = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
+_POWER_PIN = 4
 CERT_ROOT_PATH = Path(__file__).parent / 'certs'
 CERTS_PATHS = {
     'root_cert': CERT_ROOT_PATH / "root-CA.crt",
@@ -32,9 +37,16 @@ def _set_cred(env_name: str, file: Path) -> None:
         output_file.write(base64.b64decode(env))
 
 
+def _publish_update(client: CloudClient, device: DigitalInputDevice) -> None:
+    # Get the status
+    status = device.value
+    # Publish
+    client.power_status_changed(status)
+
+
 def run():
-    """Runs the application"""
-    logger.debug("MQTT Thing Starting...")
+    """Run the application"""
+    _LOGGER.debug("MQTT Thing Starting...")
 
     # Ensure certificates are available
     _create_certs()
@@ -49,11 +61,10 @@ def run():
 
     # Create a client
     with CloudClient(config) as client:
-        # Send messages too
-        i = 0
-        while True:
-            i += 1
-            logger.info(
-                'Publishing to "balena/payload_write_test" the value: %i', i)
-            client.publish("balena/payload_write_test", i, 0)
-            sleep(5)
+        # Track power status GPIO
+        power_status_device = DigitalInputDevice(_POWER_PIN)
+        # Send messages when power status changes
+        power_status_device.when_activated = lambda device: _publish_update(
+            client, device)
+        power_status_device.when_deactivated = lambda device: _publish_update(
+            client, device)

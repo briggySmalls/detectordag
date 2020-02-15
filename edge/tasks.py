@@ -72,14 +72,6 @@ def lint_mypy(c):
     """
     Lint code with mypy
     """
-    c.run("mypy --strict")
-
-
-@task
-def lint_mypy(c):
-    """
-    Lint code with mypy
-    """
     c.run("mypy --strict --config mypy.ini --allow-untyped-decorators")
 
 
