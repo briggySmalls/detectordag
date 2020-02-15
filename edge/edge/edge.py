@@ -17,6 +17,14 @@ CERTS_PATHS = {
 }
 
 
+def _create_certs():
+    # Create certificates from environment variables
+    CERT_ROOT_PATH.mkdir(parents=True, exist_ok=True)
+    set_cred("AWS_ROOT_CERT", CERTS_PATHS['root_cert'])
+    set_cred("AWS_THING_CERT", CERTS_PATHS['thing_cert'])
+    set_cred("AWS_PRIVATE_CERT", CERTS_PATHS['thing_key'])
+
+
 def payload_report(self, params, packet):
     logger.info("----- New Payload -----")
     logger.info("Topic: %s", packet.topic)
@@ -35,23 +43,21 @@ def run():
     """Runs the application"""
     logger.debug("MQTT Thing Starting...")
 
-    # Create certificates from environment variables
-    CERT_ROOT_PATH.mkdir(parents=True, exist_ok=True)
-    set_cred("AWS_ROOT_CERT", CERTS_PATHS['root_cert'])
-    set_cred("AWS_THING_CERT", CERTS_PATHS['thing_cert'])
-    set_cred("AWS_PRIVATE_CERT", CERTS_PATHS['thing_key'])
+    # Ensure certificates are available
+    _create_certs()
 
-    # Configure the client
+    # Prepare configuration for the client
     config = ClientConfig(
         device_id=os.getenv("BALENA_DEVICE_UUID"),
-        endpoint=os.getenv("AWS_ENDPOINT", "data.iot.us-east-1.amazonaws.com"),
+        endpoint=os.getenv("AWS_ENDPOINT"),
         port=os.getenv("AWS_PORT", "8883"),
         **{key: str(value)
            for key, value in CERTS_PATHS.items()})
+
+    # Create a client
     with CloudClient(config) as client:
         # Subscribe to the desired topic and register a callback.
         client.subscribe("balena/payload_test", 1, payload_report)
-
         # Send messages too
         i = 0
         while True:
