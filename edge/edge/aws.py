@@ -18,15 +18,15 @@ class ClientConfig:
     thing_key: Path
     endpoint: str
     port: int
-    draining_frequency: int = 2
-    disconnect_timeout: int = 10
-    operation_timeout: int = 5
 
 
 class CloudClient:
     """Client for interfacing with the cloud"""
     _QOS = 0
     _POWER_STATUS_TOPIC = 'detectordag/power_status_changed'
+    _DRAINING_FREQUENCY = 2
+    _DISCONNECT_TIMEOUT = 10
+    _OPERATION_TIMEOUT = 5
 
     def __init__(self, config: ClientConfig) -> None:
         self.config = config
@@ -46,13 +46,13 @@ class CloudClient:
         self.client.configureOfflinePublishQueueing(-1)
         # Used to configure the draining speed to clear up the queued requests
         # when the connection is back. (frequencyInHz)
-        self.client.configureDrainingFrequency(self.config.draining_frequency)
+        self.client.configureDrainingFrequency(self._DRAINING_FREQUENCY)
         # Configure connect/disconnect timeout to be 10 seconds
         self.client.configureConnectDisconnectTimeout(
-            self.config.disconnect_timeout)
+            self._DISCONNECT_TIMEOUT)
         # Configure MQTT operation timeout to be 5 seconds
         self.client.configureMQTTOperationTimeout(
-            self.config.operation_timeout)
+            self._OPERATION_TIMEOUT)
 
     def __enter__(self) -> 'CloudClient':
         # Connect
