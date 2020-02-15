@@ -10,6 +10,7 @@ class MockDigitalInputDevice:
         _LOGGER.debug("Creating MockDigitalInputDevice with pin: %s", pin)
         self.when_activated = None
         self.when_deactivated = None
+        self._status = False
 
     def high(self) -> None:
         """Simulate reading a 'high' value
@@ -21,8 +22,19 @@ class MockDigitalInputDevice:
         """
         self.set_status(False)
 
+    def toggle(self) -> None:
+        """Simulate the input toggling value
+        """
+        self.set_status(not self._status)
+
+    @property
+    def value(self) -> bool:
+        """Get the simulated value of the input"""
+        return self._status
+
     def set_status(self, status: bool) -> None:
         """Simulate reading a new status"""
+        self._status = status
         if status:
             self.when_activated(self)  # pylint: disable=not-callable
         else:

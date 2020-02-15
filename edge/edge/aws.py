@@ -1,7 +1,8 @@
 """Logic for connecting to AWS IoT"""
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from pathlib import Path
+import json
 
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 
@@ -18,6 +19,15 @@ class ClientConfig:
     thing_key: Path
     endpoint: str
     port: int
+
+
+@dataclass
+class PowerStatusChangedPayload:
+    version = '0.1'
+    status: bool
+
+    def to_json(self) -> str:
+        return json.dumps(asdict(self))
 
 
 class CloudClient:
@@ -48,21 +58,21 @@ class CloudClient:
         # when the connection is back. (frequencyInHz)
         self.client.configureDrainingFrequency(self._DRAINING_FREQUENCY)
         # Configure connect/disconnect timeout to be 10 seconds
-        self.client.configureConnectDisconnectTimeout(
-            self._DISCONNECT_TIMEOUT)
+        self.client.configureConnectDisconnectTimeout(self._DISCONNECT_TIMEOUT)
         # Configure MQTT operation timeout to be 5 seconds
-        self.client.configureMQTTOperationTimeout(
-            self._OPERATION_TIMEOUT)
+        self.client.configureMQTTOperationTimeout(self._OPERATION_TIMEOUT)
 
     def __enter__(self) -> 'CloudClient':
         # Connect
         self.client.connect()
+        # Return this
+        return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         del exc_type, exc_value, traceback
         self.client.disconnect()
 
-    def status_update(self, status: bool) -> None:
+    def power_status_changed(self, status: bool) -> None:
         """Send a messaging indicating the power status has updated
 
         Args:
@@ -70,4 +80,5 @@ class CloudClient:
         """
         _LOGGER.info('Publishing to "%s" the value: %i',
                      self._POWER_STATUS_TOPIC, status)
-        self.client.publish(self._POWER_STATUS_TOPIC, status, self._QOS)
+        payload = PowerStatusChangedPayload(status=status)
+        self.client.publish(self._POWER_STATUS_TOPIC, payload.to_json(), self._QOS)
