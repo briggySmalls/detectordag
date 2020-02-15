@@ -1,5 +1,6 @@
 # Next we begin the real image, first installing requirements
 FROM balenalib/%%BALENA_MACHINE_NAME%%-alpine-python:3.7
+RUN apk update && apk add py3-gpiozero
 # Copy the package source
 COPY . /app
 WORKDIR /app
