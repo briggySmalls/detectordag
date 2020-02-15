@@ -5,7 +5,11 @@ import os
 from pathlib import Path
 
 from edge.aws import ClientConfig, CloudClient
-from gpiozero import DigitalInputDevice
+try:
+    from gpiozero import DigitalInputDevice
+except ImportError:
+    # We are not on the raspberry pi
+    from mocks import MockDigitalInputDevice as DigitalInputDevice
 
 _LOGGER = logging.getLogger(__name__)
 
