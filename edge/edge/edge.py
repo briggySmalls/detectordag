@@ -1,9 +1,8 @@
 """Main module."""
-import os
 import base64
 import logging
+import os
 from pathlib import Path
-
 from time import sleep
 
 logger = logging.getLogger(__name__)
@@ -37,10 +36,10 @@ def run():
 
     # Configure the client
     config = ClientConfig(
-        aws_endpoint = os.getenv("AWS_ENDPOINT", "data.iot.us-east-1.amazonaws.com")
-        aws_port = os.getenv("AWS_PORT", 8883)
-        device_uuid = os.getenv("BALENA_DEVICE_UUID")
-        )
+        device_id=os.getenv("BALENA_DEVICE_UUID"),
+        endpoint=os.getenv("AWS_ENDPOINT", "data.iot.us-east-1.amazonaws.com"),
+        port=os.getenv("AWS_PORT", "8883"),
+    )
     with CloudClient(config) as client:
         # Subscribe to the desired topic and register a callback.
         client.subscribe("balena/payload_test", 1, payload_report)
@@ -49,6 +48,7 @@ def run():
         i = 0
         while True:
             i += 1
-            logger.info('Publishing to "balena/payload_write_test" the value: %i', i)
+            logger.info(
+                'Publishing to "balena/payload_write_test" the value: %i', i)
             client.publish("balena/payload_write_test", i, 0)
             sleep(5)

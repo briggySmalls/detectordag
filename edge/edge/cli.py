@@ -1,8 +1,10 @@
 """Console script for edge."""
-import sys
-import click
-from edge.edge import run
 import logging
+import sys
+
+import click
+
+from edge.edge import run
 
 
 @click.command()
