@@ -22,7 +22,10 @@ class ClientConfig:
 
 
 class CloudClient:
-    def __init__(self, config: ClientConfig):
+    _QOS = 0
+    _POWER_STATUS_TOPIC = 'detectordag/power_status_changed'
+
+    def __init__(self, config: ClientConfig) -> None:
         self.config = config
         # Unique ID. If another connection using the same key is opened the
         # previous one is auto closed by AWS IOT
@@ -55,3 +58,8 @@ class CloudClient:
     def __exit__(self, type, value, traceback) -> None:
         del type, value, traceback
         self.client.disconnect()
+
+    def status_update(self, status: bool) -> None:
+        # Send an update
+        logger.info('Publishing to "%s" the value: %i', self._POWER_STATUS_TOPIC, status)
+        self.client.publish(self._POWER_STATUS_TOPIC, status, self._QOS)
