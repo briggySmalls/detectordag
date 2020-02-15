@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 requirements = [
     'Click>=7.0',
     'AWSIoTPythonSDK',
-    'gpiozero; platform_machine=="armv7l"',
+    'gpiozero; platform_machine=="armv6l"',
 ]
 
 setup_requirements = ['pytest-runner', ]
