@@ -5,8 +5,8 @@ import os
 from pathlib import Path
 from time import sleep
 
-from gpiozero import DigitalInputDevice
 from edge.aws import ClientConfig, CloudClient
+from gpiozero import DigitalInputDevice
 
 logger = logging.getLogger(__name__)
 
@@ -61,5 +61,7 @@ def run():
         # Track power status GPIO
         power_status_device = DigitalInputDevice(_POWER_PIN)
         # Send messages when power status changes
-        power_status_device.when_activated = lambda device: _publish_update(client, device)
-        power_status_device.when_deactivated = lambda device: _publish_update(client, device)
+        power_status_device.when_activated = lambda device: _publish_update(
+            client, device)
+        power_status_device.when_deactivated = lambda device: _publish_update(
+            client, device)

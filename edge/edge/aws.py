@@ -61,5 +61,6 @@ class CloudClient:
 
     def status_update(self, status: bool) -> None:
         # Send an update
-        logger.info('Publishing to "%s" the value: %i', self._POWER_STATUS_TOPIC, status)
+        logger.info('Publishing to "%s" the value: %i',
+                    self._POWER_STATUS_TOPIC, status)
         self.client.publish(self._POWER_STATUS_TOPIC, status, self._QOS)
