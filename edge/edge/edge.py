@@ -20,19 +20,12 @@ CERTS_PATHS = {
 def _create_certs():
     # Create certificates from environment variables
     CERT_ROOT_PATH.mkdir(parents=True, exist_ok=True)
-    set_cred("AWS_ROOT_CERT", CERTS_PATHS['root_cert'])
-    set_cred("AWS_THING_CERT", CERTS_PATHS['thing_cert'])
-    set_cred("AWS_PRIVATE_CERT", CERTS_PATHS['thing_key'])
+    _set_cred("AWS_ROOT_CERT", CERTS_PATHS['root_cert'])
+    _set_cred("AWS_THING_CERT", CERTS_PATHS['thing_cert'])
+    _set_cred("AWS_PRIVATE_CERT", CERTS_PATHS['thing_key'])
 
 
-def payload_report(self, params, packet):
-    logger.info("----- New Payload -----")
-    logger.info("Topic: %s", packet.topic)
-    logger.info("Message: %s", packet.payload)
-    logger.info("-----------------------")
-
-
-def set_cred(env_name: str, file: Path) -> None:
+def _set_cred(env_name: str, file: Path) -> None:
     # Turn base64 encoded environmental variable into a certificate file
     env = os.getenv(env_name)
     with file.open('wb') as output_file:
@@ -56,8 +49,6 @@ def run():
 
     # Create a client
     with CloudClient(config) as client:
-        # Subscribe to the desired topic and register a callback.
-        client.subscribe("balena/payload_test", 1, payload_report)
         # Send messages too
         i = 0
         while True:
