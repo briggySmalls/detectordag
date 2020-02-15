@@ -3,12 +3,11 @@ import base64
 import logging
 import os
 from pathlib import Path
-from time import sleep
 
 from edge.aws import ClientConfig, CloudClient
 from gpiozero import DigitalInputDevice
 
-logger = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
 _POWER_PIN = 4
 CERT_ROOT_PATH = Path(__file__).parent / 'certs'
@@ -43,7 +42,7 @@ def _publish_update(client: CloudClient, device: DigitalInputDevice) -> None:
 
 def run():
     """Runs the application"""
-    logger.debug("MQTT Thing Starting...")
+    _LOGGER.debug("MQTT Thing Starting...")
 
     # Ensure certificates are available
     _create_certs()

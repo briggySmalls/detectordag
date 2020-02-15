@@ -5,7 +5,7 @@ from pathlib import Path
 
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 
-logger = logging.getLogger(__file__)
+_LOGGER = logging.getLogger(__file__)
 
 
 @dataclass
@@ -61,6 +61,6 @@ class CloudClient:
 
     def status_update(self, status: bool) -> None:
         # Send an update
-        logger.info('Publishing to "%s" the value: %i',
-                    self._POWER_STATUS_TOPIC, status)
+        _LOGGER.info('Publishing to "%s" the value: %i',
+                     self._POWER_STATUS_TOPIC, status)
         self.client.publish(self._POWER_STATUS_TOPIC, status, self._QOS)
