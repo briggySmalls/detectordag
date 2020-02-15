@@ -10,6 +10,8 @@ _LOGGER = logging.getLogger(__file__)
 
 @dataclass
 class ClientConfig:
+    """Configuration for the CloudClient"""
+
     device_id: str
     root_cert: Path
     thing_cert: Path
@@ -22,6 +24,7 @@ class ClientConfig:
 
 
 class CloudClient:
+    """Client for interfacing with the cloud"""
     _QOS = 0
     _POWER_STATUS_TOPIC = 'detectordag/power_status_changed'
 
@@ -53,14 +56,18 @@ class CloudClient:
 
     def __enter__(self) -> 'CloudClient':
         # Connect
-        self.client.connect(self.config.endpoint, self.config.port)
+        self.client.connect()
 
-    def __exit__(self, type, value, traceback) -> None:
-        del type, value, traceback
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        del exc_type, exc_value, traceback
         self.client.disconnect()
 
     def status_update(self, status: bool) -> None:
-        # Send an update
+        """Send a messaging indicating the power status has updated
+
+        Args:
+            status (bool): New power status
+        """
         _LOGGER.info('Publishing to "%s" the value: %i',
                      self._POWER_STATUS_TOPIC, status)
         self.client.publish(self._POWER_STATUS_TOPIC, status, self._QOS)

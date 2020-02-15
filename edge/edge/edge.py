@@ -45,7 +45,7 @@ def _publish_update(client: CloudClient, device: DigitalInputDevice) -> None:
 
 
 def run():
-    """Runs the application"""
+    """Run the application"""
     _LOGGER.debug("MQTT Thing Starting...")
 
     # Ensure certificates are available

@@ -12,13 +12,18 @@ class MockDigitalInputDevice:
         self.when_deactivated = None
 
     def high(self) -> None:
-        self._change_status(True)
+        """Simulate reading a 'high' value
+        """
+        self.set_status(True)
 
     def low(self) -> None:
-        self._change_status(False)
+        """Simulate reading a 'low' value
+        """
+        self.set_status(False)
 
-    def _change_status(self, status: bool) -> None:
+    def set_status(self, status: bool) -> None:
+        """Simulate reading a new status"""
         if status:
-            self.when_activated(self)
+            self.when_activated(self)  # pylint: disable=not-callable
         else:
-            self.when_deactivated(self)
+            self.when_deactivated(self)  # pylint: disable=not-callable
