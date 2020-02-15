@@ -1,11 +1,10 @@
 #!/usr/bin/env python
-
 """Tests for `edge` package."""
 # pylint: disable=redefined-outer-name
 
 import pytest
-
 from click.testing import CliRunner
+
 from edge import cli
 
 
