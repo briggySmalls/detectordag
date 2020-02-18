@@ -30,7 +30,7 @@ def app(ctx):
     """Run the 'production' edge software"""
     # Track power status GPIO
     from gpiozero import DigitalInputDevice  # noqa: E501, pylint: disable=import-error,import-outside-toplevel
-    power_status_device = DigitalInputDevice(_POWER_PIN)
+    power_status_device = DigitalInputDevice(_POWER_PIN, bounce_time=0.2)
     # Start the application
     with EdgeApp(power_status_device, ctx.obj['config']):
         while True:
