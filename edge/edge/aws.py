@@ -31,7 +31,7 @@ class PowerStatusChangedPayload:
 
 class CloudClient:
     """Client for interfacing with the cloud"""
-    _QOS = 0
+    _QOS = 1
     _POWER_STATUS_TOPIC = 'detectordag/power_status_changed'
     _DRAINING_FREQUENCY = 2
     _DISCONNECT_TIMEOUT = 10
