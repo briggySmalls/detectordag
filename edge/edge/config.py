@@ -58,7 +58,7 @@ class AppConfig:
         parsed['certs_dir'].mkdir(exist_ok=True, parents=True)
         for cert, filename in cls._CERTS.items():
             # Establish the path of the new certificate file
-            cert_path = parsed['certs_dir'] / filename
+            cert_path = parsed['certs_dir'].expanduser() / filename
             # Create the file from the environment variable
             cls._write_cert(parsed[cert], cert_path)
             # Replace the env variable content with the path to the certificate
