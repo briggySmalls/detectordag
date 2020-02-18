@@ -6,7 +6,8 @@ from setuptools import setup, find_packages
 
 requirements = [
     'Click>=7.0',
-    'AWSIoTPythonSDK',
+    'AWSIoTPythonSDK>=1.4.7',
+    'environs',
 ]
 
 setup_requirements = ['pytest-runner', ]

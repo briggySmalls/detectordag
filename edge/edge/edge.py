@@ -4,6 +4,7 @@ import logging
 import os
 from pathlib import Path
 
+from edge.config import AppConfig
 from edge.aws import ClientConfig, CloudClient
 
 try:
@@ -23,13 +24,14 @@ CERTS_PATHS = {
 
 class EdgeApp:
     """Wrapper for the entire application"""
-    def __init__(self, device: DigitalInputDevice) -> None:
+    def __init__(self, device: DigitalInputDevice, config: AppConfig) -> None:
+        self.config = config
         # Ensure certificates are available
         self._create_certs()
         # Prepare configuration for the client
-        config = ClientConfig(device_id=os.getenv("BALENA_DEVICE_UUID"),
-                              endpoint=os.getenv("AWS_ENDPOINT"),
-                              port=int(os.getenv("AWS_PORT", "8883")),
+        config = ClientConfig(device_id=config.balena_device_id.hex,
+                              endpoint=config.aws_endpoint,
+                              port=config.aws_port,
                               **CERTS_PATHS)
         self.device = device
         # Create the client
