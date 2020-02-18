@@ -1,7 +1,9 @@
 """Logic for connecting to AWS IoT"""
 import logging
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from pathlib import Path
+from typing import Any
+import datetime
 import json
 
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
@@ -23,10 +25,22 @@ class ClientConfig:
 @dataclass
 class PowerStatusChangedPayload:
     status: bool
+    timestamp: datetime.datetime = field(init=False)
     version: str = '0.1'
 
+    def __post_init__(self):
+        # Autopopulate the timestamp field
+        self.timestamp = datetime.datetime.now(datetime.timezone.utc)
+
     def to_json(self) -> str:
-        return json.dumps(asdict(self))
+        return json.dumps(asdict(self), default=self.serialise)
+
+    @staticmethod
+    def serialise(value: Any) -> str:
+        try:
+            return value.isoformat()
+        except AttributeError:
+            raise TypeError()
 
 
 class CloudClient:
