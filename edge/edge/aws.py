@@ -22,8 +22,8 @@ class ClientConfig:
 
 @dataclass
 class PowerStatusChangedPayload:
-    version = '0.1'
     status: bool
+    version: str = '0.1'
 
     def to_json(self) -> str:
         return json.dumps(asdict(self))
