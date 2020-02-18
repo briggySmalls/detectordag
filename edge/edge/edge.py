@@ -1,5 +1,4 @@
 """Main module."""
-import base64
 import logging
 import os
 from pathlib import Path
@@ -14,25 +13,18 @@ except ImportError:
 
 _LOGGER = logging.getLogger(__name__)
 
-CERT_ROOT_PATH = Path(__file__).parent / 'certs'
-CERTS_PATHS = {
-    'root_cert': CERT_ROOT_PATH / "root-CA.crt",
-    'thing_cert': CERT_ROOT_PATH / "thing.cert.pem",
-    'thing_key': CERT_ROOT_PATH / "thing.private.key",
-}
-
 
 class EdgeApp:
     """Wrapper for the entire application"""
     def __init__(self, device: DigitalInputDevice, config: AppConfig) -> None:
         self.config = config
-        # Ensure certificates are available
-        self._create_certs()
         # Prepare configuration for the client
         config = ClientConfig(device_id=config.balena_device_id.hex,
                               endpoint=config.aws_endpoint,
                               port=config.aws_port,
-                              **CERTS_PATHS)
+                              root_cert=config.aws_root_cert,
+                              thing_cert=config.aws_thing_cert,
+                              thing_key=config.aws_thing_key)
         self.device = device
         # Create the client
         self.client = CloudClient(config)
@@ -53,21 +45,6 @@ class EdgeApp:
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.client.__exit__(exc_type, exc_value, traceback)
-
-    @staticmethod
-    def _create_certs():
-        # Create certificates from environment variables
-        CERT_ROOT_PATH.mkdir(parents=True, exist_ok=True)
-        EdgeApp._set_cred("AWS_ROOT_CERT", CERTS_PATHS['root_cert'])
-        EdgeApp._set_cred("AWS_THING_CERT", CERTS_PATHS['thing_cert'])
-        EdgeApp._set_cred("AWS_PRIVATE_CERT", CERTS_PATHS['thing_key'])
-
-    @staticmethod
-    def _set_cred(env_name: str, file: Path) -> None:
-        # Turn base64 encoded environmental variable into a certificate file
-        env = os.getenv(env_name)
-        with file.open('wb') as output_file:
-            output_file.write(base64.b64decode(env))
 
     def _publish_update(self, device: DigitalInputDevice) -> None:
         del device
