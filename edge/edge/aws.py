@@ -12,7 +12,6 @@ _LOGGER = logging.getLogger(__file__)
 @dataclass
 class ClientConfig:
     """Configuration for the CloudClient"""
-
     device_id: str
     root_cert: Path
     thing_cert: Path
