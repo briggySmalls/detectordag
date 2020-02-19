@@ -23,54 +23,6 @@ WHERE accounts.id = (
 )
 `
 
-func Run(address string, params DbParams) error {
-	// Configure AMQP
-	receiver, consumer, err := setupAMQP(address)
-	if err != nil {
-		return err
-	}
-	defer receiver.Close()
-
-	// Configure database connection and query
-	database, stmt, err := setupDB(params)
-	if err != nil {
-		return err
-	}
-	defer database.Close()
-	defer stmt.Close()
-
-	forever := make(chan bool)
-	// Listen for messages until we're told to stop
-	go func() {
-		for delivery := range consumer {
-			handleMessage(delivery, stmt)
-		}
-	}()
-
-	// Wait for user to indicate we should quit
-	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-	<-forever
-	return nil
-}
-
-func setupAMQP(address string) (shared.SensingReceiver, <-chan amqp.Delivery, error) {
-	// Create a receiver
-	r := shared.NewSensingReceiver()
-
-	// Connect
-	if err := r.Connect(address); err != nil {
-		return nil, nil, err
-	}
-
-	// Obtain the consumer
-	c, err := r.PowerStatusConsumer()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return r, c, nil
-}
-
 func setupDB(params DbParams) (Database, *sql.Stmt, error) {
 	// Connect to the database
 	database := NewDatabase()
