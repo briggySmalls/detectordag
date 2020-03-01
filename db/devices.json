@@ -1,0 +1,27 @@
+{
+    "TableName": "devices",
+    "AttributeDefinitions": [
+        {
+            "AttributeName": "device-id",
+            "AttributeType": "S"
+        },
+        {
+            "AttributeName": "account-id",
+            "AttributeType": "N"
+        }
+    ],
+    "KeySchema": [
+        {
+            "AttributeName": "device-id",
+            "KeyType": "HASH"
+        }
+    ],
+    "IndexName": "account-id",
+    "Projection": {
+      "ProjectionType": "KEYS_ONLY"
+    },
+    "ProvisionedThroughput": {
+      "ReadCapacityUnits": 5,
+      "WriteCapacityUnits": 5
+    }
+}
