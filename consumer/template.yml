@@ -1,0 +1,7 @@
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  consumer:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main
+      Runtime: go1.x
