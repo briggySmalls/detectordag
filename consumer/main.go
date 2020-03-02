@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws/awserr"
     "github.com/aws/aws-sdk-go/aws/session"
     "github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -34,7 +33,7 @@ func init(tn string, pk string, sk string) *DynamoDb {
 //https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.Lambda.BestPracticesWithDynamoDB.html
 var db = init(DB_TABLE_CONFIG_NAME, DB_TABLE_CONFIG_PK, DB_TABLE_CONFIG_SK)
 
-func HandleRequest(ctx context.Context, event PowerStatusChangedEvent) (string, error) {
+func HandleRequest(ctx context.Context, event PowerStatusChangedEvent) {
 	// Request for the device associated with the ID
 	device, err := db.GetItem(db.GetItemInput{
 		TableName: "devices",
@@ -55,9 +54,8 @@ func HandleRequest(ctx context.Context, event PowerStatusChangedEvent) (string, 
 	emails, err := account.emails
 	// Send 'power status updated' emails
 	for email := range emails {
-
+		log.info("Send email to: %s", email)
 	}
-	return fmt.Sprintf("Hello %s!", name.Name), nil
 }
 
 func main() {
