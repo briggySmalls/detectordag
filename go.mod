@@ -3,9 +3,11 @@ module github.com/briggysmalls/detectordag
 go 1.13
 
 require (
+	github.com/aws/aws-lambda-go v1.14.0
+	github.com/aws/aws-sdk-go v1.29.14
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/gizak/termui/v3 v3.1.0
-	github.com/go-sql-driver/mysql v1.4.1
+	github.com/go-sql-driver/mysql v1.5.0
 	github.com/jinzhu/gorm v1.9.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/satori/go.uuid v1.2.0
