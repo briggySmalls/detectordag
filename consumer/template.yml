@@ -3,5 +3,5 @@ Resources:
   consumer:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: main
+      Handler: consumer
       Runtime: go1.x
