@@ -27,3 +27,7 @@ func (Build) Debug() error {
 		"-o", "consumer",
 		"main.go")
 }
+
+func Delve() error {
+	return sh.Run("env", "GO111MODULE=off", "go", "build", "-o", "./delve/dlv", "$GOPATH/src/github.com/go-delve/delve/cmd/dlv")
+}
