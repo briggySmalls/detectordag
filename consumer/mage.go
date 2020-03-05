@@ -12,22 +12,18 @@ type Build mg.Namespace
 var extraFlags string
 
 // Runs dep ensure and then installs the binary.
-func (Build) Production() {
-	extraFlags = ""
-	mg.Deps(build)
+func (Build) Production() error {
+	return sh.Run(
+		"go", "build",
+		"-o", "consumer",
+		"main.go")
 }
 
 // Builds a debug version of the build (with debugging)
-func (Build) Debug() {
-	extraFlags = "-gcflags='-N -l'"
-	mg.Deps(build)
-}
-
-func build() error {
+func (Build) Debug() error {
 	return sh.Run(
-		"env", "GOARCH=amd64", "GOOS=linux",
 		"go", "build",
-		extraFlags,
+		"-gcflags", "\"all=-N -l\"",
 		"-o", "consumer",
 		"main.go")
 }
