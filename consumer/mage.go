@@ -9,7 +9,23 @@ import (
 	"regexp"
 )
 
+type Invoke mg.Namespace
 type Build mg.Namespace
+
+var invokeCmd = []string{"sam", "local", "invoke", "consumer", "-e", "event.json"}
+
+// Invokes the lambda function locally
+func (Invoke) Invoke() error {
+	return sh.Run(invokeCmd[0], invokeCmd[1:]...)
+}
+
+// Invokes the lambda function locally, running the debug server
+func (Invoke) Debug() error {
+	cmdWithDebugger := append(invokeCmd, "-d", "5986", "--debugger-path", "delve", "--debug-args", "-delveAPI=2")
+	return sh.Run(
+		cmdWithDebugger[0], cmdWithDebugger[1:]...,
+	)
+}
 
 // Runs dep ensure and then installs the binary.
 func (Build) Production() error {
