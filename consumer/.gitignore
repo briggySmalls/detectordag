@@ -1,4 +1,2 @@
-# Ignore compiled executable
-consumer
-# Ignore compiled debugger
-delve
+# Ignore bin directory
+bin/

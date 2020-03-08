@@ -13,6 +13,8 @@ import (
 	"regexp"
 )
 
+const binDir = "bin/"
+
 type Invoke mg.Namespace
 type Build mg.Namespace
 
@@ -25,7 +27,7 @@ func (Invoke) Production() error {
 // Invokes the lambda function locally, running the debug server
 func (Invoke) Debug() error {
 	mg.Deps(Build.Debug, Delve)
-	return invoke("-d", "5986", "--debugger-path", "delve", "--debug-args", "-delveAPI=2")
+	return invoke("-d", "5986", "--debugger-path", getBinFile("delve"), "--debug-args", "-delveAPI=2")
 }
 
 // Runs dep ensure and then installs the binary.
@@ -59,7 +61,7 @@ func Delve() error {
 			"GOOS":   "linux",
 		},
 		"go", "build",
-		"-o", "./delve/dlv",
+		"-o", getBinFile("delve/dlv"),
 		matches[0])
 }
 
@@ -87,7 +89,7 @@ func InstallTools() error {
 func build(extraArgs ...string) error {
 	combined := []string{"build"}
 	combined = append(combined, extraArgs...)
-	combined = append(combined, "-o", "consumer", "main.go")
+	combined = append(combined, "-o", getBinFile("consumer"), "main.go")
 	return sh.RunWith(
 		map[string]string{
 			"GOARCH": "amd64",
@@ -100,4 +102,8 @@ func invoke(extraArgs ...string) error {
 	combined := []string{"local", "invoke", "consumer", "-e", "event.json"}
 	combined = append(combined, extraArgs...)
 	return sh.Run("sam", combined...)
+}
+
+func getBinFile(file string) string {
+	return path.Join(binDir, file)
 }
