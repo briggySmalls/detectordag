@@ -1,0 +1,4 @@
+# Ignore compiled executable
+consumer
+# Ignore compiled debugger
+delve
