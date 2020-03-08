@@ -38,8 +38,14 @@ func dbInit() *dynamodb.DynamoDB {
 	dbSession := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
+	if dbSession == nil {
+		log.Fatal("Failed to start session")
+	}
 	// Create Amazon DynamoDB client
 	db := dynamodb.New(dbSession)
+	if db == nil {
+		log.Fatal("Failed to create database client")
+	}
 	return db
 }
 
