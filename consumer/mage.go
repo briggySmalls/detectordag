@@ -31,21 +31,12 @@ func (Invoke) Debug() error {
 
 // Runs dep ensure and then installs the binary.
 func (Build) Production() error {
-	return sh.Run(
-		"env", "GOARCH=amd64", "GOOS=linux",
-		"go", "build",
-		"-o", "consumer",
-		"main.go")
+	return build()
 }
 
 // Builds a debug version of the build (with debugging)
 func (Build) Debug() error {
-	return sh.Run(
-		"env", "GOARCH=amd64", "GOOS=linux",
-		"go", "build",
-		"-gcflags", "all=-N -l",
-		"-o", "consumer",
-		"main.go")
+	return build("-gcflags", "all=-N -l")
 }
 
 func Delve() error {
@@ -74,4 +65,11 @@ func InstallTools() error {
 		}
 	}
 	return nil
+}
+
+func build(extraArgs ...string) error {
+	combined := []string{"GOARCH=amd64", "GOOS=linux", "go", "build"}
+	combined = append(combined, extraArgs...)
+	combined = append(combined, "-o", "consumer", "main.go")
+	return sh.Run("env", combined...)
 }
