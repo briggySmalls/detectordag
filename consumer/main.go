@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -83,6 +84,10 @@ func getDevice(id string) (*Device, error) {
 	})
 	if err != nil {
 		return nil, err
+	}
+	// Check we got exactly one device
+	if result.Item == nil {
+		return nil, fmt.Errorf("Unknown device: %s", id)
 	}
 	// Unmarshal the device
 	device := Device{}
