@@ -35,7 +35,12 @@ func (Build) Debug() error {
 }
 
 func Delve() error {
-	return sh.Run("env", "GO111MODULE=off", "GOARCH=amd64", "GOOS=linux",
+	return sh.RunWith(
+		map[string]string{
+			"GO111MODULE": "off",
+			"GOARCH":      "amd64",
+			"GOOS":        "linux",
+		},
 		"go", "build",
 		"-o", "./delve/dlv",
 		"$GOPATH/src/github.com/go-delve/delve/cmd/dlv")
@@ -63,10 +68,15 @@ func InstallTools() error {
 }
 
 func build(extraArgs ...string) error {
-	combined := []string{"GOARCH=amd64", "GOOS=linux", "go", "build"}
+	combined := []string{"build"}
 	combined = append(combined, extraArgs...)
 	combined = append(combined, "-o", "consumer", "main.go")
-	return sh.Run("env", combined...)
+	return sh.RunWith(
+		map[string]string{
+			"GOARCH": "amd64",
+			"GOOS":   "linux",
+		},
+		"go", combined...)
 }
 
 func invoke(extraArgs ...string) error {
