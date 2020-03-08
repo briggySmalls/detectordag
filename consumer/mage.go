@@ -22,7 +22,7 @@ func (Invoke) Invoke() error {
 
 // Invokes the lambda function locally, running the debug server
 func (Invoke) Debug() error {
-	mg.Deps(Build.Debug)
+	mg.Deps(Build.Debug, Delve)
 	cmdWithDebugger := append(invokeCmd, "-d", "5986", "--debugger-path", "delve", "--debug-args", "-delveAPI=2")
 	return sh.Run(
 		cmdWithDebugger[0], cmdWithDebugger[1:]...,
