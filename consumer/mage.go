@@ -32,6 +32,7 @@ func (Invoke) Debug() error {
 // Runs dep ensure and then installs the binary.
 func (Build) Production() error {
 	return sh.Run(
+		"env", "GOARCH=amd64", "GOOS=linux",
 		"go", "build",
 		"-o", "consumer",
 		"main.go")
@@ -40,6 +41,7 @@ func (Build) Production() error {
 // Builds a debug version of the build (with debugging)
 func (Build) Debug() error {
 	return sh.Run(
+		"env", "GOARCH=amd64", "GOOS=linux",
 		"go", "build",
 		"-gcflags", "all=-N -l",
 		"-o", "consumer",
@@ -47,7 +49,10 @@ func (Build) Debug() error {
 }
 
 func Delve() error {
-	return sh.Run("env", "GO111MODULE=off", "go", "build", "-o", "./delve/dlv", "$GOPATH/src/github.com/go-delve/delve/cmd/dlv")
+	return sh.Run("env", "GO111MODULE=off", "GOARCH=amd64", "GOOS=linux",
+		"go", "build",
+		"-o", "./delve/dlv",
+		"$GOPATH/src/github.com/go-delve/delve/cmd/dlv")
 }
 
 func InstallTools() error {
