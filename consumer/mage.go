@@ -13,7 +13,7 @@ type Invoke mg.Namespace
 type Build mg.Namespace
 
 // Invokes the lambda function locally
-func (Invoke) Invoke() error {
+func (Invoke) Production() error {
 	mg.Deps(Build.Production)
 	return invoke()
 }
