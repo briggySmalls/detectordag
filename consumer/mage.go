@@ -23,7 +23,7 @@ func (Build) Production() error {
 func (Build) Debug() error {
 	return sh.Run(
 		"go", "build",
-		"-gcflags", "\"all=-N -l\"",
+		"-gcflags", "all=-N -l",
 		"-o", "consumer",
 		"main.go")
 }
