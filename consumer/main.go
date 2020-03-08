@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"log"
+	"strconv"
 )
 
 const ACCOUNTS_TABLE = "accounts"
@@ -22,13 +23,13 @@ type PowerStatusChangedEvent struct {
 }
 
 type Account struct {
-	AccountId int      `json:""`
-	Emails    []string `json:""`
+	AccountId int
+	Emails    []string
 }
 
 type Device struct {
-	DeviceId  int    `json:""`
-	AccountId string `json:""`
+	DeviceId  string
+	AccountId int
 }
 
 //init set up the session and define table name, primary key, and sort key
@@ -61,6 +62,7 @@ func HandleRequest(ctx context.Context, event PowerStatusChangedEvent) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Printf("Account ID: %d", device.AccountId)
 	// Get the account
 	account, err := getAccount(device.AccountId)
 	if err != nil {
@@ -98,18 +100,22 @@ func getDevice(id string) (*Device, error) {
 	return &device, nil
 }
 
-func getAccount(id string) (*Account, error) {
+func getAccount(id int) (*Account, error) {
 	// Request for the account associated with the device
 	result, err := db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(ACCOUNTS_TABLE),
 		Key: map[string]*dynamodb.AttributeValue{
 			"account-id": {
-				N: aws.String(id),
+				N: aws.String(strconv.Itoa(id)),
 			},
 		},
 	})
 	if err != nil {
 		return nil, err
+	}
+	// Check we got exactly one account
+	if result.Item == nil {
+		return nil, fmt.Errorf("Unknown account: %d", id)
 	}
 	// Unmarshal the account
 	account := Account{}
