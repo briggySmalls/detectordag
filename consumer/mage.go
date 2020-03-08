@@ -3,9 +3,13 @@
 package main
 
 import (
+	"fmt"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 	"io/ioutil"
+	"os"
+	"path"
+	"path/filepath"
 	"regexp"
 )
 
@@ -35,15 +39,28 @@ func (Build) Debug() error {
 }
 
 func Delve() error {
+	// Ensure delve is installed
+	mg.Deps(InstallTools)
+	// Find Delve
+	pattern := path.Join(
+		os.ExpandEnv("$GOPATH"),
+		"pkg/mod/github.com/go-delve/delve@*/cmd/dlv")
+	matches, err := filepath.Glob(pattern)
+	if err != nil {
+		return err
+	}
+	if len(matches) == 0 {
+		return fmt.Errorf("delve not found")
+	}
+	// Build our version of delve
 	return sh.RunWith(
 		map[string]string{
-			"GO111MODULE": "off",
-			"GOARCH":      "amd64",
-			"GOOS":        "linux",
+			"GOARCH": "amd64",
+			"GOOS":   "linux",
 		},
 		"go", "build",
 		"-o", "./delve/dlv",
-		"$GOPATH/src/github.com/go-delve/delve/cmd/dlv")
+		matches[0])
 }
 
 func InstallTools() error {
