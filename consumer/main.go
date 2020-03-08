@@ -23,13 +23,13 @@ type PowerStatusChangedEvent struct {
 }
 
 type Account struct {
-	AccountId int
-	Emails    []string
+	AccountId dynamodbattribute.Number `dynamodbav:"account-id"`
+	Emails    []string                 `dynamodbav:"emails"`
 }
 
 type Device struct {
-	DeviceId  string
-	AccountId int
+	DeviceId  string                   `dynamodbav:"device-id"`
+	AccountId dynamodbattribute.Number `dynamodbav:"account-id"`
 }
 
 //init set up the session and define table name, primary key, and sort key
@@ -62,14 +62,19 @@ func HandleRequest(ctx context.Context, event PowerStatusChangedEvent) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("Account ID: %d", device.AccountId)
+	// Parse the account ID
+	id, err := device.AccountId.Uint64()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("Account ID: %d", id)
 	// Get the account
-	account, err := getAccount(device.AccountId)
+	account, err := getAccount(id)
 	if err != nil {
 		log.Fatal(err)
 	}
 	// Send 'power status updated' emails
-	for email := range account.Emails {
+	for _, email := range account.Emails {
 		log.Printf("Send email to: %s", email)
 	}
 }
@@ -100,13 +105,13 @@ func getDevice(id string) (*Device, error) {
 	return &device, nil
 }
 
-func getAccount(id int) (*Account, error) {
+func getAccount(id uint64) (*Account, error) {
 	// Request for the account associated with the device
 	result, err := db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(ACCOUNTS_TABLE),
 		Key: map[string]*dynamodb.AttributeValue{
 			"account-id": {
-				N: aws.String(strconv.Itoa(id)),
+				N: aws.String(strconv.FormatUint(id, 10)),
 			},
 		},
 	})
