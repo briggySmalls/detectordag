@@ -156,6 +156,13 @@ func CreatePolicy() error {
 		"--policy-document", "file://policy.json")
 }
 
+// CreateRule creates a rule to fire a lambda function
+func CreateRule() error {
+	return sh.Run("aws", "iot", "create-topic-rule",
+		"--rule-name", "power_status_changed",
+		"--topic-rule-payload", "file://topicRule.json")
+}
+
 // Encode a string in base64
 func encode(input string) string {
 	return base64.StdEncoding.EncodeToString([]byte(input))

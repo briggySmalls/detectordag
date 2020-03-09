@@ -1,0 +1,13 @@
+{
+    "sql": "SELECT clientId() as deviceId, * FROM 'detectordag/power_status_changed'",
+    "description": "Run a lambda function to handle power status updates",
+    "actions": [
+        {
+          "lambda": {
+              "functionArn": "arn:aws:lambda:eu-west-2:670763423833:function:detectordag-consumer-CJHZEASOI726"
+            }
+        }
+    ],
+    "ruleDisabled": false,
+    "awsIotSqlVersion": "2016-03-23"
+}
