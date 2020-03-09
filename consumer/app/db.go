@@ -10,14 +10,22 @@ import (
 	"strconv"
 )
 
-const ACCOUNTS_TABLE = "accounts"
-const DEVICES_TABLE = "devices"
+const (
+	ACCOUNTS_TABLE = "accounts"
+	DEVICES_TABLE  = "devices"
+)
 
+type db struct {
+	session *dynamodb.DynamoDB
+}
+
+// account represents an 'accounts' table entry
 type Account struct {
 	AccountId int      `dynamodbav:"account-id"`
 	Emails    []string `dynamodbav:"emails"`
 }
 
+// device is a 'device' table row
 type Device struct {
 	DeviceId  string `dynamodbav:"device-id"`
 	AccountId int    `dynamodbav:"account-id"`
