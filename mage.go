@@ -22,15 +22,15 @@ type createThingResponse struct {
 }
 
 type keyPair struct {
-	Publickey  string `json:""`
-	Privatekey string `json:""`
+	Public  string `json:"PublicKey"`
+	Private string `json:"PrivateKey"`
 }
 
 type createCertificateResponse struct {
-	Arn  string  `json:"certificateArn"`
-	Id   string  `json:"certificateId"`
-	Pem  string  `json:"certificatePem"`
-	Pair keyPair `json:"certificatePair"`
+	Arn     string  `json:"certificateArn"`
+	Id      string  `json:"certificateId"`
+	Pem     string  `json:"certificatePem"`
+	KeyPair keyPair `json:""`
 }
 
 func CreateThing() error {
@@ -50,7 +50,7 @@ func CreateThing() error {
 		return err
 	}
 	// Set certificates
-	err = setCertificates(*id, createCertificateResponse.Pem, createCertificateResponse.Pair.Privatekey)
+	err = setCertificates(*id, createCertificateResponse.Pem, createCertificateResponse.KeyPair.Private)
 	if err != nil {
 		return err
 	}
