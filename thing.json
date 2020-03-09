@@ -1,0 +1,33 @@
+{
+    "Parameters" : {
+        "ThingName": {
+            "Type": "String"
+        },
+        "PolicyName": {
+            "Type": "String"
+        },
+        "CertificateId": {
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "thing" : {
+            "Type" : "AWS::IoT::Thing",
+            "Properties" : {
+                "ThingName": {"Ref": "ThingName"}
+            }
+        },
+        "certificate" : {
+            "Type" : "AWS::IoT::Certificate",
+            "Properties" : {
+                "CertificateId": {"Ref": "CertificateId"}
+            }
+        },
+        "policy" : {
+            "Type" : "AWS::IoT::Policy",
+            "Properties" : {
+                "PolicyName": {"Ref": "PolicyName"}
+            }
+        }
+    }
+}

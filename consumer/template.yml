@@ -1,0 +1,12 @@
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  consumer:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: bin/consumer
+      Runtime: go1.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: devices
+        - DynamoDBReadPolicy:
+            TableName: accounts

@@ -1,0 +1,32 @@
+{
+    "accounts": [{
+        "PutRequest": {
+            "Item": {
+                "account-id": {
+                    "N": "1"
+                },
+                "emails": {
+                    "L": [{
+                            "S": "wasso14@hotmail.com"
+                        },
+                        {
+                            "S": "briggySmalls90@gmail.com"
+                        }
+                    ]
+                }
+            }
+        }
+    }],
+    "devices": [{
+        "PutRequest": {
+            "Item": {
+                "device-id": {
+                    "S": "9985413ab05a2317dc1912f1500905b9"
+                },
+                "account-id": {
+                    "N": "1"
+                }
+            }
+        }
+    }]
+}

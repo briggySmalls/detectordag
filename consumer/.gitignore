@@ -1,0 +1,4 @@
+# Ignore bin directory
+bin/
+# Ignore SAM bin
+.aws-sam
