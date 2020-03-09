@@ -5,3 +5,8 @@ Resources:
     Properties:
       Handler: bin/consumer
       Runtime: go1.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: devices
+        - DynamoDBReadPolicy:
+            TableName: accounts
