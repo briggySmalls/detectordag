@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses"
 	"html/template"
 	"log"
-	"time"
 )
 
 const (
@@ -28,7 +27,7 @@ Power status update.
 
 Your trusty detectordag has noticed a change in your power status.
 Device: {{ .DeviceId }}
-Time: {{ .Timestamp.Format("15:04 01-02-06") }}
+Time: {{ .Timestamp }}
 Status: {{ if .Status }}⚡️On{{else}}❗️Off{{end}}
 
 {{ if .Status }}
@@ -51,7 +50,7 @@ const htmlTemplateSource = `
   </tr>
   <tr>
     <td>Time</td>
-    <td>{{ .Timestamp.Format("15:04 01-02-06") }}</td>
+    <td>{{ .Timestamp }}</td>
   </tr>
   <tr>
     <td>Status</td>
@@ -74,7 +73,7 @@ const htmlTemplateSource = `
 
 type PowerStatusChangedEmailConfig struct {
 	DeviceId  string
-	Timestamp time.Time
+	Timestamp string
 	Status    bool
 }
 
@@ -85,11 +84,19 @@ var htmlTemplate *template.Template
 var textTemplate *template.Template
 
 // EmailInit initialises a client for AWS SES
-func EmailInit(session *session.Session) error {
+func EmailInit(sesh *session.Session) error {
+	sesh, err := session.NewSession(&aws.Config{
+		Region: aws.String("eu-west-1"),
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	if sesh == nil {
+		log.Fatal("Failed to start session")
+	}
 	// Create SES client
-	svc = ses.New(session)
+	svc = ses.New(sesh)
 	// Create templates
-	var err error
 	htmlTemplate, err = template.New("htmlTemplate").Parse(htmlTemplateSource)
 	if err != nil {
 		return err
@@ -143,6 +150,7 @@ func SendEmail(recipient string, status PowerStatusChangedEmailConfig) error {
 		//ConfigurationSetName: aws.String(ConfigurationSet),
 	}
 	// Attempt to send the email.
+	log.Printf("Sending email")
 	result, err := svc.SendEmail(input)
 	if err != nil {
 		return err
