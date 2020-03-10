@@ -6,7 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"log"
 	"strconv"
 )
 
@@ -14,10 +13,6 @@ const (
 	ACCOUNTS_TABLE = "accounts"
 	DEVICES_TABLE  = "devices"
 )
-
-type db struct {
-	session *dynamodb.DynamoDB
-}
 
 // account represents an 'accounts' table entry
 type Account struct {
@@ -34,25 +29,16 @@ type Device struct {
 //It is a best practice to instanciate the Amazon DynamoDB client outside
 //of the AWS Lambda function handler.
 //https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.Lambda.BestPracticesWithDynamoDB.html
-var db = dbInit()
+var db *dynamodb.DynamoDB
 
 // dbInit sets up the session and define table name, primary key, and sort key
-func dbInit() *dynamodb.DynamoDB {
-	// Initialize a session that the SDK uses to load
-	// credentials from the shared credentials file ~/.aws/credentials
-	// and region from the shared configuration file ~/.aws/config.
-	dbSession := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-	if dbSession == nil {
-		log.Fatal("Failed to start session")
-	}
+func DbInit(session *session.Session) error {
 	// Create Amazon DynamoDB client
-	db := dynamodb.New(dbSession)
+	db = dynamodb.New(session)
 	if db == nil {
-		log.Fatal("Failed to create database client")
+		return fmt.Errorf("Failed to create database client")
 	}
-	return db
+	return nil
 }
 
 func getDevice(id string) (*Device, error) {
