@@ -83,29 +83,33 @@ var svc *ses.SES
 var htmlTemplate *template.Template
 var textTemplate *template.Template
 
-// EmailInit initialises a client for AWS SES
-func EmailInit(sesh *session.Session) error {
-	sesh, err := session.NewSession(&aws.Config{
-		Region: aws.String("eu-west-1"),
+// init initialises a client for AWS SES
+func init() {
+	// Initialize a session that the SDK uses to load
+	// credentials from the shared credentials file ~/.aws/credentials
+	// and region from the shared configuration file ~/.aws/config.
+	var err error
+	sesh, err := session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+		Config: aws.Config{
+			// There is no emailing service in eu-west-2
+			Region: aws.String("eu-west-1"),
+		},
 	})
 	if err != nil {
 		log.Fatal(err)
-	}
-	if sesh == nil {
-		log.Fatal("Failed to start session")
 	}
 	// Create SES client
 	svc = ses.New(sesh)
 	// Create templates
 	htmlTemplate, err = template.New("htmlTemplate").Parse(htmlTemplateSource)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	textTemplate, err = template.New("textTemplate").Parse(textTemplateSource)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	return err
 }
 
 func SendEmail(recipient string, status PowerStatusChangedEmailConfig) error {

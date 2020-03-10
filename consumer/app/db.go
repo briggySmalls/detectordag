@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"strconv"
+	"log"
 )
 
 const (
@@ -31,14 +32,23 @@ type Device struct {
 //https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.Lambda.BestPracticesWithDynamoDB.html
 var db *dynamodb.DynamoDB
 
-// dbInit sets up the session and define table name, primary key, and sort key
-func DbInit(session *session.Session) error {
-	// Create Amazon DynamoDB client
-	db = dynamodb.New(session)
-	if db == nil {
-		return fmt.Errorf("Failed to create database client")
+// init sets up the session
+func init() {
+	// Initialize a session that the SDK uses to load
+	// credentials from the shared credentials file ~/.aws/credentials
+	// and region from the shared configuration file ~/.aws/config.
+	var err error
+	sesh, err := session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	})
+	if err != nil {
+		log.Fatal(err)
 	}
-	return nil
+	// Create Amazon DynamoDB client
+	db = dynamodb.New(sesh)
+	if db == nil {
+		log.Fatal("Failed to create database client")
+	}
 }
 
 func getDevice(id string) (*Device, error) {
