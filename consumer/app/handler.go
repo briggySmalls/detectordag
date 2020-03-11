@@ -15,13 +15,8 @@ type PowerStatusChangedEvent struct {
 
 // HandleRequest handles a lambda call
 func HandleRequest(ctx context.Context, event PowerStatusChangedEvent) {
-	// // Parse the time in the event
-	// eventTime, err := time.Parse(time.RFC3339, event.Timestamp)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// Get the device ID
-	device, err := getDevice(event.DeviceId)
+	// Update the device status in the database
+	device, err := updateDevice(event)
 	if err != nil {
 		log.Fatal(err)
 	}
