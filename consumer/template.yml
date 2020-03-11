@@ -3,7 +3,7 @@ Resources:
   consumer:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: .aws-sam/build/consumer
+      Handler: consumer
       Runtime: go1.x
       Policies:
         - DynamoDBCrudPolicy:
