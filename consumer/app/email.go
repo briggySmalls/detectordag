@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses"
 	"html/template"
 	"log"
+	"time"
 )
 
 const (
@@ -15,7 +16,8 @@ const (
 	// The subject line for the email.
 	Subject = "🚨 Detectordag power update"
 	// The character encoding for the email.
-	CharSet = "UTF-8"
+	CharSet    = "UTF-8"
+	DateFormat = "15:04 2/1/06"
 )
 
 const textTemplateSource = `
@@ -23,7 +25,7 @@ Power status update.
 
 Your trusty detectordag has noticed a change in your power status.
 Device: {{ .DeviceId }}
-Time: {{ .Timestamp }}
+Time: {{ .Timestamp.Format "15:04 02-Jan-2006" }}
 Status: {{ if .Status }}⚡️On{{else}}❗️Off{{end}}
 
 {{ if .Status }}
@@ -46,7 +48,7 @@ const htmlTemplateSource = `
   </tr>
   <tr>
     <td>Time</td>
-    <td>{{ .Timestamp }}</td>
+    <td>{{ .Timestamp.Format "15:04 02-Jan-2006" }}</td>
   </tr>
   <tr>
     <td>Status</td>
@@ -69,7 +71,7 @@ const htmlTemplateSource = `
 
 type PowerStatusChangedEmailConfig struct {
 	DeviceId  string
-	Timestamp string
+	Timestamp time.Time
 	Status    bool
 }
 
@@ -108,7 +110,7 @@ func init() {
 	}
 }
 
-func SendEmail(recipient string, status PowerStatusChangedEmailConfig) error {
+func SendEmail(recipients []string, status PowerStatusChangedEmailConfig) error {
 	// Execute the templates
 	var err error
 	var htmlBody bytes.Buffer
@@ -121,13 +123,16 @@ func SendEmail(recipient string, status PowerStatusChangedEmailConfig) error {
 	if err != nil {
 		return err
 	}
+	// Assembe the to addresses
+	toAddresses := make([]*string, len(recipients))
+	for i, recipient := range recipients {
+		toAddresses[i] = aws.String(recipient)
+	}
 	// Assemble the email.
 	input := &ses.SendEmailInput{
 		Destination: &ses.Destination{
 			CcAddresses: []*string{},
-			ToAddresses: []*string{
-				aws.String(recipient),
-			},
+			ToAddresses: toAddresses,
 		},
 		Message: &ses.Message{
 			Body: &ses.Body{
