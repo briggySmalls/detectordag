@@ -94,7 +94,7 @@ func createDevice() (*string, error) {
 func createThing(thingName, certificateId string) error {
 	// Create a new thing
 	output, err := sh.Output("aws", "iot", "register-thing",
-		"--template-body", "file://thing.json",
+		"--template-body", "file://config/thing.json",
 		"--parameters", fmt.Sprintf(
 			"ThingName=%s,CertificateId=%s,PolicyName=%s",
 			thingName, certificateId, policyName))
@@ -153,14 +153,14 @@ func setCertificates(id, cert, key string) error {
 func CreatePolicy() error {
 	return sh.Run("aws", "iot", "create-policy",
 		"--policy-name", policyName,
-		"--policy-document", "file://policy.json")
+		"--policy-document", "file://config/policy.json")
 }
 
 // CreateRule creates a rule to fire a lambda function
 func CreateRule() error {
 	return sh.Run("aws", "iot", "create-topic-rule",
 		"--rule-name", "power_status_changed",
-		"--topic-rule-payload", "file://topicRule.json")
+		"--topic-rule-payload", "file://config/topicRule.json")
 }
 
 // Encode a string in base64
