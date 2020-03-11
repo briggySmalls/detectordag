@@ -19,6 +19,7 @@ type Invoke mg.Namespace
 
 // Invokes the lambda function locally
 func (Invoke) Production() error {
+	mg.Deps(Build)
 	return invoke()
 }
 
