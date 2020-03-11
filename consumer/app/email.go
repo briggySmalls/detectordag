@@ -10,12 +10,8 @@ import (
 )
 
 const (
-	// Replace sender@example.com with your "From" address.
-	// This address must be verified with Amazon SES.
-	Sender = "sjbriggs14@gmail.com"
-	// Specify a configuration set. To use a configuration
-	// set, comment the next line and line 92.
-	//ConfigurationSet = "ConfigSet"
+	// Address from which emails will be sent
+	Sender = "briggySmalls90@gmail.com"
 	// The subject line for the email.
 	Subject = "🚨 Detectordag power update"
 	// The character encoding for the email.
@@ -150,8 +146,6 @@ func SendEmail(recipient string, status PowerStatusChangedEmailConfig) error {
 			},
 		},
 		Source: aws.String(Sender),
-		// Uncomment to use a configuration set
-		//ConfigurationSetName: aws.String(ConfigurationSet),
 	}
 	// Attempt to send the email.
 	log.Printf("Sending email")
