@@ -45,18 +45,20 @@ func CreateThing() error {
 	if err != nil {
 		return err
 	}
+	// Decide on a new device ID
+	id := strings.ReplaceAll(uuid.New().String(), "-", "")
 	// Create a new thing
-	err = createThing("dd-edge-1", createCertificateResponse.Id)
+	err = createThing(id, createCertificateResponse.Id)
 	if err != nil {
 		return err
 	}
 	// Create balena device
-	id, err := createDevice()
+	err = createDevice(id)
 	if err != nil {
 		return err
 	}
 	// Set certificates
-	err = setCertificates(*id, createCertificateResponse.Pem, createCertificateResponse.KeyPair.Private)
+	err = setCertificates(id, createCertificateResponse.Pem, createCertificateResponse.KeyPair.Private)
 	if err != nil {
 		return err
 	}
@@ -80,14 +82,13 @@ func createCertificate() (*createCertificateResponse, error) {
 	return &response, nil
 }
 
-func createDevice() (*string, error) {
-	id := strings.ReplaceAll(uuid.New().String(), "-", "")
+func createDevice(id string) error {
 	err := sh.Run("balena", "device", "register", belanaAppName, "--uuid", id)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	log.Printf("Created device %s", id)
-	return &id, nil
+	return nil
 }
 
 // createThing makes a new thing in AWS
