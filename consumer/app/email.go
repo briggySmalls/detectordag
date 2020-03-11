@@ -154,6 +154,6 @@ func SendEmail(recipient string, status PowerStatusChangedEmailConfig) error {
 		return err
 	}
 	// Log result
-	log.Printf("Message sent with ID: %s", result.MessageId)
+	log.Printf("Message sent with ID: %s", *result.MessageId)
 	return nil
 }
