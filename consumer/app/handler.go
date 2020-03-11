@@ -3,13 +3,14 @@ package app
 import (
 	"context"
 	"log"
+	"time"
 )
 
 type PowerStatusChangedEvent struct {
-	DeviceId  string `json:""`
-	Timestamp string `json:""`
-	Version   string `json:""`
-	Status    bool   `json:""`
+	DeviceId  string    `json:""`
+	Timestamp time.Time `json:""`
+	Version   string    `json:""`
+	Status    bool      `json:""`
 }
 
 // HandleRequest handles a lambda call
@@ -37,11 +38,9 @@ func HandleRequest(ctx context.Context, event PowerStatusChangedEvent) {
 		Status:    event.Status,
 	}
 	// Send 'power status updated' emails
-	for _, email := range account.Emails {
-		log.Printf("Send email to: %s", email)
-		err := SendEmail(email, update)
-		if err != nil {
-			log.Fatal(err)
-		}
+	log.Printf("Send emails to: %s", account.Emails)
+	err = SendEmail(account.Emails, update)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
