@@ -52,6 +52,8 @@ func CreateThing() error {
 	if err != nil {
 		return err
 	}
+	// Add the thing to the database
+	err = createDbEntry(id)
 	// Create balena device
 	err = createDevice(id)
 	if err != nil {
@@ -148,6 +150,12 @@ func setCertificates(id, cert, key string) error {
 		}
 	}
 	return nil
+}
+
+func createDbEntry(id string) error {
+	return sh.Run("aws", "dynamodb", "put-item",
+		"--table-name", "devices",
+		"--item", fmt.Sprintf("{\"device-id\": {\"S\": \"%s\"}}", id))
 }
 
 // CreatePolicy creates a policy for the edge devices
