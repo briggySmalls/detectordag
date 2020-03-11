@@ -13,31 +13,24 @@ import (
 	"regexp"
 )
 
-const binDir = "bin/"
+const binDir = ".aws-sam/build/"
 
 type Invoke mg.Namespace
-type Build mg.Namespace
 
 // Invokes the lambda function locally
 func (Invoke) Production() error {
-	mg.Deps(Build.Production)
 	return invoke()
 }
 
 // Invokes the lambda function locally, running the debug server
 func (Invoke) Debug() error {
-	mg.Deps(Build.Debug, Delve)
+	mg.Deps(Build, Delve)
 	return invoke("-d", "5986", "--debugger-path", getBinFile("delve"), "--debug-args", "-delveAPI=2")
 }
 
-// Runs dep ensure and then installs the binary.
-func (Build) Production() error {
-	return build()
-}
-
-// Builds a debug version of the build (with debugging)
-func (Build) Debug() error {
-	return build("-gcflags", "all=-N -l")
+// Build the project
+func Build() error {
+	return sh.Run("sam", "build")
 }
 
 func Delve() error {
@@ -84,18 +77,6 @@ func InstallTools() error {
 		}
 	}
 	return nil
-}
-
-func build(extraArgs ...string) error {
-	combined := []string{"build"}
-	combined = append(combined, extraArgs...)
-	combined = append(combined, "-o", getBinFile("consumer"), "main.go")
-	return sh.RunWith(
-		map[string]string{
-			"GOARCH": "amd64",
-			"GOOS":   "linux",
-		},
-		"go", combined...)
 }
 
 func invoke(extraArgs ...string) error {
