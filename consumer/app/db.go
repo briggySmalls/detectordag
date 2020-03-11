@@ -6,8 +6,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"strconv"
 	"log"
+	"strconv"
+	"time"
 )
 
 const (
@@ -51,26 +52,44 @@ func init() {
 	}
 }
 
-func getDevice(id string) (*Device, error) {
-	// Request for the device associated with the ID
-	result, err := db.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String(DEVICES_TABLE),
+func updateDevice(update PowerStatusChangedEvent) (*Device, error) {
+	// Create an expression for updating the row
+	input := &dynamodb.UpdateItemInput{
+		// Look up the device of interest
+		TableName: aws.String("devices"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"device-id": {
-				S: aws.String(id),
+				S: aws.String(update.DeviceId),
 			},
 		},
-	})
+		// Update the 'status' and 'last-updated' fields
+		ExpressionAttributeNames: map[string]*string{
+			"#S": aws.String("status"),
+			"#T": aws.String("last-update"),
+		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":s": {
+				BOOL: aws.Bool(update.Status),
+			},
+			":t": {
+				S: aws.String(update.Timestamp.Format(time.RFC3339)),
+			},
+		},
+		UpdateExpression: aws.String("SET #S = :s, #T = :t"),
+		// Only update if this is more recent (or never set at all)
+		ConditionExpression: aws.String("attribute_not_exists(#T) or #T < :t"),
+		// Return all the attributes (we will use them to look up account)
+		ReturnValues: aws.String("ALL_NEW"),
+	}
+	// Run the update operation
+	result, err := db.UpdateItem(input)
 	if err != nil {
 		return nil, err
 	}
-	// Check we got exactly one device
-	if result.Item == nil {
-		return nil, fmt.Errorf("Unknown device: %s", id)
-	}
-	// Unmarshal the device
+	log.Printf("Updated device: %s", result)
+	// Pull out the device attributes
 	device := Device{}
-	err = dynamodbattribute.UnmarshalMap(result.Item, &device)
+	err = dynamodbattribute.UnmarshalMap(result.Attributes, &device)
 	if err != nil {
 		return nil, err
 	}
