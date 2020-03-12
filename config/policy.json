@@ -4,11 +4,32 @@
     {
       "Effect": "Allow",
       "Action": [
-        "iot:Connect",
-        "iot:Publish",
-        "iot:Receive"
+        "iot:Connect"
       ],
-      "Resource": ["*"]
+      "Resource": [
+        "arn:aws:iot:eu-west-2:670763423833:client/${iot:Connection.Thing.ThingName}"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["iot:Publish"],
+      "Resource": [
+        "arn:aws:iot:eu-west-2:670763423833:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/update"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["iot:Subscribe"],
+      "Resource": [
+        "arn:aws:iot:eu-west-2:670763423833:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/shadow/update/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["iot:Receive"],
+      "Resource": [
+        "arn:aws:iot:eu-west-2:670763423833:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/update/*"
+      ]
     }
   ]
 }

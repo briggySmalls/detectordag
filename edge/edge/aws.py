@@ -7,6 +7,7 @@ import json
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 
 _LOGGER = logging.getLogger(__file__)
+logging.getLogger("AWSIoTPythonSDK").setLevel(logging.WARNING)
 
 
 @dataclass
@@ -77,9 +78,10 @@ class CloudClient:
 
     @staticmethod
     def shadow_update_handler(payload: str, response_status: str, token: str) -> None:
-        del payload, token
-        _LOGGER.debug("Handling update")
+        del token
         if response_status == 'accepted':
             _LOGGER.info("Shadow update accepted")
         elif response_status in ['timeout', 'rejected']:
-            _LOGGER.error("Show updated failed: status=%s", response_status)
+            _LOGGER.error("Shadow update failed: status=%s, payload=%s", response_status, payload)
+        else:
+            raise RuntimeError(f"Unexpected response_status: {response_status}")
