@@ -6,7 +6,7 @@ from typing import Any
 import datetime
 import json
 
-from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
+from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 
 _LOGGER = logging.getLogger(__file__)
 
@@ -25,29 +25,14 @@ class ClientConfig:
 @dataclass
 class PowerStatusChangedPayload:
     status: bool
-    timestamp: datetime.datetime = field(init=False)
-    version: str = '0.1'
-
-    def __post_init__(self):
-        # Autopopulate the timestamp field
-        self.timestamp = datetime.datetime.now(datetime.timezone.utc)
 
     def to_json(self) -> str:
-        return json.dumps(asdict(self), default=self.serialise)
-
-    @staticmethod
-    def serialise(value: Any) -> str:
-        try:
-            return value.isoformat()
-        except AttributeError:
-            raise TypeError()
+        return json.dumps(asdict(self))
 
 
 class CloudClient:
     """Client for interfacing with the cloud"""
     _QOS = 1
-    _POWER_STATUS_TOPIC = 'detectordag/power_status_changed'
-    _DRAINING_FREQUENCY = 2
     _DISCONNECT_TIMEOUT = 10
     _OPERATION_TIMEOUT = 5
 
@@ -55,7 +40,7 @@ class CloudClient:
         self.config = config
         # Unique ID. If another connection using the same key is opened the
         # previous one is auto closed by AWS IOT
-        self.client = AWSIoTMQTTClient(config.device_id)
+        self.client = AWSIoTMQTTShadowClient(config.device_id)
         # Used to configure the host name and port number the underneath AWS
         # IoT MQTT Client tries to connect to.
         self.client.configureEndpoint(self.config.endpoint, self.config.port)
@@ -64,16 +49,13 @@ class CloudClient:
         self.client.configureCredentials(str(self.config.root_cert.resolve()),
                                          str(self.config.thing_key.resolve()),
                                          str(self.config.thing_cert.resolve()))
-        # Configure the offline queue for publish requests to be 20 in size and
-        # drop the oldest
-        self.client.configureOfflinePublishQueueing(-1)
-        # Used to configure the draining speed to clear up the queued requests
-        # when the connection is back. (frequencyInHz)
-        self.client.configureDrainingFrequency(self._DRAINING_FREQUENCY)
         # Configure connect/disconnect timeout to be 10 seconds
         self.client.configureConnectDisconnectTimeout(self._DISCONNECT_TIMEOUT)
         # Configure MQTT operation timeout to be 5 seconds
         self.client.configureMQTTOperationTimeout(self._OPERATION_TIMEOUT)
+        # Create the shadow handler
+        self.shadow = self.client.createShadowHandlerWithName(config.device_id, False)
+
 
     def __enter__(self) -> 'CloudClient':
         # Connect
@@ -91,7 +73,16 @@ class CloudClient:
         Args:
             status (bool): New power status
         """
-        _LOGGER.info('Publishing to "%s" the value: %i',
-                     self._POWER_STATUS_TOPIC, status)
-        payload = PowerStatusChangedPayload(status=status)
-        self.client.publish(self._POWER_STATUS_TOPIC, payload.to_json(), self._QOS)
+        payload = PowerStatusChangedPayload(status=status).to_json()
+        _LOGGER.info('Publishing status update: %s', payload)
+        token = self.shadow.shadowUpdate(payload, self.shadow_update_handler, self._OPERATION_TIMEOUT)
+        _LOGGER.debug(f"Status update returned token: {token}")
+
+    @staticmethod
+    def shadow_update_handler(payload: str, response_status: str, token: str) -> None:
+        del payload, token
+        _LOGGER.debug("Handling update")
+        if response_status == 'accepted':
+            _LOGGER.info("Shadow update accepted")
+        elif response_status in ['timeout', 'rejected']:
+            _LOGGER.error("Show updated failed: status={response_status}")

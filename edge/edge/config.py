@@ -55,10 +55,11 @@ class AppConfig:
             for name, mapping in cls._PARSERS.items()
         }
         # Save certs to files
-        parsed['certs_dir'].mkdir(exist_ok=True, parents=True)
+        certs_dir = parsed['certs_dir'].expanduser()
+        certs_dir.mkdir(exist_ok=True, parents=True)
         for cert, filename in cls._CERTS.items():
             # Establish the path of the new certificate file
-            cert_path = parsed['certs_dir'].expanduser() / filename
+            cert_path = certs_dir / filename
             # Create the file from the environment variable
             cls._write_cert(parsed[cert], cert_path)
             # Replace the env variable content with the path to the certificate
