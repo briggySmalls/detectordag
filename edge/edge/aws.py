@@ -26,7 +26,8 @@ class PowerStatusChangedPayload:
     status: bool
 
     def to_json(self) -> str:
-        return json.dumps(asdict(self))
+        payload = {'state': {'desired': asdict(self)}}
+        return json.dumps(payload)
 
 
 class CloudClient:
