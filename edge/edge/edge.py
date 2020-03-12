@@ -1,7 +1,5 @@
 """Main module."""
 import logging
-import os
-from pathlib import Path
 
 from edge.aws import ClientConfig, CloudClient
 from edge.config import AppConfig
