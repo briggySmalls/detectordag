@@ -144,7 +144,6 @@ func setCertificates(id, cert, key string) error {
 	// Set the variables
 	for key, value := range envs {
 		err := sh.Run("balena", "env", "add", "--device", id, key, value)
-		log.Printf("Set env var: %s = %s", key, value)
 		if err != nil {
 			return err
 		}
