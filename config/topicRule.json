@@ -1,5 +1,5 @@
 {
-    "sql": "SELECT clientId() as deviceId, * FROM 'detectordag/power_status_changed'",
+    "sql": "SELECT * FROM '$aws/things/+/shadow/update/accepted'",
     "description": "Run a lambda function to handle power status updates",
     "actions": [
         {
