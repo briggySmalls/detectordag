@@ -26,7 +26,7 @@ class DeviceShadowState:
     status: bool
 
     def to_json(self) -> str:
-        payload = {'state': {'desired': asdict(self)}}
+        payload = {'state': {'reported': asdict(self)}}
         return json.dumps(payload)
 
 
@@ -81,7 +81,7 @@ class CloudClient:
     def shadow_update_handler(payload: str, response_status: str, token: str) -> None:
         del token
         if response_status == 'accepted':
-            _LOGGER.info("Shadow update accepted")
+            _LOGGER.info("Shadow update accepted: payload=%s", payload)
         elif response_status in ['timeout', 'rejected']:
             _LOGGER.error("Shadow update failed: status=%s, payload=%s", response_status, payload)
         else:
