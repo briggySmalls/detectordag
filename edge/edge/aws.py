@@ -73,7 +73,7 @@ class CloudClient:
         payload = PowerStatusChangedPayload(status=status).to_json()
         _LOGGER.info('Publishing status update: %s', payload)
         token = self.shadow.shadowUpdate(payload, self.shadow_update_handler, self._OPERATION_TIMEOUT)
-        _LOGGER.debug(f"Status update returned token: {token}")
+        _LOGGER.debug("Status update returned token: %s", token)
 
     @staticmethod
     def shadow_update_handler(payload: str, response_status: str, token: str) -> None:
@@ -82,4 +82,4 @@ class CloudClient:
         if response_status == 'accepted':
             _LOGGER.info("Shadow update accepted")
         elif response_status in ['timeout', 'rejected']:
-            _LOGGER.error("Show updated failed: status={response_status}")
+            _LOGGER.error("Show updated failed: status=%s", response_status)
