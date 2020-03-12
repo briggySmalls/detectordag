@@ -22,7 +22,7 @@ class ClientConfig:
 
 
 @dataclass
-class PowerStatusChangedPayload:
+class DeviceShadowState:
     status: bool
 
     def to_json(self) -> str:
@@ -72,7 +72,7 @@ class CloudClient:
         Args:
             status (bool): New power status
         """
-        payload = PowerStatusChangedPayload(status=status).to_json()
+        payload = DeviceShadowState(status=status).to_json()
         _LOGGER.info('Publishing status update: %s', payload)
         token = self.shadow.shadowUpdate(payload, self.shadow_update_handler, self._OPERATION_TIMEOUT)
         _LOGGER.debug("Status update returned token: %s", token)
