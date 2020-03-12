@@ -1,9 +1,10 @@
 """Logic for parsing configuration"""
-from environs import Env
 import base64
-from typing import Any, Optional
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Optional
+
+from environs import Env
 
 
 @dataclass
@@ -51,7 +52,8 @@ class AppConfig:
         env.read_env()
         # Parse our variables
         parsed = {
-            name: getattr(env, mapping.parser)(mapping.identifier, mapping.default)
+            name: getattr(env, mapping.parser)(mapping.identifier,
+                                               mapping.default)
             for name, mapping in cls._PARSERS.items()
         }
         # Save certs to files
@@ -68,7 +70,8 @@ class AppConfig:
         return AppConfig(**parsed)
 
     @staticmethod
-    def _write_certs(cert_dir: Path, root_cert: str, thing_cert: str, thing_key: str) -> None:
+    def _write_certs(cert_dir: Path, root_cert: str, thing_cert: str,
+                     thing_key: str) -> None:
         AppConfig._write_cert(root_cert, cert_dir / "root-CA.crt")
         AppConfig._write_cert(thing_cert, cert_dir / "thing.cert.pem")
         AppConfig._write_cert(thing_key, cert_dir / "thing.private.key")

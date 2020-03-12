@@ -1,8 +1,8 @@
 """Logic for connecting to AWS IoT"""
-import logging
-from dataclasses import dataclass, asdict
-from pathlib import Path
 import json
+import logging
+from dataclasses import asdict, dataclass
+from pathlib import Path
 
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 
@@ -54,7 +54,8 @@ class CloudClient:
         # Configure MQTT operation timeout to be 5 seconds
         self.client.configureMQTTOperationTimeout(self._OPERATION_TIMEOUT)
         # Create the shadow handler
-        self.shadow = self.client.createShadowHandlerWithName(config.device_id, False)
+        self.shadow = self.client.createShadowHandlerWithName(
+            config.device_id, False)
 
     def __enter__(self) -> 'CloudClient':
         # Connect
@@ -74,15 +75,19 @@ class CloudClient:
         """
         payload = DeviceShadowState(status=status).to_json()
         _LOGGER.info('Publishing status update: %s', payload)
-        token = self.shadow.shadowUpdate(payload, self.shadow_update_handler, self._OPERATION_TIMEOUT)
+        token = self.shadow.shadowUpdate(payload, self.shadow_update_handler,
+                                         self._OPERATION_TIMEOUT)
         _LOGGER.debug("Status update returned token: %s", token)
 
     @staticmethod
-    def shadow_update_handler(payload: str, response_status: str, token: str) -> None:
+    def shadow_update_handler(payload: str, response_status: str,
+                              token: str) -> None:
         del token
         if response_status == 'accepted':
             _LOGGER.info("Shadow update accepted: payload=%s", payload)
         elif response_status in ['timeout', 'rejected']:
-            _LOGGER.error("Shadow update failed: status=%s, payload=%s", response_status, payload)
+            _LOGGER.error("Shadow update failed: status=%s, payload=%s",
+                          response_status, payload)
         else:
-            raise RuntimeError(f"Unexpected response_status: {response_status}")
+            raise RuntimeError(
+                f"Unexpected response_status: {response_status}")

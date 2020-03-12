@@ -3,8 +3,8 @@ import logging
 import os
 from pathlib import Path
 
-from edge.config import AppConfig
 from edge.aws import ClientConfig, CloudClient
+from edge.config import AppConfig
 
 try:
     from gpiozero import DigitalInputDevice

@@ -4,8 +4,8 @@ import sys
 
 import click
 
-from edge.edge import EdgeApp
 from edge.config import AppConfig
+from edge.edge import EdgeApp
 
 _POWER_PIN = 4
 
