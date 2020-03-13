@@ -1,9 +1,10 @@
 """Logic for parsing configuration"""
-from environs import Env
 import base64
-from typing import Any, Optional
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Optional
+
+from environs import Env
 
 
 @dataclass
@@ -51,14 +52,16 @@ class AppConfig:
         env.read_env()
         # Parse our variables
         parsed = {
-            name: getattr(env, mapping.parser)(mapping.identifier, mapping.default)
+            name: getattr(env, mapping.parser)(mapping.identifier,
+                                               mapping.default)
             for name, mapping in cls._PARSERS.items()
         }
         # Save certs to files
-        parsed['certs_dir'].mkdir(exist_ok=True, parents=True)
+        certs_dir = parsed['certs_dir'].expanduser()
+        certs_dir.mkdir(exist_ok=True, parents=True)
         for cert, filename in cls._CERTS.items():
             # Establish the path of the new certificate file
-            cert_path = parsed['certs_dir'].expanduser() / filename
+            cert_path = certs_dir / filename
             # Create the file from the environment variable
             cls._write_cert(parsed[cert], cert_path)
             # Replace the env variable content with the path to the certificate
@@ -67,7 +70,8 @@ class AppConfig:
         return AppConfig(**parsed)
 
     @staticmethod
-    def _write_certs(cert_dir: Path, root_cert: str, thing_cert: str, thing_key: str) -> None:
+    def _write_certs(cert_dir: Path, root_cert: str, thing_cert: str,
+                     thing_key: str) -> None:
         AppConfig._write_cert(root_cert, cert_dir / "root-CA.crt")
         AppConfig._write_cert(thing_cert, cert_dir / "thing.cert.pem")
         AppConfig._write_cert(thing_key, cert_dir / "thing.private.key")

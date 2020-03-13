@@ -4,8 +4,8 @@ import sys
 
 import click
 
-from edge.edge import EdgeApp
 from edge.config import AppConfig
+from edge.edge import EdgeApp
 
 _POWER_PIN = 4
 
@@ -49,9 +49,15 @@ def mock(ctx):
         # Allow the user to toggle the power status
         while True:
             char = click.getchar()
-            if char == 'p':
+            if char == 't':
                 # Toggle power status
                 power_status_device.toggle()
+            elif char == 'h':
+                # Set power status high
+                power_status_device.high()
+            elif char == 'l':
+                # Set power status low
+                power_status_device.low()
 
 
 if __name__ == "__main__":
