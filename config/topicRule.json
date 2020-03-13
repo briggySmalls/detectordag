@@ -1,5 +1,5 @@
 {
-    "sql": "SELECT topic(3) as deviceId, timestamp, state.reported,  FROM '$aws/things/+/shadow/update/documents'",
+    "sql": "SELECT topic(3) as deviceId, timestamp, current.state.reported as state, current.metadata.reported as updated FROM '$aws/things/+/shadow/update/documents' WHERE current.state.reported.status <> previous.state.reported.status",
     "description": "Run a lambda function to handle power status updates",
     "actions": [
         {
