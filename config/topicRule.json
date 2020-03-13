@@ -1,5 +1,5 @@
 {
-    "sql": "SELECT * FROM '$aws/things/+/shadow/update/accepted'",
+    "sql": "SELECT topic(3) as deviceId, * FROM '$aws/things/+/shadow/update/accepted'",
     "description": "Run a lambda function to handle power status updates",
     "actions": [
         {
