@@ -2,3 +2,5 @@
 .aws-sam
 # Ignore swagger codegen
 go/
+.swagger-codegen/
+api/
