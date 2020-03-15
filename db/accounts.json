@@ -4,6 +4,10 @@
     {
       "AttributeName": "account-id",
       "AttributeType": "S"
+    },
+    {
+      "AttributeName": "username",
+      "AttributeType": "S"
     }
   ],
   "KeySchema": [
@@ -12,17 +16,24 @@
       "KeyType": "HASH"
     }
   ],
-  "GlobalSecondaryIndexes": {
-    "IndexName": "username-index",
-    "KeySchema": [
+  "GlobalSecondaryIndexes": [
       {
-        "AttributeName": "account-id"
+        "IndexName": "username-index",
+        "KeySchema": [
+          {
+            "AttributeName": "username",
+            "KeyType": "HASH"
+          }
+        ],
+        "Projection": {
+          "ProjectionType": "ALL"
+        },
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5
+        }
       }
-    ],
-    "Projection": {
-      "ProjectionType": "KEYS_ONLY"
-    }
-  },
+  ],
   "ProvisionedThroughput": {
     "ReadCapacityUnits": 5,
     "WriteCapacityUnits": 5
