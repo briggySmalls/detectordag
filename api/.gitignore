@@ -1,6 +1,9 @@
 # Ignore build output
 .aws-sam
 # Ignore swagger codegen
-go/
+go/model_*.go
+go/logger.go
+go/routers.go
+go/README.md
 .swagger-codegen/
 api/
