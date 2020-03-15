@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"github.com/briggysmalls/detectordag/shared"
 	"log"
 	"time"
 )
@@ -28,13 +29,13 @@ type StatusUpdatedEvent struct {
 // HandleRequest handles a lambda call
 func HandleRequest(ctx context.Context, event StatusUpdatedEvent) {
 	// Update the device status in the database
-	device, err := getDevice(event.DeviceId)
+	device, err := shared.GetDevice(event.DeviceId)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Printf("Account ID: %d", device.AccountId)
 	// Get the account
-	account, err := getAccount(device.AccountId)
+	account, err := shared.GetAccount(device.AccountId)
 	if err != nil {
 		log.Fatal(err)
 	}

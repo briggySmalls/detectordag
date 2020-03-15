@@ -1,4 +1,4 @@
-package app
+package shared
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ type Device struct {
 	AccountId int    `dynamodbav:"account-id"`
 }
 
-//It is a best practice to instanciate the Amazon DynamoDB client outside
+//It is a best practice to instantiate the Amazon DynamoDB client outside
 //of the AWS Lambda function handler.
 //https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.Lambda.BestPracticesWithDynamoDB.html
 var db *dynamodb.DynamoDB
@@ -51,7 +51,7 @@ func init() {
 	}
 }
 
-func getDevice(id string) (*Device, error) {
+func GetDevice(id string) (*Device, error) {
 	// Request for the device associated with the ID
 	result, err := db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(DEVICES_TABLE),
@@ -77,7 +77,7 @@ func getDevice(id string) (*Device, error) {
 	return &device, nil
 }
 
-func getAccount(id int) (*Account, error) {
+func GetAccount(id int) (*Account, error) {
 	// Request for the account associated with the device
 	result, err := db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(ACCOUNTS_TABLE),
