@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  api:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: api
+      Runtime: go1.x
+      Events:
+        Auth:
+          Type: Api
+          Properties:
+            Path: /auth
+            Method: post
+        UpdateDevice:
+          Type: Api
+          Properties:
+            Path: /device/{deviceId}
+            Method: patch
+        GetAccount:
+          Type: Api
+          Properties:
+            Path: /accounts/{accountId}
+            Method: get
+        UpdateAccount:
+          Type: Api
+          Properties:
+            Path: /accounts/{accountId}
+            Method: patch
+        GetAccountDevices:
+          Type: Api
+          Properties:
+            Path: /accounts/{accountId}/devices
+            Method: get
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'dynamodb:GetItem'
+                - 'dynamodb:UpdateItem'
+                - 'dynamodb:Query'
+              Resource: "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/devices"
+        - Version: '2012-10-17'
+          Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:UpdateItem'
+                Resource: "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/accounts"
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'iot:GetThingShadow'
+              Resource: 'arn:aws:iot:${AWS::Partition}:${AWS::AccountId}:thing/*'
