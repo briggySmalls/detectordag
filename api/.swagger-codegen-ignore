@@ -1,2 +1,7 @@
 # Swagger Codegen Ignore
+
+# Keep our custom main file (we adapt server to lambda)
 main.go
+
+# Keep our handler implementations
+go/api_*.go
