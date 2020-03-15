@@ -4,7 +4,6 @@ package main
 
 import (
 	"github.com/briggysmalls/detectordag/shared"
-	"github.com/magefile/mage/mg"
 )
 
 var helper shared.Lambda
@@ -13,16 +12,9 @@ func init() {
 	helper = shared.New(".aws-sam/build/", "./tools/tools.go")
 }
 
-type Invoke mg.Namespace
-
 // Invokes the lambda function locally
-func (Invoke) Production() error {
-	return helper.Invoke()
-}
-
-// Invokes the lambda function locally, running the debug server
-func (Invoke) Debug() error {
-	return helper.InvokeDebug()
+func StartApi() error {
+	return helper.StartApi()
 }
 
 // Build the project

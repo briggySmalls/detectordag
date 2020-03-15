@@ -18,6 +18,7 @@ type lambda struct {
 
 type Lambda interface {
     Build() error
+    StartApi() error
     Invoke() error
     InvokeDebug() error
     BuildDelve() error
@@ -37,6 +38,12 @@ func New(binDir, toolsFile string) Lambda {
 func (l *lambda) Invoke() error {
     mg.Deps(l.Build)
     return invoke()
+}
+
+// Starts a local API gateway for the lambda function locally
+func (l *lambda) StartApi() error {
+    mg.Deps(l.Build)
+    return sh.Run("sam", "local", "start-api")
 }
 
 // Invokes the lambda function locally, running the debug server
