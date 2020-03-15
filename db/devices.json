@@ -16,17 +16,24 @@
       "KeyType": "HASH"
     }
   ],
-  "GlobalSecondaryIndexes": {
-    "IndexName": "account-id",
-    "KeySchema": [
-      {
-        "AttributeName": "account-id-index"
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "account-id-index",
+      "KeySchema": [
+        {
+          "AttributeName": "account-id",
+          "KeyType": "HASH"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "KEYS_ONLY"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
       }
-    ],
-    "Projection": {
-      "ProjectionType": "KEYS_ONLY"
     }
-  },
+  ],
   "ProvisionedThroughput": {
     "ReadCapacityUnits": 5,
     "WriteCapacityUnits": 5
