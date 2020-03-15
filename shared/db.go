@@ -10,14 +10,22 @@ import (
 )
 
 const (
-	ACCOUNTS_TABLE = "accounts"
-	DEVICES_TABLE  = "devices"
+	ACCOUNTS_TABLE    = "accounts"
+	DEVICES_TABLE     = "devices"
+	ACCOUNTS_GSI_NAME = "username-index"
 )
+
+type Credentials struct {
+	Username string
+	Password string
+	Salt     string
+}
 
 // account represents an 'accounts' table entry
 type Account struct {
-	AccountId string   `dynamodbav:"account-id"`
-	Emails    []string `dynamodbav:"emails"`
+	AccountId   string      `dynamodbav:"account-id"`
+	Emails      []string    `dynamodbav:"emails"`
+	Credentials Credentials `dynamodbav:"credentials"`
 }
 
 // device is a 'device' table row
@@ -94,8 +102,31 @@ func GetAccount(id string) (*Account, error) {
 		return nil, fmt.Errorf("Unknown account: %d", id)
 	}
 	// Unmarshal the account
+	return unmarshalAccount(result.Item)
+}
+
+func QueryAccount(username string) (*Account, error) {
+	// Request for the account associated with the username
+	result, err := db.Query(&dynamodb.QueryInput{
+		TableName:              aws.String(ACCOUNTS_TABLE),
+		IndexName:              aws.String(ACCOUNTS_GSI_NAME),
+		KeyConditionExpression: aws.String(fmt.Sprintf("username = :%s", username)),
+		Select:                 aws.String("ALL_PROJECTED_ATTRIBUTES"),
+	})
+	if err != nil {
+		return nil, err
+	}
+	// Check we got exactly one account
+	if len(result.Items) != 1 {
+		return nil, fmt.Errorf("Unknown account: %d", username)
+	}
+	return unmarshalAccount(result.Items[0])
+}
+
+func unmarshalAccount(item map[string]*dynamodb.AttributeValue) (*Account, error) {
+	// Unmarshal the account
 	account := Account{}
-	err = dynamodbattribute.UnmarshalMap(result.Item, &account)
+	err := dynamodbattribute.UnmarshalMap(item, &account)
 	if err != nil {
 		return nil, err
 	}
