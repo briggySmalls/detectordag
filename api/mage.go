@@ -16,15 +16,15 @@ func init() {
 	helper = shared.New(".aws-sam/build/", "./tools/tools.go")
 }
 
-type Swagger mg.Namespace
-
 // Starts the API locally
 func StartApi() error {
+	mg.Deps(Build)
 	return helper.StartApi()
 }
 
 // Build the project
 func Build() error {
+	mg.Deps(Generate)
 	return helper.Build()
 }
 
@@ -36,10 +36,6 @@ func InstallTools() error {
 	return helper.InstallTools()
 }
 
-func (Swagger) Validate() error {
-	return sh.Run("swagger", "validate", apiSpecFile)
-}
-
-func (Swagger) Generate() error {
+func Generate() error {
 	return sh.Run("swagger-codegen", "generate", "-i", "api.yaml", "--lang", "go-server")
 }
