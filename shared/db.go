@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"log"
-	"strconv"
 )
 
 const (
@@ -17,14 +16,14 @@ const (
 
 // account represents an 'accounts' table entry
 type Account struct {
-	AccountId int      `dynamodbav:"account-id"`
+	AccountId string   `dynamodbav:"account-id"`
 	Emails    []string `dynamodbav:"emails"`
 }
 
 // device is a 'device' table row
 type Device struct {
 	DeviceId  string `dynamodbav:"device-id"`
-	AccountId int    `dynamodbav:"account-id"`
+	AccountId string `dynamodbav:"account-id"`
 }
 
 //It is a best practice to instantiate the Amazon DynamoDB client outside
@@ -77,13 +76,13 @@ func GetDevice(id string) (*Device, error) {
 	return &device, nil
 }
 
-func GetAccount(id int) (*Account, error) {
+func GetAccount(id string) (*Account, error) {
 	// Request for the account associated with the device
 	result, err := db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(ACCOUNTS_TABLE),
 		Key: map[string]*dynamodb.AttributeValue{
 			"account-id": {
-				N: aws.String(strconv.Itoa(id)),
+				S: aws.String(id),
 			},
 		},
 	})
