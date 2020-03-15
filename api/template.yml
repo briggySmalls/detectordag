@@ -10,27 +10,27 @@ Resources:
         Auth:
           Type: Api
           Properties:
-            Path: /auth
+            Path: /v1/auth
             Method: post
         UpdateDevice:
           Type: Api
           Properties:
-            Path: /device/{deviceId}
+            Path: /v1/device/{deviceId}
             Method: patch
         GetAccount:
           Type: Api
           Properties:
-            Path: /accounts/{accountId}
+            Path: /v1/accounts/{accountId}
             Method: get
         UpdateAccount:
           Type: Api
           Properties:
-            Path: /accounts/{accountId}
+            Path: /v1/accounts/{accountId}
             Method: patch
         GetAccountDevices:
           Type: Api
           Properties:
-            Path: /accounts/{accountId}/devices
+            Path: /v1/accounts/{accountId}/devices
             Method: get
       Policies:
         - Version: '2012-10-17'
