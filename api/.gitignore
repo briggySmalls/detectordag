@@ -1,1 +1,4 @@
+# Ignore build output
 .aws-sam
+# Ignore swagger codegen
+go/
