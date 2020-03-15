@@ -1,0 +1,30 @@
+{
+  "TableName": "accounts",
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "account-id",
+      "AttributeType": "S"
+    }
+  ],
+  "KeySchema": [
+    {
+      "AttributeName": "account-id",
+      "KeyType": "HASH"
+    }
+  ],
+  "GlobalSecondaryIndexes": {
+    "IndexName": "username-index",
+    "KeySchema": [
+      {
+        "AttributeName": "account-id"
+      }
+    ],
+    "Projection": {
+      "ProjectionType": "KEYS_ONLY"
+    }
+  },
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  }
+}

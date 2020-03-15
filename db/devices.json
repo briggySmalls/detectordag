@@ -1,0 +1,34 @@
+{
+  "TableName": "devices",
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "device-id",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "account-id",
+      "AttributeType": "S"
+    }
+  ],
+  "KeySchema": [
+    {
+      "AttributeName": "device-id",
+      "KeyType": "HASH"
+    }
+  ],
+  "GlobalSecondaryIndexes": {
+    "IndexName": "account-id",
+    "KeySchema": [
+      {
+        "AttributeName": "account-id-index"
+      }
+    ],
+    "Projection": {
+      "ProjectionType": "KEYS_ONLY"
+    }
+  },
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  }
+}
