@@ -10,10 +10,9 @@
 package swagger
 
 import (
-	"crypto/sha256"
 	"encoding/json"
-	"fmt"
 	"github.com/briggysmalls/detectordag/shared"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
@@ -21,8 +20,9 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	// Whatever happens, we return JSON
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	// Try to parse the body
-	var creds shared.Credentials
-	err := json.NewDecoder(r.Body).Decode(&creds)
+	var creds Credentials
+	var err error
+	err = json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
 		setError(w, err, http.StatusBadRequest)
 		return
@@ -34,16 +34,9 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Check that the password is correct
-	sum := sha256.Sum256([]byte(creds.Password + account.Credentials.Salt))
-	pw := []byte(account.Credentials.Password)
-	if len(pw) != 32 {
-		setError(w, fmt.Errorf("Unexpected password format"), http.StatusInternalServerError)
-		return
-	}
-	var pwArr [32]byte
-	copy(pwArr[:], pw)
-	if sum != pwArr {
-		setError(w, fmt.Errorf("Incorrect credentials"), http.StatusForbidden)
+	err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(creds.Password))
+	if err != nil {
+		setError(w, err, http.StatusForbidden)
 		return
 	}
 	// Build response

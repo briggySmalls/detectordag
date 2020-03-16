@@ -16,17 +16,12 @@ const (
 	ACCOUNTS_GSI_NAME = "username-index"
 )
 
-type Credentials struct {
-	Username string
-	Password string
-	Salt     string
-}
-
 // account represents an 'accounts' table entry
 type Account struct {
-	AccountId   string      `dynamodbav:"account-id"`
-	Emails      []string    `dynamodbav:"emails"`
-	Credentials Credentials `dynamodbav:"credentials"`
+	AccountId string   `dynamodbav:"account-id"`
+	Emails    []string `dynamodbav:"emails"`
+	Username  string   `dynamodbav:"username"`
+	Password  string   `dynamodbav:"password"`
 }
 
 // device is a 'device' table row
