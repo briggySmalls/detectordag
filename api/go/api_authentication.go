@@ -20,7 +20,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	// Whatever happens, we return JSON
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	// Try to parse the body
-	var creds Credentials
+	var creds shared.Credentials
 	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
 		setError(w, err, http.StatusBadRequest)
@@ -51,18 +51,18 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 
 func setError(w http.ResponseWriter, err error, status int) {
 	// Create the error struct
-	ModelError{
-		Error: err.Error()
+	m := ModelError{
+		Error_: err.Error(),
 	}
 	// Marshal into string
-	content, err := json.Marshal(ModelError)
+	content, err := json.Marshal(m)
 	if err != nil {
 		// What do ew
 		http.Error(w, "{\"error\": \"Failed to format error message\"}", http.StatusInternalServerError)
 		return
 	}
 	// Write the output
-	http.Error(w, content, status)
+	http.Error(w, string(content), status)
 }
 
 func raiseError(w http.ResponseWriter, err error, status int) {
