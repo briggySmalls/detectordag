@@ -8,15 +8,8 @@
                 "username": {
                     "S": "briggySmalls90@gmail.com"
                 },
-                "credentials": {
-                    "M": {
-                        "password": {
-                            "S": "900A46277EBC12C6C936FBBD57D719D19F2B63BDA131F83347CF54D396CFE4B6"
-                        },
-                        "salt": {
-                            "S": "aqrMvKp0Pq0bXIDT0iEF/A=="
-                        }
-                    }
+                "password": {
+                    "S": "$2y$12$PQ8Yq/KNmlmJYlgfhy1/Keahdr6aGMDM6Wdygk.oiUoPjqVJU2aja"
                 },
                 "emails": {
                     "L": [{
