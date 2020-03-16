@@ -17,27 +17,52 @@ import (
 )
 
 func Auth(w http.ResponseWriter, r *http.Request) {
+	// Whatever happens, we return JSON
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	// Try to parse the body
 	var creds Credentials
 	err := json.NewDecoder(r.Body).Decode(&creds)
-	raiseError(w, err, http.StatusBadRequest)
+	if err != nil {
+		setError(w, err, http.StatusBadRequest)
+		return
+	}
 	// Query for an account with the given username
 	account, err := shared.QueryAccount(creds.Username)
-	raiseError(w, err, http.StatusForbidden)
+	if err != nil {
+		setError(w, err, http.StatusForbidden)
+		return
+	}
 	// Check that the password is correct
 	sum := sha256.Sum256([]byte(creds.Password + account.Credentials.Salt))
 	pw := []byte(account.Credentials.Password)
 	if len(pw) != 32 {
 		http.Error(w, "Unexpected password format", http.StatusInternalServerError)
+		return
 	}
 	var pwArr [32]byte
 	copy(pwArr[:], pw)
 	if sum != pwArr {
 		http.Error(w, "Incorrect credentials", http.StatusForbidden)
+		return
 	}
 	// Build response
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
+}
+
+func setError(w http.ResponseWriter, err error, status int) {
+	// Create the error struct
+	ModelError{
+		Error: err.Error()
+	}
+	// Marshal into string
+	content, err := json.Marshal(ModelError)
+	if err != nil {
+		// What do ew
+		http.Error(w, "{\"error\": \"Failed to format error message\"}", http.StatusInternalServerError)
+		return
+	}
+	// Write the output
+	http.Error(w, content, status)
 }
 
 func raiseError(w http.ResponseWriter, err error, status int) {
