@@ -2,7 +2,7 @@ package app
 
 import (
 	"context"
-	"github.com/briggysmalls/detectordag/shared"
+	"github.com/briggysmalls/detectordag/shared/database"
 	"log"
 	"time"
 )
@@ -26,16 +26,19 @@ type StatusUpdatedEvent struct {
 	Updated   updated `json:""`
 }
 
+// Create a database client
+var db = database.New()
+
 // HandleRequest handles a lambda call
 func HandleRequest(ctx context.Context, event StatusUpdatedEvent) {
 	// Update the device status in the database
-	device, err := shared.GetDevice(event.DeviceId)
+	device, err := db.GetDeviceById(event.DeviceId)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Printf("Account ID: %d", device.AccountId)
 	// Get the account
-	account, err := shared.GetAccount(device.AccountId)
+	account, err := db.GetAccountById(device.AccountId)
 	if err != nil {
 		log.Fatal(err)
 	}

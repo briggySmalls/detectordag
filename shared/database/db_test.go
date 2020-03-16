@@ -1,12 +1,14 @@
-package shared
+package database
 
 import (
 	"testing"
 )
 
 func TestGetAccountByUsername(t *testing.T) {
+	// Create a client under test
+	c := New()
 	// Query for a known account
-	acc, err := GetAccountByUsername("briggySmalls90@gmail.com")
+	acc, err := c.GetAccountByUsername("briggySmalls90@gmail.com")
 	// Ensure no err
 	if err != nil {
 		t.Error(err)

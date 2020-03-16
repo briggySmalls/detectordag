@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/briggysmalls/detectordag/shared"
+	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/gorilla/mux"
 )
 
@@ -26,12 +26,12 @@ type Route struct {
 }
 
 type handlerer struct {
-	db shared.DbClient
+	db database.Client
 }
 
 type Routes []Route
 
-func NewRouter(db shared.DbClient) *mux.Router {
+func NewRouter(db database.Client) *mux.Router {
 	// Create the router
 	router := mux.NewRouter().StrictSlash(true)
 	// Create a handlerer
