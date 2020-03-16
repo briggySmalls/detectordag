@@ -3,14 +3,14 @@
 package main
 
 import (
-	"github.com/briggysmalls/detectordag/shared"
+	"github.com/briggysmalls/detectordag/shared/mage"
 	"github.com/magefile/mage/mg"
 )
 
-var helper shared.Lambda
+var helper mage.Lambda
 
 func init() {
-	helper = shared.New(".aws-sam/build/", "./tools/tools.go")
+	helper = mage.New(".aws-sam/build/", "./tools/tools.go")
 }
 
 type Invoke mg.Namespace

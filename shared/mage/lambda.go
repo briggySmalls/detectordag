@@ -1,4 +1,4 @@
-package shared
+package mage
 
 import (
     "fmt"

@@ -3,17 +3,17 @@
 package main
 
 import (
-	"github.com/briggysmalls/detectordag/shared"
+	"github.com/briggysmalls/detectordag/shared/mage"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 )
 
-var helper shared.Lambda
+var helper mage.Lambda
 
 const apiSpecFile = "api.yaml"
 
 func init() {
-	helper = shared.New(".aws-sam/build/", "./tools/tools.go")
+	helper = mage.New(".aws-sam/build/", "./tools/tools.go")
 }
 
 // Starts the API locally
