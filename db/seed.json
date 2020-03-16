@@ -5,6 +5,9 @@
                 "account-id": {
                     "S": "aac45d02-c97d-442c-8431-336d578fdcf7"
                 },
+                "username": {
+                    "S": "briggySmalls90@gmail.com"
+                },
                 "credentials": {
                     "M": {
                         "password": {
@@ -12,9 +15,6 @@
                         },
                         "salt": {
                             "S": "aqrMvKp0Pq0bXIDT0iEF/A=="
-                        },
-                        "username": {
-                            "S": "briggySmalls90@gmail.com"
                         }
                     }
                 },
