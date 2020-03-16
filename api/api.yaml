@@ -65,6 +65,7 @@ paths:
           type: string
       requestBody:
         description: Properties to update about the device
+        required: true
         content:
           application/json:
             schema:
@@ -132,6 +133,7 @@ paths:
           type: string
       requestBody:
         description: Properties to update about the account
+        required: true
         content:
           application/json:
             schema:
