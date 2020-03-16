@@ -100,7 +100,7 @@ func GetAccount(id string) (*Account, error) {
 	}
 	// Check we got exactly one account
 	if result.Item == nil {
-		return nil, fmt.Errorf("Unknown account: %d", id)
+		return nil, fmt.Errorf("Unknown account: %s", id)
 	}
 	// Unmarshal the account
 	return unmarshalAccount(result.Item)
