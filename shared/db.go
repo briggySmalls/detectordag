@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"log"
 )
 
@@ -106,19 +107,27 @@ func GetAccount(id string) (*Account, error) {
 }
 
 func QueryAccount(username string) (*Account, error) {
+	// Build an expression
+	kc := expression.Key("username").Equal(expression.Value(username))
+	expr, err := expression.NewBuilder().WithKeyCondition(kc).Build()
+	if err != nil {
+		return nil, err
+	}
 	// Request for the account associated with the username
 	result, err := db.Query(&dynamodb.QueryInput{
-		TableName:              aws.String(ACCOUNTS_TABLE),
-		IndexName:              aws.String(ACCOUNTS_GSI_NAME),
-		KeyConditionExpression: aws.String(fmt.Sprintf("username = :%s", username)),
-		Select:                 aws.String("ALL_PROJECTED_ATTRIBUTES"),
+		TableName:                 aws.String(ACCOUNTS_TABLE),
+		IndexName:                 aws.String(ACCOUNTS_GSI_NAME),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		KeyConditionExpression:    expr.KeyCondition(),
+		Select:                    aws.String("ALL_PROJECTED_ATTRIBUTES"),
 	})
 	if err != nil {
 		return nil, err
 	}
 	// Check we got exactly one account
 	if len(result.Items) != 1 {
-		return nil, fmt.Errorf("Unknown account: %d", username)
+		return nil, fmt.Errorf("Unknown account: %s", username)
 	}
 	return unmarshalAccount(result.Items[0])
 }
