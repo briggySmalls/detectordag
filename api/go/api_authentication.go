@@ -12,6 +12,7 @@ package swagger
 import (
 	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"github.com/briggysmalls/detectordag/shared"
 	"net/http"
 )
@@ -36,13 +37,13 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	sum := sha256.Sum256([]byte(creds.Password + account.Credentials.Salt))
 	pw := []byte(account.Credentials.Password)
 	if len(pw) != 32 {
-		http.Error(w, "Unexpected password format", http.StatusInternalServerError)
+		setError(w, fmt.Errorf("Unexpected password format"), http.StatusInternalServerError)
 		return
 	}
 	var pwArr [32]byte
 	copy(pwArr[:], pw)
 	if sum != pwArr {
-		http.Error(w, "Incorrect credentials", http.StatusForbidden)
+		setError(w, fmt.Errorf("Incorrect credentials"), http.StatusForbidden)
 		return
 	}
 	// Build response
