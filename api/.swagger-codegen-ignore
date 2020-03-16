@@ -5,3 +5,4 @@ main.go
 
 # Keep our handler implementations
 go/api_*.go
+go/routers.go

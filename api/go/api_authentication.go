@@ -11,12 +11,11 @@ package swagger
 
 import (
 	"encoding/json"
-	"github.com/briggysmalls/detectordag/shared"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
-func Auth(w http.ResponseWriter, r *http.Request) {
+func (h *handlerer) Auth(w http.ResponseWriter, r *http.Request) {
 	// Whatever happens, we return JSON
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	// Try to parse the body
@@ -28,7 +27,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Query for an account with the given username
-	account, err := shared.QueryAccount(creds.Username)
+	account, err := h.db.GetAccountByUsername(creds.Username)
 	if err != nil {
 		setError(w, err, http.StatusForbidden)
 		return

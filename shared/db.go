@@ -16,6 +16,16 @@ const (
 	ACCOUNTS_GSI_NAME = "username-index"
 )
 
+type dbClient struct {
+}
+
+// DbClient is a client for interfacing with a detectordag database
+type DbClient interface {
+	GetDeviceById(id string) (*Device, error)
+	GetAccountById(id string) (*Account, error)
+	GetAccountByUsername(username string) (*Account, error)
+}
+
 // account represents an 'accounts' table entry
 type Account struct {
 	AccountId string   `dynamodbav:"account-id"`
@@ -54,7 +64,13 @@ func init() {
 	}
 }
 
-func GetDevice(id string) (*Device, error) {
+// New gets a new DbClient
+func NewDb() DbClient {
+	client := dbClient{}
+	return &client
+}
+
+func (d *dbClient) GetDeviceById(id string) (*Device, error) {
 	// Request for the device associated with the ID
 	result, err := db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(DEVICES_TABLE),
@@ -80,7 +96,7 @@ func GetDevice(id string) (*Device, error) {
 	return &device, nil
 }
 
-func GetAccount(id string) (*Account, error) {
+func (d *dbClient) GetAccountById(id string) (*Account, error) {
 	// Request for the account associated with the device
 	result, err := db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(ACCOUNTS_TABLE),
@@ -101,7 +117,7 @@ func GetAccount(id string) (*Account, error) {
 	return unmarshalAccount(result.Item)
 }
 
-func QueryAccount(username string) (*Account, error) {
+func (d *dbClient) GetAccountByUsername(username string) (*Account, error) {
 	// Build an expression
 	kc := expression.Key("username").Equal(expression.Value(username))
 	expr, err := expression.NewBuilder().WithKeyCondition(kc).Build()

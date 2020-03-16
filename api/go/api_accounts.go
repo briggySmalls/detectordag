@@ -13,17 +13,17 @@ import (
 	"net/http"
 )
 
-func GetAccount(w http.ResponseWriter, r *http.Request) {
+func (h *handlerer) GetAccount(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 }
 
-func GetDevices(w http.ResponseWriter, r *http.Request) {
+func (h *handlerer) GetDevices(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 }
 
-func UpdateAccount(w http.ResponseWriter, r *http.Request) {
+func (h *handlerer) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusNotImplemented)
 }

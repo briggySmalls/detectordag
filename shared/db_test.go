@@ -4,9 +4,9 @@ import (
 	"testing"
 )
 
-func TestQueryAccount(t *testing.T) {
+func TestGetAccountByUsername(t *testing.T) {
 	// Query for a known account
-	acc, err := QueryAccount("briggySmalls90@gmail.com")
+	acc, err := GetAccountByUsername("briggySmalls90@gmail.com")
 	// Ensure no err
 	if err != nil {
 		t.Error(err)
