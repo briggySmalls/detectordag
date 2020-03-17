@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/briggysmalls/detectordag/api/mocks"
 	"github.com/briggysmalls/detectordag/shared/database"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/golang/mock/gomock"
 	"net/http"
 	"net/http/httptest"
@@ -12,6 +13,12 @@ import (
 )
 
 func TestAuthSuccess(t *testing.T) {
+	// Create some test constants
+	const (
+		username  = "email@example.com"
+		accountId = "35581BF4-32C8-4908-8377-2E6A021D3D2B"
+		jwtSecret = "mysecret"
+	)
 	// Create mock controller
 	ctrl := gomock.NewController(t)
 	// Create mock database client
@@ -19,13 +26,9 @@ func TestAuthSuccess(t *testing.T) {
 	// Create unit under test
 	s := server{
 		db:     c,
-		config: Config{JwtSecret: "mysecret"},
+		config: Config{JwtSecret: jwtSecret},
 	}
 	// Configure the mock db client to expect a call to fetch the account
-	const (
-		username  = "email@example.com"
-		accountId = "35581BF4-32C8-4908-8377-2E6A021D3D2B"
-	)
 	account := database.Account{
 		AccountId: accountId,
 		Username:  username,
@@ -48,12 +51,24 @@ func TestAuthSuccess(t *testing.T) {
 			status, http.StatusOK)
 	}
 	// Check the response body is what we expect.
-	var token Token
-	err = json.Unmarshal(rr.Body.Bytes(), &token)
+	var resp Token
+	err = json.Unmarshal(rr.Body.Bytes(), &resp)
 	if err != nil {
 		t.Fatalf("Body could not be unmarshalled as a token: %v", rr.Body.String())
 	}
-	if token.AccountId != accountId {
-		t.Fatalf("handler returned unexpected account ID: got %s want %s", token.AccountId, accountId)
+	if resp.AccountId != accountId {
+		t.Fatalf("handler returned unexpected account ID: got %s want %s", resp.AccountId, accountId)
+	}
+	// Parse the token contents
+	token, err := jwt.ParseWithClaims(resp.Token, &CustomAuthClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtSecret), nil
+	})
+	// Check the claims
+	if claims, ok := token.Claims.(*CustomAuthClaims); ok && token.Valid {
+		if claims.AccountId != resp.AccountId {
+			t.Fatalf("Token did not correspond with authenticated user")
+		}
+	} else {
+		t.Fatalf(err.Error())
 	}
 }
