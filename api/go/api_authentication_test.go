@@ -38,13 +38,11 @@ func TestAuthSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
+	// Run the handler using test code
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(s.Auth)
-	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
-	// directly and pass in our Request and ResponseRecorder.
 	handler.ServeHTTP(rr, req)
-	// Check the status code is what we expect.
+	// Assert the HTTP status
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
