@@ -191,9 +191,9 @@ paths:
 components:
   parameters:
     Token:
-      name: token
-      in: query
-      description: Authentication token for the API
+      name: Authorization
+      in: header
+      description: Token obtained through authentication
       required: true
       schema:
         type: string
