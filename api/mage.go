@@ -38,12 +38,12 @@ func InstallTools() error {
 }
 
 func Generate() error {
-	return sh.Run("swagger-codegen", "generate", "-i", "api.yaml", "--lang", "go-server")
+	return sh.Run("swagger-codegen", "generate", "-i", "api.yaml", "--lang", "go-server", "-Dmodels", "--output", "swagger")
 }
 
 func Test() error {
 	mg.Deps(Mock)
-	return sh.Run("go", "test", "./go")
+	return sh.Run("go", "test", "./swagger/...")
 }
 
 func Mock() error {

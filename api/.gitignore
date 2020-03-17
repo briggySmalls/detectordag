@@ -1,11 +1,9 @@
 # Ignore build output
 .aws-sam
 # Ignore swagger codegen
-go/model_*.go
-go/logger.go
-go/README.md
-.swagger-codegen/
-api/
+swagger/go/
+swagger/api/
+swagger/.swagger-codegen
 # Ignore mocks
 mocks/
 # Ignore .env files

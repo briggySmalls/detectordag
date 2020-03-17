@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/briggysmalls/detectordag/api/mocks"
+	models "github.com/briggysmalls/detectordag/api/swagger/go"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/golang/mock/gomock"
@@ -29,7 +30,7 @@ func TestAuthSuccess(t *testing.T) {
 	// Assert the HTTP status
 	assertStatus(t, rr, http.StatusOK)
 	// Check the response body is what we expect.
-	var resp Token
+	var resp models.Token
 	var err error
 	err = json.Unmarshal(rr.Body.Bytes(), &resp)
 	if err != nil {
@@ -87,12 +88,12 @@ func runHandler(h func(http.ResponseWriter, *http.Request), req *http.Request) *
 	return rr
 }
 
-func createRequest(method, route, body string) {
-	body := fmt.Sprintf(`{"username": "email@example.com", "password": "%s"}`, password)
-	req, err := http.NewRequest("POST", "/v1/auth", strings.NewReader(body))
+func createRequest(t *testing.T, method, route, body string) *http.Request {
+	req, err := http.NewRequest(method, route, strings.NewReader(body))
 	if err != nil {
 		t.Fatal(err)
 	}
+	return req
 }
 
 func assertStatus(t *testing.T, rr *httptest.ResponseRecorder, expected int) {

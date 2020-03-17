@@ -11,6 +11,7 @@ package swagger
 
 import (
 	"encoding/json"
+	models "github.com/briggysmalls/detectordag/api/swagger/go"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
@@ -24,7 +25,7 @@ func (s *server) Auth(w http.ResponseWriter, r *http.Request) {
 	// Whatever happens, we return JSON
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	// Try to parse the body
-	var creds Credentials
+	var creds models.Credentials
 	var err error
 	err = json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
@@ -49,7 +50,7 @@ func (s *server) Auth(w http.ResponseWriter, r *http.Request) {
 		setError(w, err, http.StatusInternalServerError)
 	}
 	// Build response content
-	content := Token{
+	content := models.Token{
 		AccountId: account.AccountId,
 		Token:     token,
 	}
@@ -65,7 +66,7 @@ func (s *server) Auth(w http.ResponseWriter, r *http.Request) {
 func setError(w http.ResponseWriter, err error, status int) {
 	// TODO: If 5xx error then hide message unless in debug
 	// Create the error struct
-	m := ModelError{
+	m := models.ModelError{
 		Error_: err.Error(),
 	}
 	// Marshal into string
