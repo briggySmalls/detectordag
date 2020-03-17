@@ -1,8 +1,13 @@
 package swagger
 
 import (
+	"encoding/json"
 	"github.com/briggysmalls/detectordag/api/mocks"
 	"github.com/briggysmalls/detectordag/shared/database"
+	"github.com/golang/mock/gomock"
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -23,7 +28,7 @@ func TestAuthSuccess(t *testing.T) {
 		Username:  username,
 		Password:  "$2y$12$Nt3ajpggM4ViynWVGLOpW.JSbnVVVKRjNuw/ZYI71cj1WNG3Fty0K",
 	}
-	c.EXPECT().GetAccountByUsername(gomock.Eq(username)).Return(account)
+	c.EXPECT().GetAccountByUsername(gomock.Eq(username)).Return(&account, nil)
 	// Create a request to authenticate
 	const body = `{"username": "email@example.com", "password": "mypassword"}`
 	req, err := http.NewRequest("POST", "/v1/auth", strings.NewReader(body))
@@ -32,7 +37,7 @@ func TestAuthSuccess(t *testing.T) {
 	}
 	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(HealthCheckHandler)
+	handler := http.HandlerFunc(h.Auth)
 	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
 	// directly and pass in our Request and ResponseRecorder.
 	handler.ServeHTTP(rr, req)
@@ -43,11 +48,11 @@ func TestAuthSuccess(t *testing.T) {
 	}
 	// Check the response body is what we expect.
 	var token Token
-	err := json.Unmarshal(rr.Body.String())
+	err = json.Unmarshal(rr.Body.Bytes(), &token)
 	if err != nil {
-		t.Errorf("Body could not be unmarshalled as a token: %v", rr.Body.String())
+		t.Fatalf("Body could not be unmarshalled as a token: %v", rr.Body.String())
 	}
 	if token.AccountId != accountId {
-		t.Errorf("handler returned unexpected account ID: got %s want %s", token.AccountId, accountId)
+		t.Fatalf("handler returned unexpected account ID: got %s want %s", token.AccountId, accountId)
 	}
 }
