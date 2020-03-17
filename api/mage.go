@@ -6,6 +6,7 @@ import (
 	"github.com/briggysmalls/detectordag/shared/mage"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
+	"github.com/magefile/mage/target"
 )
 
 var helper mage.Lambda
@@ -46,5 +47,6 @@ func Test() error {
 }
 
 func Mock() error {
-	return sh.Run("mockgen", "-source", "../shared/database/db.go", "-package", "mocks", "-destination", "mocks/db.go")
+	target.Path("./mocks/db.go", "../shared/database/db.go")
+	return sh.Run("mockgen", "-destination", "mocks/db.go", "-package", "mocks", "github.com/briggysmalls/detectordag/shared/database", "Client")
 }
