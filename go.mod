@@ -8,8 +8,9 @@ require (
 	github.com/awslabs/aws-lambda-go-api-proxy v0.6.0
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/gizak/termui/v3 v3.1.0
-	github.com/go-delve/delve v1.4.0 // indirect
+	github.com/go-delve/delve v1.4.0
 	github.com/go-sql-driver/mysql v1.5.0
+	github.com/golang/mock v1.1.1
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.4
 	github.com/jinzhu/gorm v1.9.12

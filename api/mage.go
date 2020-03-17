@@ -39,3 +39,12 @@ func InstallTools() error {
 func Generate() error {
 	return sh.Run("swagger-codegen", "generate", "-i", "api.yaml", "--lang", "go-server")
 }
+
+func Test() error {
+	mg.Deps(Mock)
+	return sh.Run("go", "test", "./...")
+}
+
+func Mock() error {
+	return sh.Run("mockgen", "-source", "../shared/database/db.go", "-package", "mocks", "-destination", "mocks/db.go")
+}
