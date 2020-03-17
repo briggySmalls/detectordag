@@ -17,7 +17,7 @@ func TestAuthSuccess(t *testing.T) {
 	// Create mock database client
 	c := mocks.NewMockClient(ctrl)
 	// Create unit under test
-	h := handlerer{
+	s := server{
 		db:     c,
 		config: Config{JwtSecret: "mysecret"},
 	}
@@ -40,7 +40,7 @@ func TestAuthSuccess(t *testing.T) {
 	}
 	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(h.Auth)
+	handler := http.HandlerFunc(s.Auth)
 	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
 	// directly and pass in our Request and ResponseRecorder.
 	handler.ServeHTTP(rr, req)

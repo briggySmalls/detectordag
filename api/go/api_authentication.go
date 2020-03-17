@@ -11,7 +11,6 @@ package swagger
 
 import (
 	"encoding/json"
-	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
@@ -21,12 +20,7 @@ const (
 	issuer         = "detectordag"
 )
 
-type CustomAuthClaims struct {
-	AccountId string `json:"accountId"`
-	jwt.StandardClaims
-}
-
-func (h *handlerer) Auth(w http.ResponseWriter, r *http.Request) {
+func (s *server) Auth(w http.ResponseWriter, r *http.Request) {
 	// Whatever happens, we return JSON
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	// Try to parse the body
@@ -38,7 +32,7 @@ func (h *handlerer) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Query for an account with the given username
-	account, err := h.db.GetAccountByUsername(creds.Username)
+	account, err := s.db.GetAccountByUsername(creds.Username)
 	if err != nil {
 		setError(w, err, http.StatusForbidden)
 		return
@@ -49,25 +43,15 @@ func (h *handlerer) Auth(w http.ResponseWriter, r *http.Request) {
 		setError(w, err, http.StatusForbidden)
 		return
 	}
-	// Create the Claims
-	claims := CustomAuthClaims{
-		account.AccountId,
-		jwt.StandardClaims{
-			ExpiresAt: expiryDuration,
-			Issuer:    issuer,
-		},
-	}
-	// Create a new token object, specifying signing method and the claims
-	// you would like it to contain.
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	ss, err := token.SignedString([]byte(h.config.JwtSecret))
+	// Create a token for the authenticated user
+	token, err := s.createToken(account.AccountId)
 	if err != nil {
 		setError(w, err, http.StatusInternalServerError)
 	}
 	// Build response content
 	content := Token{
 		AccountId: account.AccountId,
-		Token:     ss,
+		Token:     token,
 	}
 	body, err := json.Marshal(content)
 	if err != nil {
