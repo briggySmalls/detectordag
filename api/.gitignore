@@ -6,3 +6,5 @@ go/logger.go
 go/README.md
 .swagger-codegen/
 api/
+# Ignore mocks
+mocks/
