@@ -43,7 +43,7 @@ func Generate() error {
 
 func Test() error {
 	mg.Deps(Mock)
-	return sh.Run("go", "test", "./...")
+	return sh.Run("go", "test", "./go")
 }
 
 func Mock() error {
