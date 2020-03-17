@@ -1,6 +1,7 @@
 package swagger
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/briggysmalls/detectordag/api/mocks"
@@ -10,7 +11,6 @@ import (
 	"github.com/golang/mock/gomock"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
@@ -38,7 +38,7 @@ func TestAuthSuccess(t *testing.T) {
 	account := database.Account{AccountId: accountId, Username: username, Password: hashedPassword}
 	c.EXPECT().GetAccountByUsername(gomock.Eq(username)).Return(&account, nil)
 	// Create a request to authenticate
-	req := createRequest(t, "POST", "/v1/auth", fmt.Sprintf(`{"username": "email@example.com", "password": "%s"}`, password))
+	req := createRequest(t, "POST", "/v1/auth", []byte(fmt.Sprintf(`{"username": "email@example.com", "password": "%s"}`, password)))
 	// Execute the handler
 	rr := runHandler(s.Auth, req)
 	// Assert the HTTP status
@@ -82,8 +82,8 @@ func runHandler(h func(http.ResponseWriter, *http.Request), req *http.Request) *
 	return rr
 }
 
-func createRequest(t *testing.T, method, route, body string) *http.Request {
-	req, err := http.NewRequest(method, route, strings.NewReader(body))
+func createRequest(t *testing.T, method, route string, body []byte) *http.Request {
+	req, err := http.NewRequest(method, route, bytes.NewReader(body))
 	if err != nil {
 		t.Fatal(err)
 	}
