@@ -15,7 +15,7 @@ import (
 
 func (s *server) GetAccount(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
