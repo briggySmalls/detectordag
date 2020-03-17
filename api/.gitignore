@@ -8,3 +8,5 @@ go/README.md
 api/
 # Ignore mocks
 mocks/
+# Ignore .env files
+.env
