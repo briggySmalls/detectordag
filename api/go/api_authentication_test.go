@@ -56,10 +56,8 @@ func TestAuthSuccess(t *testing.T) {
 }
 
 func runTest(t *testing.T, username, accountId, jwtDuration, password, hashedPassword string) *httptest.ResponseRecorder {
-	// Create mock controller
-	ctrl := gomock.NewController(t)
-	// Create mock database client
-	c := mocks.NewMockClient(ctrl)
+	// Create a mock client
+	c := getMockClient(t)
 	// Create unit under test
 	s := server{
 		db:     c,
@@ -78,9 +76,20 @@ func runTest(t *testing.T, username, accountId, jwtDuration, password, hashedPas
 	if err != nil {
 		t.Fatal(err)
 	}
+	return runHandler(s.Auth, req)
+}
+
+func getMockClient(t *testing.T) *mocks.MockClient {
+	// Create mock controller
+	ctrl := gomock.NewController(t)
+	// Create mock database client
+	return mocks.NewMockClient(ctrl)
+}
+
+func runHandler(h func(http.ResponseWriter, *http.Request), req *http.Request) *httptest.ResponseRecorder {
 	// Run the handler using test code
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(s.Auth)
+	handler := http.HandlerFunc(h)
 	handler.ServeHTTP(rr, req)
 	return rr
 }
