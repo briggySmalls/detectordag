@@ -21,12 +21,26 @@ const (
 func TestAuthSuccess(t *testing.T) {
 	// Create some test constants
 	const (
-		username    = "email@example.com"
-		accountId   = "35581BF4-32C8-4908-8377-2E6A021D3D2B"
-		jwtDuration = "2h"
+		username       = "email@example.com"
+		accountId      = "35581BF4-32C8-4908-8377-2E6A021D3D2B"
+		jwtDuration    = "2h"
+		password       = "mypassword"
+		hashedPassword = "$2y$12$Nt3ajpggM4ViynWVGLOpW.JSbnVVVKRjNuw/ZYI71cj1WNG3Fty0K"
 	)
-	// Run the test
-	rr := runTest(t, username, accountId, jwtDuration, "mypassword", "$2y$12$Nt3ajpggM4ViynWVGLOpW.JSbnVVVKRjNuw/ZYI71cj1WNG3Fty0K")
+	// Create a mock client
+	c := createMockClient(t)
+	// Create unit under test
+	s := server{
+		db:     c,
+		config: Config{JwtSecret: jwtSecret, JwtDuration: jwtDuration},
+	}
+	// Configure the mock db client to expect a call to fetch the account
+	account := database.Account{AccountId: accountId, Username: username, Password: hashedPassword}
+	c.EXPECT().GetAccountByUsername(gomock.Eq(username)).Return(&account, nil)
+	// Create a request to authenticate
+	req := createRequest(t, "POST", "/v1/auth", fmt.Sprintf(`{"username": "email@example.com", "password": "%s"}`, password))
+	// Execute the handler
+	rr := runHandler(s.Auth, req)
 	// Assert the HTTP status
 	assertStatus(t, rr, http.StatusOK)
 	// Check the response body is what we expect.
@@ -51,26 +65,6 @@ func TestAuthSuccess(t *testing.T) {
 	} else {
 		t.Fatalf(err.Error())
 	}
-}
-
-func runTest(t *testing.T, username, accountId, jwtDuration, password, hashedPassword string) *httptest.ResponseRecorder {
-	// Create a mock client
-	c := createMockClient(t)
-	// Create unit under test
-	s := server{
-		db:     c,
-		config: Config{JwtSecret: jwtSecret, JwtDuration: jwtDuration},
-	}
-	// Configure the mock db client to expect a call to fetch the account
-	account := database.Account{AccountId: accountId, Username: username, Password: hashedPassword}
-	c.EXPECT().GetAccountByUsername(gomock.Eq(username)).Return(&account, nil)
-	// Create a request to authenticate
-	body := fmt.Sprintf(`{"username": "email@example.com", "password": "%s"}`, password)
-	req, err := http.NewRequest("POST", "/v1/auth", strings.NewReader(body))
-	if err != nil {
-		t.Fatal(err)
-	}
-	return runHandler(s.Auth, req)
 }
 
 func createMockClient(t *testing.T) *mocks.MockClient {
