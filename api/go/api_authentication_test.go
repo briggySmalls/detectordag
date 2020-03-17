@@ -15,9 +15,10 @@ import (
 func TestAuthSuccess(t *testing.T) {
 	// Create some test constants
 	const (
-		username  = "email@example.com"
-		accountId = "35581BF4-32C8-4908-8377-2E6A021D3D2B"
-		jwtSecret = "mysecret"
+		username    = "email@example.com"
+		accountId   = "35581BF4-32C8-4908-8377-2E6A021D3D2B"
+		jwtSecret   = "mysecret"
+		jwtDuration = "2h"
 	)
 	// Create mock controller
 	ctrl := gomock.NewController(t)
@@ -26,7 +27,7 @@ func TestAuthSuccess(t *testing.T) {
 	// Create unit under test
 	s := server{
 		db:     c,
-		config: Config{JwtSecret: jwtSecret},
+		config: Config{JwtSecret: jwtSecret, JwtDuration: jwtDuration},
 	}
 	// Configure the mock db client to expect a call to fetch the account
 	account := database.Account{
