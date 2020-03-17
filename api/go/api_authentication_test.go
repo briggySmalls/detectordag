@@ -17,7 +17,10 @@ func TestAuthSuccess(t *testing.T) {
 	// Create mock database client
 	c := mocks.NewMockClient(ctrl)
 	// Create unit under test
-	h := handlerer{db: c}
+	h := handlerer{
+		db:     c,
+		config: Config{JwtSecret: "mysecret"},
+	}
 	// Configure the mock db client to expect a call to fetch the account
 	const (
 		username  = "email@example.com"

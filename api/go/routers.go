@@ -16,6 +16,7 @@ import (
 
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/gorilla/mux"
+	"github.com/kelseyhightower/envconfig"
 )
 
 type Route struct {
@@ -26,17 +27,33 @@ type Route struct {
 }
 
 type handlerer struct {
-	db database.Client
+	db     database.Client
+	config Config
+}
+
+type Config struct {
+	JwtSecret string `split_words:"true"`
 }
 
 type Routes []Route
 
-func NewRouter(db database.Client) *mux.Router {
+func NewConfig() (*Config, error) {
+	// Load config
+	var c Config
+	err := envconfig.Process("detectordag", &c)
+	if err != nil {
+		return nil, err
+	}
+	return &c, nil
+}
+
+func NewRouter(config *Config, db database.Client) *mux.Router {
 	// Create the router
 	router := mux.NewRouter().StrictSlash(true)
 	// Create a handlerer
 	h := handlerer{
-		db: db,
+		config: *config,
+		db:     db,
 	}
 	// Prepare the routes
 	var routes = Routes{

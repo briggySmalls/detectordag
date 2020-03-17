@@ -7,16 +7,27 @@ import (
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	swagger "github.com/briggysmalls/detectordag/api/go"
 	"github.com/briggysmalls/detectordag/shared/database"
+	"github.com/joho/godotenv"
 	"log"
 )
 
 var adapter *gorillamux.GorillaMuxAdapter
 
 func init() {
+	// Load .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	// Get config from environment
+	c, err := swagger.NewConfig()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	// Create a new Db client
 	db := database.New()
 	// Create the server
-	server := swagger.NewRouter(db)
+	server := swagger.NewRouter(c, db)
 	// Create an adapter for aws lambda
 	adapter = gorillamux.New(server)
 }

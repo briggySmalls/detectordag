@@ -11,9 +11,20 @@ package swagger
 
 import (
 	"encoding/json"
+	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
+
+const (
+	expiryDuration = 1500
+	issuer         = "detectordag"
+)
+
+type CustomAuthClaims struct {
+	AccountId string `json:"accountId"`
+	jwt.StandardClaims
+}
 
 func (h *handlerer) Auth(w http.ResponseWriter, r *http.Request) {
 	// Whatever happens, we return JSON
@@ -38,11 +49,37 @@ func (h *handlerer) Auth(w http.ResponseWriter, r *http.Request) {
 		setError(w, err, http.StatusForbidden)
 		return
 	}
-	// Build response
+	// Create the Claims
+	claims := CustomAuthClaims{
+		account.AccountId,
+		jwt.StandardClaims{
+			ExpiresAt: expiryDuration,
+			Issuer:    issuer,
+		},
+	}
+	// Create a new token object, specifying signing method and the claims
+	// you would like it to contain.
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	ss, err := token.SignedString([]byte(h.config.JwtSecret))
+	if err != nil {
+		setError(w, err, http.StatusInternalServerError)
+	}
+	// Build response content
+	content := Token{
+		AccountId: account.AccountId,
+		Token:     ss,
+	}
+	body, err := json.Marshal(content)
+	if err != nil {
+		setError(w, err, http.StatusInternalServerError)
+	}
+	// Write the response
 	w.WriteHeader(http.StatusOK)
+	w.Write(body)
 }
 
 func setError(w http.ResponseWriter, err error, status int) {
+	// TODO: If 5xx error then hide message unless in debug
 	// Create the error struct
 	m := ModelError{
 		Error_: err.Error(),
