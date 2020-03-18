@@ -23,7 +23,7 @@ func TestGetDevicesSuccess(t *testing.T) {
 	s := server{db: c, config: Config{JwtSecret: jwtSecret}}
 	// Configure the mock db client to expect a call to query for devices in an account
 	account := database.Account{AccountId: accountId, Emails: []string{"email@email@example.com"}}
-	c.EXPECT().GetAccountById(gomock.Eq(accountId)).Return(&account, nil)
+	c.EXPECT().GetDevicesByAccount(gomock.Eq(accountId)).Return(&account, nil)
 	// Create a request for devices
 	req := createRequest(t, "GET", fmt.Sprintf("/v1/accounts/%s/devices", accountId), nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))

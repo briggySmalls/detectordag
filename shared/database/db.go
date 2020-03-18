@@ -14,6 +14,7 @@ const (
 	ACCOUNTS_TABLE    = "accounts"
 	DEVICES_TABLE     = "devices"
 	ACCOUNTS_GSI_NAME = "username-index"
+	ACCOUNTS_GSI_NAME = "account-id-index"
 )
 
 type client struct {
@@ -96,8 +97,32 @@ func (d *client) GetDeviceById(id string) (*Device, error) {
 	return &device, nil
 }
 
-func (d *client) GetDevicesByAccount(id string) ([]*Device, error) {
-
+func (d *client) GetDevicesByAccount(id string) ([]Device, error) {
+	// Build an expression
+	kc := expression.Key("#acc").Equal(expression.Value(id))
+	expr, err := expression.NewBuilder().WithKeyCondition(kc).Build()
+	if err != nil {
+		return nil, err
+	}
+	// Request for the devices associated with the account
+	result, err := db.Query(&dynamodb.QueryInput{
+		TableName:                 aws.String(DEVICES_TABLE),
+		IndexName:                 aws.String(DEVICES_GSI_NAME),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		KeyConditionExpression:    expr.KeyCondition(),
+		Select:                    aws.String("ALL_PROJECTED_ATTRIBUTES"),
+	})
+	if err != nil {
+		return nil, err
+	}
+	// Unmarshal the devices
+	var devices []Device
+	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &devices)
+	if err != nil {
+		return nil, err
+	}
+	return devices
 }
 
 func (d *client) GetAccountById(id string) (*Account, error) {
