@@ -21,7 +21,7 @@ func TestGetDevicesSuccess(t *testing.T) {
 	c := createMockClient(t)
 	// Create unit under test
 	s := server{db: c, config: Config{JwtSecret: jwtSecret}}
-	// Configure the mock db client to expect a call to fetch the account
+	// Configure the mock db client to expect a call to query for devices in an account
 	account := database.Account{AccountId: accountId, Emails: []string{"email@email@example.com"}}
 	c.EXPECT().GetAccountById(gomock.Eq(accountId)).Return(&account, nil)
 	// Create a request for devices

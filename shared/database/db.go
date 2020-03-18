@@ -96,6 +96,10 @@ func (d *client) GetDeviceById(id string) (*Device, error) {
 	return &device, nil
 }
 
+func (d *client) GetDevicesByAccount(id string) ([]*Device, error) {
+
+}
+
 func (d *client) GetAccountById(id string) (*Account, error) {
 	// Request for the account associated with the device
 	result, err := db.GetItem(&dynamodb.GetItemInput{
