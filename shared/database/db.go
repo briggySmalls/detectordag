@@ -14,7 +14,7 @@ const (
 	ACCOUNTS_TABLE    = "accounts"
 	DEVICES_TABLE     = "devices"
 	ACCOUNTS_GSI_NAME = "username-index"
-	ACCOUNTS_GSI_NAME = "account-id-index"
+	DEVICES_GSI_NAME  = "account-id-index"
 )
 
 type client struct {
@@ -25,6 +25,7 @@ type Client interface {
 	GetDeviceById(id string) (*Device, error)
 	GetAccountById(id string) (*Account, error)
 	GetAccountByUsername(username string) (*Account, error)
+	GetDevicesByAccount(id string) ([]Device, error)
 }
 
 // account represents an 'accounts' table entry
@@ -122,7 +123,7 @@ func (d *client) GetDevicesByAccount(id string) ([]Device, error) {
 	if err != nil {
 		return nil, err
 	}
-	return devices
+	return devices, nil
 }
 
 func (d *client) GetAccountById(id string) (*Account, error) {
