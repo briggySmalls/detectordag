@@ -71,9 +71,22 @@ func TestCheckAuthorized(t *testing.T) {
 		token     string
 		now       time.Time
 		accountID string
-		error     error
+		errors    uint32
 	}{
-		{secret: "mysecret", token: "", accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B", error: nil},
+		{
+			secret:    "mysecret",
+			accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B",
+			token:     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiIzNTU4MUJGNC0zMkM4LTQ5MDgtODM3Ny0yRTZBMDIxRDNEMkIiLCJleHAiOjE1ODQ3OTk0NzQsImlzcyI6ImRldGVjdG9yZGFnIn0.qqMDypPk5BT1dz_8KT6S9eNLABWcYIfnaRr_BroisKo",
+			now:       createTime(t, "2020/03/21 12:06:00"),
+			errors:    0,
+		},
+		{
+			secret:    "mysecret",
+			accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B",
+			token:     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiIzNTU4MUJGNC0zMkM4LTQ5MDgtODM3Ny0yRTZBMDIxRDNEMkIiLCJleHAiOjE1ODQ3OTk0NzQsImlzcyI6ImRldGVjdG9yZGFnIn0.qqMDypPk5BT1dz_8KT6S9eNLABWcYIfnaRr_BroisKo",
+			now:       createTime(t, "2020/03/22 12:06:00"),
+			errors:    jwt.ValidationErrorExpired,
+		},
 	}
 	for _, params := range testParams {
 		// Create a server
@@ -83,11 +96,19 @@ func TestCheckAuthorized(t *testing.T) {
 		// Check if the token authorises the supplied account
 		at(params.now, func() {
 			err := srv.checkAuthorized(params.token, params.accountID)
-			if err != params.error {
+			if vErr, ok := err.(jwt.ValidationError); ok && (vErr.Errors&params.errors != 0) {
 				t.Errorf(err.Error())
 			}
 		})
 	}
+}
+
+func createTime(t *testing.T, timeString string) time.Time {
+	tme, err := time.Parse("2006/01/02 15:04:05", timeString)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	return tme
 }
 
 // Override time value for tests.  Restore default value after.
