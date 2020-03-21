@@ -9,8 +9,9 @@ import (
 )
 
 type Config struct {
-	JwtSecret   string `split_words:"true"`
-	JwtDuration string `split_words:"true`
+	JwtSecret      string `split_words:"true"`
+	JwtDuration    string `split_words:"true`
+	ShadowEndpoint string `split_words:"true"`
 }
 
 type server struct {
@@ -64,4 +65,30 @@ func (s *server) createToken(accountId string) (string, error) {
 	// you would like it to contain.
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(s.config.JwtSecret))
+}
+
+// checkAuthorized checks that the token authorises access to the specified account
+func (s *server) checkAuthorized(tokenString, accountId string) error {
+	// Parse takes the token string and a function for looking up the key.
+	token, err := jwt.ParseWithClaims(tokenString, &CustomAuthClaims{}, func(token *jwt.Token) (interface{}, error) {
+		// Validate the alg is what we expect
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		// Return our secret
+		return []byte(s.config.JwtSecret), nil
+	})
+	if err != nil {
+		return err
+	}
+	// Check the token contents
+	if claims, ok := token.Claims.(*CustomAuthClaims); ok && token.Valid {
+		// Confirm the account IDs match
+		if claims.AccountId != accountId {
+			return fmt.Errorf("Not authorized to access account: %s", accountId)
+		}
+		// The token authorises access
+		return nil
+	}
+	return err
 }

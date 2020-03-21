@@ -63,3 +63,38 @@ func TestCreateToken(t *testing.T) {
 		}
 	}
 }
+
+func TestCheckAuthorized(t *testing.T) {
+	// Create some test inputs
+	testParams := []struct {
+		secret    string
+		token     string
+		now       time.Time
+		accountID string
+		error     error
+	}{
+		{secret: "mysecret", token: "", accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B", error: nil},
+	}
+	for _, params := range testParams {
+		// Create a server
+		srv := server{
+			config: Config{JwtSecret: params.secret},
+		}
+		// Check if the token authorises the supplied account
+		at(params.now, func() {
+			err := srv.checkAuthorized(params.token, params.accountID)
+			if err != params.error {
+				t.Errorf(err.Error())
+			}
+		})
+	}
+}
+
+// Override time value for tests.  Restore default value after.
+func at(t time.Time, f func()) {
+	jwt.TimeFunc = func() time.Time {
+		return t
+	}
+	f()
+	jwt.TimeFunc = time.Now
+}
