@@ -10,7 +10,7 @@
 package swagger
 
 import (
-	"fmt"
+	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -26,7 +26,7 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 	// Pull out the account ID
 	vars := mux.Vars(r)
 	if _, ok := vars["articleId"]; !ok {
-		setError(w, fmt.Errorf("Article ID not supplied in path"), http.StatusBadRequest)
+		setError(w, errors.New("Article ID not supplied in path"), http.StatusBadRequest)
 		return
 	}
 	// Fetch the devices associated with the account
