@@ -92,6 +92,6 @@ func createRequest(t *testing.T, method, route string, body []byte) *http.Reques
 
 func assertStatus(t *testing.T, rr *httptest.ResponseRecorder, expected int) {
 	if status := rr.Code; status != http.StatusOK {
-		t.Fatalf("handler returned wrong status code: got %v want %v", status, expected)
+		t.Errorf("handler returned wrong status code: got %v want %v", status, expected)
 	}
 }
