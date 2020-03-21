@@ -87,6 +87,13 @@ func TestCheckAuthorized(t *testing.T) {
 			now:       createTime(t, "2020/03/22 12:06:00"),
 			errors:    jwt.ValidationErrorExpired,
 		},
+		{
+			secret:    "mysecret",
+			accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B",
+			token:     "",
+			now:       createTime(t, "2020/03/22 12:06:00"),
+			errors:    jwt.ValidationErrorMalformed,
+		},
 	}
 	for _, params := range testParams {
 		// Create a server
@@ -96,8 +103,15 @@ func TestCheckAuthorized(t *testing.T) {
 		// Check if the token authorises the supplied account
 		at(params.now, func() {
 			err := srv.checkAuthorized(params.token, params.accountID)
-			if vErr, ok := err.(jwt.ValidationError); ok && (vErr.Errors&params.errors != 0) {
-				t.Errorf(err.Error())
+			if err == nil && params.errors == 0 {
+				// We weren't expecting an error
+				return
+			}
+			vErr, ok := err.(*jwt.ValidationError)
+			if !ok {
+				t.Errorf("Unexpected error format: %v", err)
+			} else if vErr.Errors&params.errors == 0 {
+				t.Errorf("Unexpected error: %v", err)
 			}
 		})
 	}
