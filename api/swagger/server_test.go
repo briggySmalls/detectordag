@@ -3,10 +3,16 @@ package swagger
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"math"
 	"testing"
+	"time"
 )
 
 func TestCreateToken(t *testing.T) {
+	timeLeeway, err := time.ParseDuration("10ns")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
 	// Create some test inputs
 	testParams := []struct {
 		secret    string
@@ -38,8 +44,18 @@ func TestCreateToken(t *testing.T) {
 		})
 		// Check the claims
 		if claims, ok := token.Claims.(*CustomAuthClaims); ok && token.Valid {
+			// Confirm the accounts match
 			if claims.AccountId != params.accountID {
 				t.Fatalf("Token did not save correct account ID")
+			}
+			// Confirm the expiry time
+			dur, err := time.ParseDuration(params.duration)
+			if err != nil {
+				t.Fatalf(err.Error())
+			}
+			exp := time.Unix(claims.ExpiresAt, 0)
+			if math.Abs(float64(time.Until(exp)-dur)) < float64(timeLeeway) {
+				t.Fatalf("Token did not save correct duration")
 			}
 		} else {
 			t.Fatalf(err.Error())
