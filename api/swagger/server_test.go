@@ -20,7 +20,8 @@ func TestCreateToken(t *testing.T) {
 		accountID string
 		error     error
 	}{
-		{secret: "mysecret", duration: "2h", accountID: ""},
+		{secret: "mysecret", duration: "2h", accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B"},
+		{secret: "anothersecret", duration: "1m", accountID: "22222222-32C8-4908-8377-2E6A021D3D2B"},
 	}
 	for _, params := range testParams {
 		// Create a server
