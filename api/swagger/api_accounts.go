@@ -10,6 +10,8 @@
 package swagger
 
 import (
+	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
@@ -21,6 +23,18 @@ func (s *server) GetAccount(w http.ResponseWriter, r *http.Request) {
 func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 	// We return JSON no matter what
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	// Pull out the account ID
+	vars := mux.Vars(r)
+	if _, ok := vars["articleId"]; !ok {
+		setError(w, fmt.Errorf("Article ID not supplied in path"), http.StatusBadRequest)
+		return
+	}
+	// Fetch the devices associated with the account
+	_, err := s.db.GetDevicesByAccount(vars["articleId"])
+	if err != nil {
+		setError(w, err, http.StatusInternalServerError)
+	}
+	// Request each device's shadow
 	w.WriteHeader(http.StatusOK)
 }
 
