@@ -1,11 +1,23 @@
 package swagger
 
 import (
+	"errors"
 	"fmt"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/kelseyhightower/envconfig"
+	"net/http"
+	"strings"
 	"time"
+)
+
+const (
+	AuthenticationHeaderPrefix = "Bearer "
+)
+
+var (
+	ErrNoAuthHeader           = errors.New("Authentication header not set")
+	ErrMalformattedAuthHeader = errors.New("Authentication header badly formed")
 )
 
 type Config struct {
@@ -91,4 +103,18 @@ func (s *server) checkAuthorized(tokenString, accountId string) error {
 		return nil
 	}
 	return err
+}
+
+func (s *server) getToken(header *http.Header) (string, error) {
+	// Check the auth header is set
+	authHeader := header.Get("Authentication")
+	if authHeader == "" {
+		return "", ErrNoAuthHeader
+	}
+	// Ensure we've been given a JWT how we expect
+	if !strings.HasPrefix(authHeader, AuthenticationHeaderPrefix) {
+		return "", ErrMalformattedAuthHeader
+	}
+	// Return the token
+	return strings.TrimPrefix(authHeader, AuthenticationHeaderPrefix), nil
 }

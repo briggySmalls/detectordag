@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"math"
+	"net/http"
 	"testing"
 	"time"
 )
@@ -114,6 +115,32 @@ func TestCheckAuthorized(t *testing.T) {
 				t.Errorf("Unexpected error: %v", err)
 			}
 		})
+	}
+}
+
+func TestGetToken(t *testing.T) {
+	// Create some test inputs
+	testParams := []struct {
+		authHeader http.Header
+		token      string
+		error      error
+	}{
+		{authHeader: http.Header{"Authentication": {"Bearer mytoken"}}, token: "mytoken", error: nil},
+		{authHeader: http.Header{"Authentication": {"badHeader"}}, token: "", error: ErrMalformattedAuthHeader},
+		{authHeader: http.Header{}, token: "", error: ErrNoAuthHeader},
+	}
+	// Run the test
+	for _, params := range testParams {
+		// Create a server
+		srv := server{}
+		// Get the token
+		token, err := srv.getToken(&params.authHeader)
+		// Assert results
+		if err != params.error {
+			t.Errorf("Unexpected error: %v", err)
+		} else if token != params.token {
+			t.Errorf("Unexpected token: %s", token)
+		}
 	}
 }
 
