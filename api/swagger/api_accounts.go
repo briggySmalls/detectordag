@@ -21,16 +21,29 @@ func (s *server) GetAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
+	var err error
 	// We return JSON no matter what
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	// Pull out the account ID
-	vars := mux.Vars(r)
-	if _, ok := vars["articleId"]; !ok {
-		setError(w, errors.New("Article ID not supplied in path"), http.StatusBadRequest)
+	// Ensure that there is a token sent
+	token, err := s.getToken(&r.Header)
+	if err != nil {
+		setError(w, err, http.StatusUnauthorized)
 		return
 	}
+	// Pull out the account ID
+	vars := mux.Vars(r)
+	accountId, ok := vars["accountId"]
+	if !ok {
+		setError(w, errors.New("Account ID not supplied in path"), http.StatusBadRequest)
+		return
+	}
+	// Check the user is authorised
+	err = s.checkAuthorized(token, accountId)
+	if err != nil {
+		setError(w, err, http.StatusForbidden)
+	}
 	// Fetch the devices associated with the account
-	_, err := s.db.GetDevicesByAccount(vars["articleId"])
+	_, err = s.db.GetDevicesByAccount(accountId)
 	if err != nil {
 		setError(w, err, http.StatusInternalServerError)
 	}

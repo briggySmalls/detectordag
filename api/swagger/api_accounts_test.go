@@ -5,6 +5,7 @@ import (
 	"fmt"
 	models "github.com/briggysmalls/detectordag/api/swagger/go"
 	"github.com/briggysmalls/detectordag/shared/database"
+	"github.com/gorilla/mux"
 
 	"github.com/golang/mock/gomock"
 	"net/http"
@@ -29,6 +30,9 @@ func TestGetDevicesSuccess(t *testing.T) {
 	c.EXPECT().GetDevicesByAccount(gomock.Eq(accountId)).Return(devices, nil)
 	// Create a request for devices
 	req := createRequest(t, "GET", fmt.Sprintf("/v1/accounts/%s/devices", accountId), nil)
+	req = mux.SetURLVars(req, map[string]string{
+		"accountId": accountId,
+	})
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	// Execute the handler
 	rr := runHandler(s.GetDevices, req)
