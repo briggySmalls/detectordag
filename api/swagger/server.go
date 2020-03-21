@@ -16,8 +16,8 @@ const (
 )
 
 var (
-	ErrNoAuthHeader           = errors.New("Authentication header not set")
-	ErrMalformattedAuthHeader = errors.New("Authentication header badly formed")
+	ErrNoAuthHeader           = errors.New("Authorization header not set")
+	ErrMalformattedAuthHeader = errors.New("Authorization header badly formed")
 )
 
 type Config struct {
@@ -107,7 +107,7 @@ func (s *server) checkAuthorized(tokenString, accountId string) error {
 
 func (s *server) getToken(header *http.Header) (string, error) {
 	// Check the auth header is set
-	authHeader := header.Get("Authentication")
+	authHeader := header.Get("Authorization")
 	if authHeader == "" {
 		return "", ErrNoAuthHeader
 	}

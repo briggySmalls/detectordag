@@ -125,8 +125,8 @@ func TestGetToken(t *testing.T) {
 		token      string
 		error      error
 	}{
-		{authHeader: http.Header{"Authentication": {"Bearer mytoken"}}, token: "mytoken", error: nil},
-		{authHeader: http.Header{"Authentication": {"badHeader"}}, token: "", error: ErrMalformattedAuthHeader},
+		{authHeader: http.Header{"Authorization": {"Bearer mytoken"}}, token: "mytoken", error: nil},
+		{authHeader: http.Header{"Authorization": {"badHeader"}}, token: "", error: ErrMalformattedAuthHeader},
 		{authHeader: http.Header{}, token: "", error: ErrNoAuthHeader},
 	}
 	// Run the test
