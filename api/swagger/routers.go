@@ -18,6 +18,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+	uuidRegex = `[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}`
+)
+
 type Route struct {
 	Name        string
 	Method      string
@@ -47,21 +51,21 @@ func NewRouter(config *Config, db database.Client) *mux.Router {
 		Route{
 			"GetAccount",
 			strings.ToUpper("Get"),
-			"/v1/accounts/{accountId}",
+			fmt.Sprintf("/v1/accounts/{accountId:%s}", uuidRegex),
 			h.GetAccount,
 		},
 
 		Route{
 			"GetDevices",
 			strings.ToUpper("Get"),
-			"/v1/accounts/{accountId}/devices",
+			fmt.Sprintf("/v1/accounts/{accountId:%s}/devices", uuidRegex),
 			h.GetDevices,
 		},
 
 		Route{
 			"UpdateAccount",
 			strings.ToUpper("Patch"),
-			"/v1/accounts/{accountId}",
+			fmt.Sprintf("/v1/accounts/{accountId:%s}", uuidRegex),
 			h.UpdateAccount,
 		},
 
