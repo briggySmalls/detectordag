@@ -79,9 +79,3 @@ func setError(w http.ResponseWriter, err error, status int) {
 	// Write the output
 	http.Error(w, string(content), status)
 }
-
-func raiseError(w http.ResponseWriter, err error, status int) {
-	if err != nil {
-		http.Error(w, err.Error(), status)
-	}
-}
