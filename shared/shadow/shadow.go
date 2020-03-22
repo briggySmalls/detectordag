@@ -9,12 +9,24 @@ import (
 	"time"
 )
 
+type timestamp struct {
+	time.Time
+}
+
+func (t *timestamp) UnmarshalJSON(data []byte) error {
+	// Parse data to int
+	epoch := int64(data)
+	// Conver to a time
+	t.Time = time.Unix(epoch, 0)
+	return nil
+}
+
 type client struct {
 	dp iotdataplaneiface.IoTDataPlaneAPI
 }
 
 type MetadataEntry struct {
-	Timestamp time.Time
+	Timestamp timestamp `json:""`
 }
 
 type Metadata struct {
@@ -26,7 +38,7 @@ type State struct {
 }
 
 type Shadow struct {
-	Timestamp time.Time `json:""`
+	Timestamp timestamp `json:""`
 	Metadata  Metadata  `json:""`
 	State     State     `json:""`
 }
