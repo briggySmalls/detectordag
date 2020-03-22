@@ -144,20 +144,3 @@ func TestGetToken(t *testing.T) {
 		}
 	}
 }
-
-func createTime(t *testing.T, timeString string) time.Time {
-	tme, err := time.Parse("2006/01/02 15:04:05", timeString)
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-	return tme
-}
-
-// Override time value for tests.  Restore default value after.
-func at(t time.Time, f func()) {
-	jwt.TimeFunc = func() time.Time {
-		return t
-	}
-	f()
-	jwt.TimeFunc = time.Now
-}

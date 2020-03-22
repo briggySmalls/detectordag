@@ -5,10 +5,12 @@ package swagger
 
 import (
 	"bytes"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/golang/mock/gomock"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func createMocks(t *testing.T) (*MockDBClient, *MockShadowClient) {
@@ -41,4 +43,21 @@ func assertStatus(t *testing.T, rr *httptest.ResponseRecorder, expected int) {
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, expected)
 	}
+}
+
+func createTime(t *testing.T, timeString string) time.Time {
+	tme, err := time.Parse("2006/01/02 15:04:05", timeString)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	return tme
+}
+
+// Override time value for tests.  Restore default value after.
+func at(t time.Time, f func()) {
+	jwt.TimeFunc = func() time.Time {
+		return t
+	}
+	f()
+	jwt.TimeFunc = time.Now
 }
