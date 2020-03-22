@@ -1,5 +1,7 @@
 package main
 
+//go:generate swagger-codegen generate -i api.yaml --lang go-server -Dmodels --output swagger
+
 import (
 	"context"
 	"github.com/aws/aws-lambda-go/events"

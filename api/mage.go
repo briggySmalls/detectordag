@@ -6,7 +6,6 @@ import (
 	"github.com/briggysmalls/detectordag/shared/mage"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
-	"github.com/magefile/mage/target"
 )
 
 var helper mage.Lambda
@@ -38,15 +37,10 @@ func InstallTools() error {
 }
 
 func Generate() error {
-	return sh.Run("swagger-codegen", "generate", "-i", "api.yaml", "--lang", "go-server", "-Dmodels", "--output", "swagger")
+	return sh.Run("go", "generate")
 }
 
 func Test() error {
-	mg.Deps(Mock)
+	mg.Deps(Generate)
 	return sh.Run("go", "test", "-v", "./swagger/...")
-}
-
-func Mock() error {
-	target.Path("./mocks/db.go", "../shared/database/db.go")
-	return sh.Run("mockgen", "-destination", "mocks/db.go", "-package", "mocks", "github.com/briggysmalls/detectordag/shared/database", "Client")
 }
