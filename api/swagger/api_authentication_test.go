@@ -28,15 +28,16 @@ func TestAuthSuccess(t *testing.T) {
 		hashedPassword = "$2y$12$Nt3ajpggM4ViynWVGLOpW.JSbnVVVKRjNuw/ZYI71cj1WNG3Fty0K"
 	)
 	// Create a mock client
-	c := createMockClient(t)
+	db, shadow := createMocks(t)
 	// Create unit under test
 	s := server{
-		db:     c,
+		db:     db,
 		config: Config{JwtSecret: jwtSecret, JwtDuration: jwtDuration},
+		shadow: shadow,
 	}
 	// Configure the mock db client to expect a call to fetch the account
 	account := database.Account{AccountId: accountId, Username: username, Password: hashedPassword}
-	c.EXPECT().GetAccountByUsername(gomock.Eq(username)).Return(&account, nil)
+	db.EXPECT().GetAccountByUsername(gomock.Eq(username)).Return(&account, nil)
 	// Create a request to authenticate
 	req := createRequest(t, "POST", "/v1/auth", []byte(fmt.Sprintf(`{"username": "email@example.com", "password": "%s"}`, password)))
 	// Execute the handler

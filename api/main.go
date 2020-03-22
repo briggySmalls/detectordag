@@ -7,6 +7,7 @@ import (
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	"github.com/briggysmalls/detectordag/api/swagger"
 	"github.com/briggysmalls/detectordag/shared/database"
+	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/joho/godotenv"
 	"log"
 )
@@ -26,8 +27,10 @@ func init() {
 	}
 	// Create a new Db client
 	db := database.New()
+	// Create a new shadow client
+	shadow := shadow.New()
 	// Create the server
-	server := swagger.NewRouter(c, db)
+	server := swagger.NewRouter(c, db, shadow)
 	// Create an adapter for aws lambda
 	adapter = gorillamux.New(server)
 }

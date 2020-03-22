@@ -19,15 +19,15 @@ func TestGetDevicesSuccess(t *testing.T) {
 		token     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiIzNTU4MUJGNC0zMkM4LTQ5MDgtODM3Ny0yRTZBMDIxRDNEMkIiLCJleHAiOjkyMjMzNzIwMzY4NTQ3NzU4MDcsImlzcyI6ImRldGVjdG9yZGFnIn0.CzyaCEIXlq1E0F89HR2Z9wbUn5gBDyQKTOCxTsX6iiQ"
 	)
 	// Create a client
-	c := createMockClient(t)
+	db, shadow := createMocks(t)
 	// Create unit under test
-	s := server{db: c, config: Config{JwtSecret: jwtSecret}}
+	s := server{db: db, config: Config{JwtSecret: jwtSecret}, shadow: shadow}
 	// Configure the mock db client to expect a call to query for devices in an account
 	devices := []database.Device{
 		{AccountId: "35581BF4-32C8-4908-8377-2E6A021D3D2B", DeviceId: "63eda5eb-7f56-417f-88ed-44a9eb9e5f67"},
 		{AccountId: "35581BF4-32C8-4908-8377-2E6A021D3D2B", DeviceId: "4e9a7d26-d4de-4ea9-a0be-ec1b8264e35b"},
 	}
-	c.EXPECT().GetDevicesByAccount(gomock.Eq(accountId)).Return(devices, nil)
+	db.EXPECT().GetDevicesByAccount(gomock.Eq(accountId)).Return(devices, nil)
 	// Create a request for devices
 	req := createRequest(t, "GET", fmt.Sprintf("/v1/accounts/%s/devices", accountId), nil)
 	req = mux.SetURLVars(req, map[string]string{

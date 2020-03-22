@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/briggysmalls/detectordag/shared/database"
+	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/kelseyhightower/envconfig"
 	"net/http"
@@ -28,8 +29,10 @@ type Config struct {
 
 type server struct {
 	db     database.Client
+	shadow shadow.Client
 	config Config
 }
+
 
 type CustomAuthClaims struct {
 	AccountId string `json:"accountId"`

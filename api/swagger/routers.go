@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/briggysmalls/detectordag/shared/database"
+	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/gorilla/mux"
 )
 
@@ -31,13 +32,14 @@ type Route struct {
 
 type Routes []Route
 
-func NewRouter(config *Config, db database.Client) *mux.Router {
+func NewRouter(config *Config, db database.Client, shadow shadow.Client) *mux.Router {
 	// Create the router
 	router := mux.NewRouter().StrictSlash(true)
 	// Create a handlerer
-	h := server{
+	s := server{
 		config: *config,
 		db:     db,
+		shadow: shadow,
 	}
 	// Prepare the routes
 	var routes = Routes{
@@ -52,35 +54,35 @@ func NewRouter(config *Config, db database.Client) *mux.Router {
 			"GetAccount",
 			strings.ToUpper("Get"),
 			fmt.Sprintf("/v1/accounts/{accountId:%s}", uuidRegex),
-			h.GetAccount,
+			s.GetAccount,
 		},
 
 		Route{
 			"GetDevices",
 			strings.ToUpper("Get"),
 			fmt.Sprintf("/v1/accounts/{accountId:%s}/devices", uuidRegex),
-			h.GetDevices,
+			s.GetDevices,
 		},
 
 		Route{
 			"UpdateAccount",
 			strings.ToUpper("Patch"),
 			fmt.Sprintf("/v1/accounts/{accountId:%s}", uuidRegex),
-			h.UpdateAccount,
+			s.UpdateAccount,
 		},
 
 		Route{
 			"Auth",
 			strings.ToUpper("Post"),
 			"/v1/auth",
-			h.Auth,
+			s.Auth,
 		},
 
 		Route{
 			"UpdateDevice",
 			strings.ToUpper("Patch"),
 			"/v1/devices/{deviceId}",
-			h.UpdateDevice,
+			s.UpdateDevice,
 		},
 	}
 
