@@ -6,6 +6,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iotdataplane"
 	"github.com/aws/aws-sdk-go/service/iotdataplane/iotdataplaneiface"
+	"log"
+	"strconv"
 	"time"
 )
 
@@ -15,9 +17,13 @@ type timestamp struct {
 
 func (t *timestamp) UnmarshalJSON(data []byte) error {
 	// Parse data to int
-	epoch := int64(data)
+	epoch, err := strconv.Atoi(string(data))
+	if err != nil {
+		return err
+	}
+	log.Print(epoch)
 	// Conver to a time
-	t.Time = time.Unix(epoch, 0)
+	t.Time = time.Unix(int64(epoch), 0)
 	return nil
 }
 
