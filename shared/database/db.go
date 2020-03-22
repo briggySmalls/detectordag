@@ -30,7 +30,7 @@ type Client interface {
 
 // account represents an 'accounts' table entry
 type Account struct {
-	AccountId string   `dynamodbav:"account-id"`
+	AccountId string   `dynamodbav:"account-id"` // TODO: unmarshal into our own UUID type
 	Emails    []string `dynamodbav:"emails"`
 	Username  string   `dynamodbav:"username"`
 	Password  string   `dynamodbav:"password"`
@@ -47,7 +47,7 @@ type Device struct {
 //https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.Lambda.BestPracticesWithDynamoDB.html
 var db *dynamodb.DynamoDB
 
-// init sets up the session
+// init sets up the session TODO: remove this
 func init() {
 	// Initialize a session that the SDK uses to load
 	// credentials from the shared credentials file ~/.aws/credentials
