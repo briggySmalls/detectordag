@@ -1,16 +1,13 @@
 package swagger
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/briggysmalls/detectordag/api/mocks"
 	models "github.com/briggysmalls/detectordag/api/swagger/go"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/golang/mock/gomock"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 )
 
@@ -65,34 +62,5 @@ func TestAuthSuccess(t *testing.T) {
 		}
 	} else {
 		t.Fatalf(err.Error())
-	}
-}
-
-func createMockClient(t *testing.T) *mocks.MockClient {
-	// Create mock controller
-	ctrl := gomock.NewController(t)
-	// Create mock database client
-	return mocks.NewMockClient(ctrl)
-}
-
-func runHandler(h func(http.ResponseWriter, *http.Request), req *http.Request) *httptest.ResponseRecorder {
-	// Run the handler using test code
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(h)
-	handler.ServeHTTP(rr, req)
-	return rr
-}
-
-func createRequest(t *testing.T, method, route string, body []byte) *http.Request {
-	req, err := http.NewRequest(method, route, bytes.NewReader(body))
-	if err != nil {
-		t.Fatal(err)
-	}
-	return req
-}
-
-func assertStatus(t *testing.T, rr *httptest.ResponseRecorder, expected int) {
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, expected)
 	}
 }
