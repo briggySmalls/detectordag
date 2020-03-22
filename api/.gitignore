@@ -5,6 +5,6 @@ swagger/go/
 swagger/api/
 swagger/.swagger-codegen
 # Ignore mocks
-mocks/
+mock_*.go
 # Ignore .env files
 .env
