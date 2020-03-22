@@ -41,13 +41,24 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 	err = s.checkAuthorized(token, accountId)
 	if err != nil {
 		setError(w, err, http.StatusForbidden)
+		return
 	}
 	// Fetch the devices associated with the account
-	_, err = s.db.GetDevicesByAccount(accountId)
+	devices, err := s.db.GetDevicesByAccount(accountId)
 	if err != nil {
 		setError(w, err, http.StatusInternalServerError)
+		return
 	}
 	// Request each device's shadow
+	for _, device := range devices {
+		// Request the shadow
+		_, err := s.shadow.Get(device.DeviceId)
+		if err != nil {
+			setError(w, err, http.StatusInternalServerError)
+		}
+		// Coerce the data into the right form
+
+	}
 	w.WriteHeader(http.StatusOK)
 }
 
