@@ -10,7 +10,9 @@
 package swagger
 
 import (
+	"encoding/json"
 	"errors"
+	models "github.com/briggysmalls/detectordag/api/swagger/go"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -50,16 +52,33 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Request each device's shadow
-	for _, device := range devices {
+	payload := make([]models.Device, len(devices))
+	for i, device := range devices {
 		// Request the shadow
-		_, err := s.shadow.Get(device.DeviceId)
+		shdw, err := s.shadow.Get(device.DeviceId)
 		if err != nil {
 			setError(w, err, http.StatusInternalServerError)
+			return
 		}
 		// Coerce the data into the right form
-
+		status, ok := shdw.State.Reported["status"].(bool)
+		if !ok {
+			setError(w, err, http.StatusInternalServerError)
+		}
+		payload[i] = models.Device{
+			DeviceId: device.DeviceId,
+			Updated:  shdw.Timestamp.Time,
+			State:    &models.DeviceState{Power: status},
+		}
 	}
+	// Prepare the JSON response
+	body, err := json.Marshal(payload)
+	if err != nil {
+		setError(w, err, http.StatusInternalServerError)
+	}
+	// Write the response
 	w.WriteHeader(http.StatusOK)
+	w.Write(body)
 }
 
 func (s *server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
