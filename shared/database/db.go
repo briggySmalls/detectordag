@@ -18,6 +18,7 @@ const (
 )
 
 type client struct {
+	db *dynamodb.DynamoDB
 }
 
 // Client is a client for interfacing with a detectordag database
@@ -42,39 +43,23 @@ type Device struct {
 	AccountId string `dynamodbav:"account-id"`
 }
 
-//It is a best practice to instantiate the Amazon DynamoDB client outside
-//of the AWS Lambda function handler.
-//https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.Lambda.BestPracticesWithDynamoDB.html
-var db *dynamodb.DynamoDB
-
-// init sets up the session TODO: remove this
-func init() {
-	// Initialize a session that the SDK uses to load
-	// credentials from the shared credentials file ~/.aws/credentials
-	// and region from the shared configuration file ~/.aws/config.
-	var err error
-	sesh, err := session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
+// New gets a new Client
+func New(sesh *session.Session) Client {
 	// Create Amazon DynamoDB client
-	db = dynamodb.New(sesh)
+	db := dynamodb.New(sesh)
 	if db == nil {
 		log.Fatal("Failed to create database client")
 	}
-}
-
-// New gets a new Client
-func New() Client {
-	client := client{}
+	// Create our client wrapper
+	client := client{
+		db: db,
+	}
 	return &client
 }
 
 func (d *client) GetDeviceById(id string) (*Device, error) {
 	// Request for the device associated with the ID
-	result, err := db.GetItem(&dynamodb.GetItemInput{
+	result, err := d.db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(DEVICES_TABLE),
 		Key: map[string]*dynamodb.AttributeValue{
 			"device-id": {
@@ -106,7 +91,7 @@ func (d *client) GetDevicesByAccount(id string) ([]Device, error) {
 		return nil, err
 	}
 	// Request for the devices associated with the account
-	result, err := db.Query(&dynamodb.QueryInput{
+	result, err := d.db.Query(&dynamodb.QueryInput{
 		TableName:                 aws.String(DEVICES_TABLE),
 		IndexName:                 aws.String(DEVICES_GSI_NAME),
 		ExpressionAttributeNames:  expr.Names(),
@@ -128,7 +113,7 @@ func (d *client) GetDevicesByAccount(id string) ([]Device, error) {
 
 func (d *client) GetAccountById(id string) (*Account, error) {
 	// Request for the account associated with the device
-	result, err := db.GetItem(&dynamodb.GetItemInput{
+	result, err := d.db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(ACCOUNTS_TABLE),
 		Key: map[string]*dynamodb.AttributeValue{
 			"account-id": {
@@ -155,7 +140,7 @@ func (d *client) GetAccountByUsername(username string) (*Account, error) {
 		return nil, err
 	}
 	// Request for the account associated with the username
-	result, err := db.Query(&dynamodb.QueryInput{
+	result, err := d.db.Query(&dynamodb.QueryInput{
 		TableName:                 aws.String(ACCOUNTS_TABLE),
 		IndexName:                 aws.String(ACCOUNTS_GSI_NAME),
 		ExpressionAttributeNames:  expr.Names(),

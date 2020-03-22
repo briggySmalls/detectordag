@@ -6,6 +6,7 @@ import (
 	"context"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	"github.com/briggysmalls/detectordag/api/swagger"
 	"github.com/briggysmalls/detectordag/shared/database"
@@ -27,10 +28,18 @@ func init() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	// Create an AWS session
+	// Good practice will share this session for all services
+	sesh, err := session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	})
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	// Create a new Db client
-	db := database.New()
+	db := database.New(sesh)
 	// Create a new shadow client
-	shadow := shadow.New()
+	shadow := shadow.New(sesh)
 	// Create the server
 	server := swagger.NewRouter(c, db, shadow)
 	// Create an adapter for aws lambda
