@@ -23,10 +23,10 @@ func TestGetShadow(t *testing.T) {
 			payload:  `{"state":{"desired":{"status":true},"reported":{"status":false},"delta":{"status":true}},"metadata":{"desired":{"status":{"timestamp":1584003580}},"reported":{"status":{"timestamp":1584803417}}},"version":50,"timestamp":1584810789}`,
 			error:    nil,
 			shadow: Shadow{
-				Timestamp: timestamp{time.Unix(1584810789, 0)},
+				Timestamp: Timestamp{time.Unix(1584810789, 0)},
 				Metadata: Metadata{
 					Reported: map[string]MetadataEntry{
-						"status": {Timestamp: timestamp{time.Unix(1584803417, 0)}},
+						"status": {Timestamp: Timestamp{time.Unix(1584803417, 0)}},
 					},
 				},
 				State: State{Reported: map[string]interface{}{"status": false}},

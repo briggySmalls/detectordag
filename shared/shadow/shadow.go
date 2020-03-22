@@ -11,11 +11,11 @@ import (
 	"time"
 )
 
-type timestamp struct {
+type Timestamp struct {
 	time.Time
 }
 
-func (t *timestamp) UnmarshalJSON(data []byte) error {
+func (t *Timestamp) UnmarshalJSON(data []byte) error {
 	// Parse data to int
 	epoch, err := strconv.Atoi(string(data))
 	if err != nil {
@@ -32,7 +32,7 @@ type client struct {
 }
 
 type MetadataEntry struct {
-	Timestamp timestamp `json:""`
+	Timestamp Timestamp `json:""`
 }
 
 type Metadata struct {
@@ -44,7 +44,7 @@ type State struct {
 }
 
 type Shadow struct {
-	Timestamp timestamp `json:""`
+	Timestamp Timestamp `json:""`
 	Metadata  Metadata  `json:""`
 	State     State     `json:""`
 }
