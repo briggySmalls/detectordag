@@ -11,18 +11,12 @@ import (
 	"github.com/briggysmalls/detectordag/api/swagger"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/shadow"
-	"github.com/joho/godotenv"
 	"log"
 )
 
 var adapter *gorillamux.GorillaMuxAdapter
 
 func init() {
-	// Load .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 	// Get config from environment
 	c, err := swagger.NewConfig()
 	if err != nil {
