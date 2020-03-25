@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iotdataplane"
 	"github.com/golang/mock/gomock"
+	"github.com/google/go-cmp/cmp"
 	"testing"
 	"time"
 )
@@ -51,7 +52,10 @@ func TestGetShadow(t *testing.T) {
 		shadow, err := client.Get(params.deviceID)
 		if err != params.error {
 			t.Errorf("Unexpected error: %v", err)
-		} else if shadow.Timestamp != params.shadow.Timestamp {
+			continue
+		}
+		// Assert parts of the shadow
+		if cmp.Equal(shadow, params.shadow) {
 			t.Errorf("Unexpected shadow: %v", shadow)
 		}
 	}
