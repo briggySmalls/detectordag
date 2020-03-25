@@ -85,7 +85,7 @@ func (d *client) GetDeviceById(id string) (*Device, error) {
 
 func (d *client) GetDevicesByAccount(id string) ([]Device, error) {
 	// Build an expression
-	kc := expression.Key("#acc").Equal(expression.Value(id))
+	kc := expression.Key("account-id").Equal(expression.Value(id))
 	expr, err := expression.NewBuilder().WithKeyCondition(kc).Build()
 	if err != nil {
 		return nil, err
