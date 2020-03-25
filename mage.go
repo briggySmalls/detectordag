@@ -171,6 +171,16 @@ func CreateRule() error {
 		"--topic-rule-payload", "file://config/topicRule.json")
 }
 
+func CreateTables() error {
+	// Create accounts table
+	err := sh.Run("aws", "dynamodb", "create-table", "--table-name", "accounts", "--cli-json-input", "file://db/accounts.json")
+	if err != nil {
+		return err
+	}
+	// Create devices table
+	return sh.Run("aws", "dynamodb", "create-table", "--table-name", "devices", "--cli-json-input", "file://db/devices.json")
+}
+
 // Encode a string in base64
 func encode(input string) string {
 	return base64.StdEncoding.EncodeToString([]byte(input))

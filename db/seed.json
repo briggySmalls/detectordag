@@ -3,7 +3,13 @@
         "PutRequest": {
             "Item": {
                 "account-id": {
-                    "N": "1"
+                    "S": "aac45d02-c97d-442c-8431-336d578fdcf7"
+                },
+                "username": {
+                    "S": "briggySmalls90@gmail.com"
+                },
+                "password": {
+                    "S": "$2y$12$PQ8Yq/KNmlmJYlgfhy1/Keahdr6aGMDM6Wdygk.oiUoPjqVJU2aja"
                 },
                 "emails": {
                     "L": [{
@@ -21,10 +27,10 @@
         "PutRequest": {
             "Item": {
                 "device-id": {
-                    "S": "9985413ab05a2317dc1912f1500905b9"
+                    "S": "92f59eeb298c4f8c8773e4704d9afe65"
                 },
                 "account-id": {
-                    "N": "1"
+                    "S": "aac45d02-c97d-442c-8431-336d578fdcf7"
                 }
             }
         }

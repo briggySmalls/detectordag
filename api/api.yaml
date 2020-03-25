@@ -1,0 +1,288 @@
+openapi: 3.0.1
+info:
+  title: Detectordag
+  description: API for detectordag JAMStack dashboard
+  contact:
+    email: briggySmalls90@gmail.com
+  license:
+    name: MIT 2.0
+    url: https://opensource.org/licenses/MIT
+  version: 1.0.0
+externalDocs:
+  description: Find out more about detectordag
+  url: https://github.com/briggySmalls/detectordag
+servers:
+- url: https://petstore.swagger.io/v1
+tags:
+- name: authentication
+  description: Login to the app
+- name: devices
+  description: Access to detectordag devices
+- name: accounts
+  description: Access to detectordag accounts
+paths:
+  /auth:
+    post:
+      tags:
+      - authentication
+      summary: Obtain token for the site
+      operationId: auth
+      requestBody:
+        description: Credentials for logging in
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+        required: true
+      responses:
+        200:
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        403:
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+  /devices/{deviceId}:
+    patch:
+      tags:
+      - devices
+      summary: Update a device
+      description: Update device configuration
+      operationId: updateDevice
+      parameters:
+      - $ref: '#/components/parameters/Token'
+      - name: deviceId
+        in: path
+        description: ID of device that is to be updated
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Properties to update about the device
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+      responses:
+        200:
+          description: successful operation
+          content: {}
+        400:
+          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          $ref: '#/components/responses/Unauthenticated'
+        403:
+          $ref: '#/components/responses/Unauthorised'
+  /accounts/{accountId}:
+    get:
+      tags:
+      - accounts
+      summary: Get account details
+      operationId: getAccount
+      parameters:
+      - $ref: '#/components/parameters/Token'
+      - name: accountId
+        in: path
+        description: ID of account that is to be queried
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        400:
+          $ref: '#/components/responses/AccountNotFoundError'
+        401:
+          $ref: '#/components/responses/Unauthenticated'
+        403:
+          $ref: '#/components/responses/Unauthorised'
+      x-codegen-request-body-name: body
+    patch:
+      tags:
+      - accounts
+      summary: Update an account
+      description: Update account configuration
+      operationId: updateAccount
+      parameters:
+      - $ref: '#/components/parameters/Token'
+      - name: accountId
+        in: path
+        description: ID of account that is to be queried
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Properties to update about the account
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - emails
+              properties:
+                emails:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        200:
+          description: successful operation
+          content: {}
+        400:
+          $ref: '#/components/responses/AccountNotFoundError'
+        401:
+          $ref: '#/components/responses/Unauthenticated'
+        403:
+          $ref: '#/components/responses/Unauthorised'
+        404:
+          description: Order not found
+          content: {}
+  /accounts/{accountId}/devices:
+    get:
+      tags:
+      - accounts
+      summary: Get all devices associated with the user's account
+      operationId: getDevices
+      parameters:
+      - $ref: '#/components/parameters/Token'
+      - name: accountId
+        in: path
+        description: ID of account that is to be queried
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+        400:
+          $ref: '#/components/responses/AccountNotFoundError'
+        401:
+          $ref: '#/components/responses/Unauthenticated'
+        403:
+          $ref: '#/components/responses/Unauthorised'
+      x-codegen-request-body-name: body
+components:
+  parameters:
+    Token:
+      name: Authorization
+      in: header
+      description: Token obtained through authentication
+      required: true
+      schema:
+        type: string
+        format: base64
+  responses:
+    Unauthenticated:
+      description: Authorization token missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorised:
+      description: Token doesn't permit accessing this resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    AccountNotFoundError:
+      description: Account with that ID not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Device:
+      type: object
+      required:
+        - name
+        - deviceId
+        - state
+        - updated
+      properties:
+        name:
+          type: string
+        deviceId:
+          type: string
+          format: uuid
+        state:
+          type: object
+          required:
+            - power
+          properties:
+            power:
+              type: boolean
+        updated:
+          type: string
+          format: date-time
+    Error:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: string
+    Credentials:
+      type: object
+      required:
+      - username
+      - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    Token:
+      type: object
+      required:
+      - token
+      - accountId
+      properties:
+        token:
+          type: string
+        accountId:
+          type: string
+          format: uuid
+    Account:
+      type: object
+      properties:
+        emails:
+          type: array
+          items:
+            type: string
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string

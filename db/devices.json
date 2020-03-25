@@ -1,27 +1,41 @@
 {
-    "TableName": "devices",
-    "AttributeDefinitions": [
-        {
-            "AttributeName": "device-id",
-            "AttributeType": "S"
-        },
-        {
-            "AttributeName": "account-id",
-            "AttributeType": "N"
-        }
-    ],
-    "KeySchema": [
-        {
-            "AttributeName": "device-id",
-            "KeyType": "HASH"
-        }
-    ],
-    "IndexName": "account-id",
-    "Projection": {
-      "ProjectionType": "KEYS_ONLY"
+  "TableName": "devices",
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "device-id",
+      "AttributeType": "S"
     },
-    "ProvisionedThroughput": {
-      "ReadCapacityUnits": 5,
-      "WriteCapacityUnits": 5
+    {
+      "AttributeName": "account-id",
+      "AttributeType": "S"
     }
+  ],
+  "KeySchema": [
+    {
+      "AttributeName": "device-id",
+      "KeyType": "HASH"
+    }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "account-id-index",
+      "KeySchema": [
+        {
+          "AttributeName": "account-id",
+          "KeyType": "HASH"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "KEYS_ONLY"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  }
 }
