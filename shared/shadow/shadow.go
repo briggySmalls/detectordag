@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/iot"
 	"github.com/aws/aws-sdk-go/service/iotdataplane"
 	"github.com/aws/aws-sdk-go/service/iotdataplane/iotdataplaneiface"
 	"log"
@@ -51,8 +52,16 @@ type Shadow struct {
 
 // New creates a new shadow client
 func New(sess *session.Session) Client {
-	// Create the service client
-	svc := iotdataplane.New(sess)
+	// We need to use an IoT control plane client to get an endpoint address
+	ctrlSvc := iot.New(sess)
+	descResp, err := ctrlSvc.DescribeEndpoint(&iot.DescribeEndpointInput{})
+	if err != nil {
+		log.Fatal("failed to get dataplane endpoint", err)
+	}
+	// Create a IoT data plane client using the endpoint address we retrieved
+	svc := iotdataplane.New(sess, &aws.Config{
+		Endpoint: descResp.EndpointAddress,
+	})
 	// Return our client wrapper
 	return &client{
 		dp: svc,

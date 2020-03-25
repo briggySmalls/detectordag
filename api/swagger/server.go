@@ -22,9 +22,8 @@ var (
 )
 
 type Config struct {
-	JwtSecret      string `split_words:"true"`
-	JwtDuration    string `split_words:"true"`
-	ShadowEndpoint string `split_words:"true"`
+	JwtSecret   string `split_words:"true"`
+	JwtDuration string `split_words:"true"`
 }
 
 type server struct {
@@ -32,7 +31,6 @@ type server struct {
 	shadow shadow.Client
 	config Config
 }
-
 
 type CustomAuthClaims struct {
 	AccountId string `json:"accountId"`

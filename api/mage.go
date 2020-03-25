@@ -11,7 +11,7 @@ import (
 var helper mage.Lambda
 
 const (
-	envFile  = "env.json"
+	envFile  = ""
 	toolsDir = "./tools/tools.go"
 	buildDir = ".aws-sam/"
 )
