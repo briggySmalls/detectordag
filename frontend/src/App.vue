@@ -1,21 +1,14 @@
 <template>
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
-    <Login msg="Welcome to Your Vue.js + TypeScript App"/>
+    <router-view/>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import Login from './components/Login.vue';
-import Review from './components/Review.vue';
 
-@Component({
-  components: {
-    Login,
-    Review,
-  },
-})
+@Component({})
 export default class App extends Vue {}
 </script>
 
