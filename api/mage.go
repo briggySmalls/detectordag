@@ -10,16 +10,26 @@ import (
 
 var helper mage.Lambda
 
-const apiSpecFile = "api.yaml"
+const (
+	envFile  = "env.json"
+	toolsDir = "./tools/tools.go"
+	buildDir = ".aws-sam/"
+)
 
 func init() {
-	helper = mage.New(".aws-sam/build/", "./tools/tools.go")
+	helper = mage.New(buildDir, toolsDir)
 }
 
 // Starts the API locally
 func StartApi() error {
-	mg.Deps(Build)
-	return helper.StartApi()
+	mg.Deps(Generate)
+	return helper.StartApi(false, envFile)
+}
+
+// Starts the API locally, with debugging
+func DebugApi() error {
+	mg.Deps(Generate)
+	return helper.StartApi(true, envFile)
 }
 
 // Build the project
@@ -28,19 +38,19 @@ func Build() error {
 	return helper.Build()
 }
 
-func Delve() error {
-	return helper.BuildDelve()
-}
-
+// InstallTools installs tools locally
 func InstallTools() error {
 	return helper.InstallTools()
 }
 
-func Generate() error {
-	return sh.Run("go", "generate")
-}
-
+// Test runs unit tests
 func Test() error {
+	// Generate mocks
 	mg.Deps(Generate)
 	return sh.Run("go", "test", "-v", "./swagger/...")
+}
+
+// Generate generates sources
+func Generate() error {
+	return sh.Run("go", "generate")
 }

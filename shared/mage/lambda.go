@@ -19,9 +19,8 @@ type lambda struct {
 
 type Lambda interface {
     Build() error
-    StartApi() error
-    Invoke() error
-    InvokeDebug() error
+    StartApi(debug bool, envFile string) error
+    Invoke(debug bool, envFile string) error
     BuildDelve() error
     InstallTools() error
 }
@@ -36,21 +35,39 @@ func New(binDir, toolsFile string) Lambda {
 }
 
 // Invokes the lambda function locally
-func (l *lambda) Invoke() error {
+func (l *lambda) Invoke(debug bool, envFile string) error {
+    extraArgs := []string{}
+    // Add an env file if specified
+    if envFile != "" {
+        extraArgs = append(extraArgs, "--env-vars", envFile)
+    }
+    if debug {
+        // Specify delve as a dependency for debug
+        mg.Deps(l.BuildDelve)
+        // Add debug flags
+        extraArgs = append(extraArgs, "-d", "5986", "--debugger-path", l.getBinFile("delve"), "--debug-args", "-delveAPI=2")
+    }
+    // We always need to build before this
     mg.Deps(l.Build)
-    return invoke()
+    return invoke(extraArgs...)
 }
 
 // Starts a local API gateway for the lambda function locally
-func (l *lambda) StartApi() error {
+func (l *lambda) StartApi(debug bool, envFile string) error {
+    // Start building the arguments to the 'sam' command
+    args := []string{"local", "start-api"}
+    // Add an env file if specified
+    if envFile != "" {
+        args = append(args, "--env-vars", envFile)
+    }
+    if debug {
+        // Ensure we have the debugger available
+        mg.Deps(l.BuildDelve)
+        args = append(args, "-d", "5986", "--debugger-path", l.getBinFile("delve"), "--debug-args", "-delveAPI=2")
+    }
+    // We always need to build
     mg.Deps(l.Build)
-    return sh.Run("sam", "local", "start-api")
-}
-
-// Invokes the lambda function locally, running the debug server
-func (l *lambda) InvokeDebug() error {
-    mg.Deps(l.Build, l.BuildDelve)
-    return invoke("-d", "5986", "--debugger-path", l.getBinFile("delve"), "--debug-args", "-delveAPI=2")
+    return sh.Run("sam", args...)
 }
 
 // Build the project
@@ -100,11 +117,9 @@ func (l *lambda) InstallTools() error {
     if err != nil {
         return err
     }
-
     // Parse the tools
     re := regexp.MustCompile(`_ \"(.*?)\"`)
     matches := re.FindAllSubmatch(toolsFile, -1)
-
     // Install
     for _, match := range matches {
         err := sh.Run("go", "install", string(match[1]))

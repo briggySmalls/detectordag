@@ -17,23 +17,15 @@ type Invoke mg.Namespace
 
 // Invokes the lambda function locally
 func (Invoke) Production() error {
-	return helper.Invoke()
+	return helper.Invoke(false, "")
 }
 
 // Invokes the lambda function locally, running the debug server
 func (Invoke) Debug() error {
-	return helper.InvokeDebug()
+	return helper.Invoke(true, "")
 }
 
-// Build the project
-func Build() error {
-	return helper.Build()
-}
-
-func Delve() error {
-	return helper.BuildDelve()
-}
-
+// InstallTools installs project tools
 func InstallTools() error {
 	return helper.InstallTools()
 }
