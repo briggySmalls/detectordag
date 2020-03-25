@@ -220,6 +220,11 @@ components:
   schemas:
     Device:
       type: object
+      required:
+        - name
+        - deviceId
+        - state
+        - updated
       properties:
         name:
           type: string
@@ -228,6 +233,8 @@ components:
           format: uuid
         state:
           type: object
+          required:
+            - power
           properties:
             power:
               type: boolean
