@@ -4,6 +4,7 @@ import (
     "fmt"
     "github.com/magefile/mage/mg"
     "github.com/magefile/mage/sh"
+    "github.com/magefile/mage/target"
     "io/ioutil"
     "os"
     "path"
@@ -71,15 +72,26 @@ func (l *lambda) BuildDelve() error {
     if len(matches) == 0 {
         return fmt.Errorf("delve not found")
     }
-    // Build our version of delve
-    return sh.RunWith(
-        map[string]string{
-            "GOARCH": "amd64",
-            "GOOS":   "linux",
-        },
-        "go", "build",
-        "-o", l.getBinFile("delve/dlv"),
-        matches[0])
+    src := matches[0]
+    // State our inputs and outputs
+    tgt := l.getBinFile("delve/dlv")
+    isNew, err := target.Path(tgt, src)
+    if err != nil {
+        return err
+    }
+    if isNew {
+        // Build our version of delve
+        return sh.RunWith(
+            map[string]string{
+                "GOARCH": "amd64",
+                "GOOS":   "linux",
+            },
+            "go", "build",
+            "-o", tgt,
+            src)
+    }
+    // Nothing to build
+    return nil
 }
 
 func (l *lambda) InstallTools() error {
