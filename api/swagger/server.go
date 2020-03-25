@@ -23,7 +23,7 @@ var (
 
 type Config struct {
 	JwtSecret      string `split_words:"true"`
-	JwtDuration    string `split_words:"true`
+	JwtDuration    string `split_words:"true"`
 	ShadowEndpoint string `split_words:"true"`
 }
 
