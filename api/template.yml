@@ -4,6 +4,11 @@ Resources:
   Api:
     Type: AWS::Serverless::Function
     Properties:
+      Environment:
+        Variables:
+          DETECTORDAG_JWT_DURATION: "2h"
+          DETECTORDAG_JWT_SECRET: "dummy-secret"
+          DETECTORDAG_SHADOW_ENDPOINT: "dummy-endpoint"
       Handler: api
       Runtime: go1.x
       Events:
