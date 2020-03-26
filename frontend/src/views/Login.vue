@@ -58,7 +58,7 @@ export default class Login extends Vue {
   ) {
     if (error) {
       // Assign the error
-      this.error = error;
+      this.error = new Error(response.text);
       // Also log it
       console.error(error);
     } else {
