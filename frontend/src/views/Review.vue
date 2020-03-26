@@ -18,13 +18,13 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { AccountsApi } from '../../lib/client';
+import { AccountsApi, Device } from '../../lib/client';
 
 @Component
 export default class Review extends Vue {
-  private error!: Error = null;
+  private error: Error | null = null;
 
-  private devices!: Device[] = null;
+  private devices: Device[] | null = null;
 
   private client: AccountsApi;
 

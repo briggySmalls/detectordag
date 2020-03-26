@@ -33,7 +33,7 @@ export default class Login extends Vue {
 
   private client: AuthenticationApi;
 
-  public error!: Error = null;
+  public error: Error | null = null;
 
   public constructor() {
     // Call super
