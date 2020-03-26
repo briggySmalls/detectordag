@@ -41,7 +41,7 @@ export default class Review extends Vue {
     const accountId = localStorage.getItem('accountId');
     // Get the devices
     console.log(`Making request for devices on account ${accountId}`);
-    this.client.getDevices(token, accountId);
+    this.client.getDevices(token, accountId, this.handleDevices);
   }
 
   public handleDevices(error: Error, data: Device[], response: any): any {
