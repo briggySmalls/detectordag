@@ -20,6 +20,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import { ApiClient, AuthenticationApi, Credentials } from '../detectordag';
 
 @Component
 export default class Login extends Vue {
@@ -27,11 +28,35 @@ export default class Login extends Vue {
 
   private password = '';
 
+  private client: AuthenticationApi
+
+  public constructor() {
+    // Call super
+    super();
+    // Create client
+    ApiClient.instance.basePath = 'http://localhost:8080/api/v1';
+    this.client = new AuthenticationApi();
+  }
+
   public submit(event: Event) { // eslint-disable-line class-methods-use-this
     // Submit a request to the backend
     console.log(`Submitting request, {"email": "${this.email}", "password": "${this.password}"}`);
+    // Create the request body
+    const creds = new Credentials(this.email, this.password);
+    // Submit the request
+    this.client.auth(creds, this.handleLogin);
     // Do not actually perform a post action
     event.preventDefault();
+  }
+
+  private handleLogin( // eslint-disable-line class-methods-use-this
+    error: Error, data: any, response: any,
+  ) {
+    if (error) {
+      console.error(error);
+    } else {
+      console.log(`API called successfully. Returned data: ${data}`);
+    }
   }
 }
 </script>

@@ -15,6 +15,9 @@ module.exports = {
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
   },
+  ignorePatterns: [
+    "./src/detectordag"
+  ],
   overrides: [
     {
       files: [
