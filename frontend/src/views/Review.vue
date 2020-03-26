@@ -1,6 +1,7 @@
 <template>
   <div class="review">
     <h1>This is the review page</h1>
+    <button v-on:click="request">Refresh</button>
     <div class="device" v-for="device in devices" :key="device.deviceId">
       <h2>Device {{ device.name }} - ({{ device.deviceId }})</h2>
       <h3>Updated {{ device.updated }}</h3>
@@ -36,6 +37,14 @@ export default class Review extends Vue {
   }
 
   public created() {
+    // Make a request immediately
+    this.request();
+  }
+
+  public request() {
+    // Clear any existing devices
+    this.devices = null;
+    this.error = null;
     // Fetch the token/accountId
     const token = localStorage.getItem('token');
     const accountId = localStorage.getItem('accountId');
