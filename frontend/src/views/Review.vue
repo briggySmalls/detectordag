@@ -52,7 +52,7 @@ export default class Review extends Vue {
   public handleDevices(error: Error, data: Device[], response: any): any {
     if (error) {
       // Assign the error
-      this.error = error;
+      this.error = new Error(response.text);
       // Also log it
       console.error(error);
     } else {
