@@ -46,7 +46,7 @@ export default class Review extends Vue {
     }
     // Get the devices
     console.log(`Making request for devices on account ${accountId}`);
-    this.client.getDevices(token, accountId, this.handleDevices);
+    this.client.getDevices(`Bearer ${token}`, accountId, this.handleDevices);
   }
 
   public handleDevices(error: Error, data: Device[], response: any): any {
@@ -58,6 +58,7 @@ export default class Review extends Vue {
     } else {
       console.log(`API called successfully. Returned data: ${data}`);
       // Record the token and account
+      this.devices = data;
     }
   }
 }
