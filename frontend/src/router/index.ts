@@ -7,9 +7,10 @@ Vue.use(VueRouter);
 
 const routes = [
   {
-    path: '/',
+    path: '/dashboard',
     name: 'Review',
     component: Review,
+    alias: '/',
   },
   {
     path: '/login',

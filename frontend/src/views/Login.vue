@@ -15,12 +15,17 @@
       </div>
       <input type="submit" value="Submit">
     </form>
+    <div v-if="error">
+      {{ error.message }}
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { ApiClient, AuthenticationApi, Credentials } from '../../lib/detectordag';
+import {
+  ApiClient, AuthenticationApi, Credentials, Token,
+} from '../../lib/client';
 
 @Component
 export default class Login extends Vue {
@@ -28,7 +33,9 @@ export default class Login extends Vue {
 
   private password = '';
 
-  private client: AuthenticationApi
+  private client: AuthenticationApi;
+
+  public error!: Error = null;
 
   public constructor() {
     // Call super
@@ -50,12 +57,20 @@ export default class Login extends Vue {
   }
 
   private handleLogin( // eslint-disable-line class-methods-use-this
-    error: Error, data: any, response: any,
+    error: Error, data: Token, response: any,
   ) {
     if (error) {
+      // Assign the error
+      this.error = error;
+      // Also log it
       console.error(error);
     } else {
       console.log(`API called successfully. Returned data: ${data}`);
+      // Record the token and account
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('accountId', data.accountId);
+      // Navigate home
+      this.$router.push('/');
     }
   }
 }
