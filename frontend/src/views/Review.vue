@@ -39,6 +39,11 @@ export default class Review extends Vue {
     // Fetch the token/accountId
     const token = localStorage.getItem('token');
     const accountId = localStorage.getItem('accountId');
+    // Redirect to login if these are not present
+    if (token === null || accountId == null) {
+      this.$router.push('/login');
+      return;
+    }
     // Get the devices
     console.log(`Making request for devices on account ${accountId}`);
     this.client.getDevices(token, accountId, this.handleDevices);
