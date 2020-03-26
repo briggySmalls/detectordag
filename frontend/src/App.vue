@@ -7,9 +7,16 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import { ApiClient } from '../lib/client';
 
 @Component({})
-export default class App extends Vue {}
+export default class App extends Vue {
+  constructor() {
+    super();
+    // Configure client endpoint
+    ApiClient.instance.basePath = 'http://localhost:8080/api/v1';
+  }
+}
 </script>
 
 <style lang="scss">

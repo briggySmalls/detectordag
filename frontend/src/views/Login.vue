@@ -23,9 +23,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import {
-  ApiClient, AuthenticationApi, Credentials, Token,
-} from '../../lib/client';
+import { AuthenticationApi, Credentials, Token } from '../../lib/client';
 
 @Component
 export default class Login extends Vue {
@@ -41,7 +39,6 @@ export default class Login extends Vue {
     // Call super
     super();
     // Create client
-    ApiClient.instance.basePath = 'http://localhost:8080/api/v1';
     this.client = new AuthenticationApi();
   }
 
