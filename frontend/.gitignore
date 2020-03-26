@@ -22,3 +22,7 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Ignore generated source
+lib/client/**/*
+!lib/client/src/index.d.ts
