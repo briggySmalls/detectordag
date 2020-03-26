@@ -31,5 +31,5 @@ export class Device {
 }
 
 export class DeviceState {
-  power: bool;
+  power: boolean;
 }
