@@ -20,7 +20,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { ApiClient, AuthenticationApi, Credentials } from '../detectordag';
+import { ApiClient, AuthenticationApi, Credentials } from '../../lib/detectordag';
 
 @Component
 export default class Login extends Vue {

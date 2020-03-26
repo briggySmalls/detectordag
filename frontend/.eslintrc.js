@@ -16,7 +16,7 @@ module.exports = {
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
   },
   ignorePatterns: [
-    "./src/detectordag"
+    "./lib/detectordag"
   ],
   overrides: [
     {
