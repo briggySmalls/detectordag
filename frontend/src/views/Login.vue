@@ -76,7 +76,7 @@ export default class Login extends Vue {
       // Also log it
       console.error(response.text);
     } else {
-      console.log(`API called successfully. Returned data: ${data}`);
+      console.log(data);
       // Record the token and account
       this.storage.save(new AuthBundle(data.accountId, data.token));
       // Navigate home

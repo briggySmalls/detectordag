@@ -75,7 +75,7 @@ export default class Review extends Vue {
       // If we have authorization issues, redirect to login
       this.$router.push('/login');
     } else {
-      console.log(`API called successfully. Returned data: ${data}`);
+      console.log(data);
       // Display the requested devices
       this.devices = data;
     }
