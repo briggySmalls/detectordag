@@ -1,13 +1,11 @@
 <template>
   <b-card :title="device.deviceId">
-    <b-list-group v-for="(value, key) in device.state" :key="key" flush>
-      <b-list-group-item>
-        {{ key }}: {{ value }}
-      </b-list-group-item>
-    </b-list-group>
-    <footer>
-      Updated: {{ device.updated }}
-    </footer>
+    <b-card-text>
+      Status: {{ powerStatus }}
+    </b-card-text>
+    <template v-slot:footer>
+      Updated: {{ device.updated.toLocaleString() }}
+    </template>
   </b-card>
 </template>
 
@@ -18,5 +16,9 @@ import { Device as DeviceModel } from '../../lib/client';
 @Component
 export default class Device extends Vue {
   @Prop() private device!: DeviceModel;
+
+  private get powerStatus(): string {
+    return (this.device.state.power) ? '⚡️ On' : '❗️ Off';
+  }
 }
 </script>
