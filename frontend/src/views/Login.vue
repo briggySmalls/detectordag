@@ -1,24 +1,36 @@
 <template>
-  <div class="login">
-    <h1>This is the login page</h1>
-    <form
-        @submit="submit"
-        action="https://vuejs.org/"
-        method="post">
-      <div>
-        <label for="email">Email</label>
-        <input id="email" type="email" name="email" v-model="email" required>
-      </div>
-      <div>
-        <label for="password">Password</label>
-        <input id="password" type="password" name="password" v-model="password" required>
-      </div>
-      <input type="submit" value="Submit">
-    </form>
+  <b-container id="login">
+    <h1>Login</h1>
+    <b-form
+      @submit="submit"
+      action="https://vuejs.org/"
+      method="post">
+      <b-form-group
+        id="email"
+        label="Email:"
+        label-for="email">
+        <b-form-input
+          id="email" type="email" name="email"
+          v-model="email"
+          trim required>
+        </b-form-input>
+      </b-form-group>
+      <b-form-group
+        id="password"
+        label="Password:"
+        label-for="password">
+        <b-form-input
+          id="password" type="password" name="password"
+          v-model="password"
+          trim required>
+        </b-form-input>
+      </b-form-group>
+      <b-button type="submit" >Submit</b-button>
+    </b-form>
     <div v-if="error">
       {{ error.message }}
     </div>
-  </div>
+  </b-container>
 </template>
 
 <script lang="ts">
@@ -72,3 +84,9 @@ export default class Login extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+#login {
+  max-width: 30em;
+}
+</style>
