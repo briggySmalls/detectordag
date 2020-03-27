@@ -1,15 +1,15 @@
 module.exports = {
   configureWebpack: {
-    devtool: 'source-map'
+    devtool: 'source-map',
   },
   devServer: {
     proxy: {
       '/api': {
         target: 'http://localhost:3000',
         pathRewrite: {
-          '^/api': '/' // remove base path
-        }
-      }
-    }
-  }
-}
+          '^/api': '/', // remove base path
+        },
+      },
+    },
+  },
+};
