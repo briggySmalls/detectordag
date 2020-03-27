@@ -5,9 +5,7 @@
     <b-card-group deck>
       <DeviceComponent v-for="device in devices" :key="device.deviceId" :device="device" />
     </b-card-group>
-    <b-alert variant="danger" v-if="error">
-      {{ error.message }}
-    </b-alert>
+    <ErrorComponent :error="error" />
   </div>
 </template>
 
@@ -16,10 +14,12 @@ import { Component, Vue } from 'vue-property-decorator';
 import { AccountsApi, Device } from '../../lib/client';
 import { Storage } from '../utils';
 import DeviceComponent from '../components/Device.vue';
+import ErrorComponent from '../components/Error.vue';
 
 @Component({
   components: {
     DeviceComponent,
+    ErrorComponent,
   },
 })
 export default class Review extends Vue {

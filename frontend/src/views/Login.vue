@@ -1,7 +1,7 @@
 <template>
   <b-container id="login">
     <h1>Login</h1>
-    <form @submit="submit">
+    <b-form @submit="submit">
       <b-form-group
         id="email"
         label="Email:"
@@ -23,10 +23,8 @@
         </b-form-input>
       </b-form-group>
       <b-button type="submit" >Submit</b-button>
-    </form>
-    <b-alert variant="danger" v-if="error">
-      {{ error.message }}
-    </b-alert>
+    </b-form>
+    <ErrorComponent :error="error" />
   </b-container>
 </template>
 
@@ -34,8 +32,13 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { AuthenticationApi, Credentials, Token } from '../../lib/client';
 import { Storage, AuthBundle } from '../utils';
+import ErrorComponent from '../components/Error.vue';
 
-@Component
+@Component({
+  components: {
+    ErrorComponent,
+  },
+})
 export default class Login extends Vue {
   private email = '';
 
