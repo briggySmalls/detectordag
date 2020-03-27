@@ -80,7 +80,7 @@ export default class Login extends Vue {
       // Record the token and account
       this.storage.save(new AuthBundle(data.accountId, data.token));
       // Navigate home
-      this.$router.push('/dashboard');
+      this.$router.push('/');
     }
   }
 }

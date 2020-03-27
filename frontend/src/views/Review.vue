@@ -54,16 +54,15 @@ export default class Review extends Vue {
     this.error = null;
     this.isRefreshing = true;
     // Fetch the token/accountId
-    const token = localStorage.getItem('token');
-    const accountId = localStorage.getItem('accountId');
+    const { bundle } = this.storage;
     // Redirect to login if these are not present
-    if (token === null || accountId == null) {
+    if (bundle == null) {
       this.$router.push('/login');
       return;
     }
     // Get the devices
-    console.log(`Making request for devices on account ${accountId}`);
-    this.client.getDevices(`Bearer ${token}`, accountId, this.handleDevices);
+    console.log(`Making request for devices on account ${bundle.accountId}`);
+    this.client.getDevices(`Bearer ${bundle.token}`, bundle.accountId, this.handleDevices);
   }
 
   public handleDevices(error: Error, data: Device[], response: any): any {
