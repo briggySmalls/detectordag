@@ -7,7 +7,9 @@
         Detectordag
       </b-navbar-brand>
     </b-navbar>
-    <router-view/>
+    <b-container>
+      <router-view/>
+    </b-container>
   </div>
 </template>
 
@@ -19,7 +21,7 @@ import { ApiClient } from '../lib/client';
 // Install BootstrapVue
 Vue.use(BootstrapVue);
 
-@Component({})
+@Component
 export default class App extends Vue {
   constructor() {
     super();

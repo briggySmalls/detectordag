@@ -1,16 +1,10 @@
 <template>
   <div class="review">
     <h1>This is the review page</h1>
-    <button v-on:click="request" :disabled="isRefreshing">Refresh</button>
-    <div class="device" v-for="device in devices" :key="device.deviceId">
-      <h2>Device {{ device.name }} - ({{ device.deviceId }})</h2>
-      <h3>Updated {{ device.updated }}</h3>
-      <ul>
-        <li v-for="(value, key) in device.state" :key="key">
-          {{ key }}: {{ value }}
-        </li>
-      </ul>
-    </div>
+    <b-button v-on:click="request" :disabled="isRefreshing">Refresh</b-button>
+    <b-card-group deck>
+      <DeviceComponent v-for="device in devices" :key="device.deviceId" :device="device" />
+    </b-card-group>
     <b-alert variant="danger" v-if="error">
       {{ error.message }}
     </b-alert>
@@ -21,8 +15,13 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { AccountsApi, Device } from '../../lib/client';
 import { Storage } from '../utils';
+import DeviceComponent from '../components/Device.vue';
 
-@Component
+@Component({
+  components: {
+    DeviceComponent,
+  },
+})
 export default class Review extends Vue {
   private error: Error | null = null;
 
