@@ -1,10 +1,7 @@
 <template>
   <b-container id="login">
     <h1>Login</h1>
-    <b-form
-      @submit="submit"
-      action="https://vuejs.org/"
-      method="post">
+    <form @submit="submit">
       <b-form-group
         id="email"
         label="Email:"
@@ -26,16 +23,17 @@
         </b-form-input>
       </b-form-group>
       <b-button type="submit" >Submit</b-button>
-    </b-form>
-    <div v-if="error">
+    </form>
+    <b-alert variant="danger" v-if="error">
       {{ error.message }}
-    </div>
+    </b-alert>
   </b-container>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { AuthenticationApi, Credentials, Token } from '../../lib/client';
+import { Storage, AuthBundle } from '../utils';
 
 @Component
 export default class Login extends Vue {
@@ -45,6 +43,8 @@ export default class Login extends Vue {
 
   private client: AuthenticationApi;
 
+  private storage: Storage;
+
   public error: Error | null = null;
 
   public constructor() {
@@ -52,6 +52,8 @@ export default class Login extends Vue {
     super();
     // Create client
     this.client = new AuthenticationApi();
+    // Create storage helper
+    this.storage = new Storage();
   }
 
   public submit(event: Event) { // eslint-disable-line class-methods-use-this
@@ -70,16 +72,15 @@ export default class Login extends Vue {
   ) {
     if (error) {
       // Assign the error
-      this.error = new Error(response.text);
+      this.error = error;
       // Also log it
-      console.error(error);
+      console.error(response.text);
     } else {
       console.log(`API called successfully. Returned data: ${data}`);
       // Record the token and account
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('accountId', data.accountId);
+      this.storage.save(new AuthBundle(data.accountId, data.token));
       // Navigate home
-      this.$router.push('/');
+      this.$router.push('/dashboard');
     }
   }
 }

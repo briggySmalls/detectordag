@@ -11,15 +11,16 @@
         </li>
       </ul>
     </div>
-    <div v-if="error">
+    <b-alert variant="danger" v-if="error">
       {{ error.message }}
-    </div>
+    </b-alert>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { AccountsApi, Device } from '../../lib/client';
+import { Storage } from '../utils';
 
 @Component
 export default class Review extends Vue {
@@ -29,6 +30,8 @@ export default class Review extends Vue {
 
   private client: AccountsApi;
 
+  private storage: Storage;
+
   private isRefreshing = false;
 
   public constructor() {
@@ -36,6 +39,8 @@ export default class Review extends Vue {
     super();
     // Create client
     this.client = new AccountsApi();
+    // Create storage helper
+    this.storage = new Storage();
   }
 
   public created() {
@@ -64,12 +69,14 @@ export default class Review extends Vue {
   public handleDevices(error: Error, data: Device[], response: any): any {
     if (error) {
       // Assign the error
-      this.error = new Error(response.text);
+      this.error = error;
       // Also log it
-      console.error(error);
+      console.error(response.text);
+      // If we have authorization issues, redirect to login
+      this.$router.push('/login');
     } else {
       console.log(`API called successfully. Returned data: ${data}`);
-      // Record the token and account
+      // Display the requested devices
       this.devices = data;
     }
     this.isRefreshing = false;
