@@ -271,7 +271,11 @@ components:
           format: uuid
     Account:
       type: object
+      required:
+      - emails
       properties:
+        username:
+          type: string
         emails:
           type: array
           items:

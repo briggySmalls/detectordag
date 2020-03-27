@@ -11,42 +11,50 @@ package swagger
 
 import (
 	"encoding/json"
-	"errors"
 	models "github.com/briggysmalls/detectordag/api/swagger/go"
-	"github.com/gorilla/mux"
 	"net/http"
 )
 
 func (s *server) GetAccount(w http.ResponseWriter, r *http.Request) {
+	// We return JSON no matter what
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusNotImplemented)
+	// Validate the sender is authorised
+	accountId := s.validateAccount(w, r)
+	if accountId == nil {
+		return
+	}
+	// Request the account
+	account, err := s.db.GetAccountById(*accountId)
+	if err != nil {
+		setError(w, err, http.StatusInternalServerError)
+		return
+	}
+	// Build the response
+	payload := models.Account{
+		Username: account.Username,
+		Emails:   account.Emails,
+	}
+	// Prepare the JSON response
+	body, err := json.Marshal(payload)
+	if err != nil {
+		setError(w, err, http.StatusInternalServerError)
+	}
+	// Write the response
+	w.WriteHeader(http.StatusOK)
+	w.Write(body)
 }
 
 func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 	var err error
 	// We return JSON no matter what
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	// Ensure that there is a token sent
-	token, err := s.getToken(&r.Header)
-	if err != nil {
-		setError(w, err, http.StatusUnauthorized)
-		return
-	}
-	// Pull out the account ID
-	vars := mux.Vars(r)
-	accountId, ok := vars["accountId"]
-	if !ok {
-		setError(w, errors.New("Account ID not supplied in path"), http.StatusBadRequest)
-		return
-	}
-	// Check the user is authorised
-	err = s.checkAuthorized(token, accountId)
-	if err != nil {
-		setError(w, err, http.StatusForbidden)
+	// Validate the sender is authorised
+	accountId := s.validateAccount(w, r)
+	if accountId == nil {
 		return
 	}
 	// Fetch the devices associated with the account
-	devices, err := s.db.GetDevicesByAccount(accountId)
+	devices, err := s.db.GetDevicesByAccount(*accountId)
 	if err != nil {
 		setError(w, err, http.StatusInternalServerError)
 		return
