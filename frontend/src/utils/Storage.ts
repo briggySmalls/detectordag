@@ -13,7 +13,7 @@ export default class Storage {
 
   public get bundle(): AuthBundle | null {
     // Try to get the bundle
-    bundle = localStorage.getItem(this.fieldName);
+    const bundle = localStorage.getItem(this.fieldName);
     if (!bundle) {
       return null;
     }
