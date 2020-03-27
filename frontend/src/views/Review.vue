@@ -1,7 +1,7 @@
 <template>
   <div class="review">
-    <h1>This is the review page</h1>
-    <b-button v-on:click="request" :disabled="isRefreshing">Refresh</b-button>
+    <h1>Review dags</h1>
+    <b-button class="mt-2 mb-2" v-on:click="request" :disabled="isRefreshing">Refresh</b-button>
     <b-card-group deck>
       <DeviceComponent v-for="device in devices" :key="device.deviceId" :device="device" />
     </b-card-group>
