@@ -87,7 +87,7 @@ export default class Review extends Vue {
   }
 
   private get username() {
-    const account = this.$store.account;
+    const account = this.$store.state.account;
     return (account) ? account.username : '?';
   }
 }
