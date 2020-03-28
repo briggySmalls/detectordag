@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/iot"
 	"github.com/aws/aws-sdk-go/service/iotdataplane"
 	"github.com/aws/aws-sdk-go/service/iotdataplane/iotdataplaneiface"
-	"log"
 	"strconv"
 	"time"
 )
@@ -22,7 +21,6 @@ func (t *Timestamp) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	log.Print(epoch)
 	// Conver to a time
 	t.Time = time.Unix(int64(epoch), 0)
 	return nil
@@ -51,12 +49,12 @@ type Shadow struct {
 }
 
 // New creates a new shadow client
-func New(sess *session.Session) Client {
+func New(sess *session.Session) (Client, error) {
 	// We need to use an IoT control plane client to get an endpoint address
 	ctrlSvc := iot.New(sess)
 	descResp, err := ctrlSvc.DescribeEndpoint(&iot.DescribeEndpointInput{})
 	if err != nil {
-		log.Fatal("failed to get dataplane endpoint", err)
+		return nil, err
 	}
 	// Create a IoT data plane client using the endpoint address we retrieved
 	svc := iotdataplane.New(sess, &aws.Config{
@@ -65,7 +63,7 @@ func New(sess *session.Session) Client {
 	// Return our client wrapper
 	return &client{
 		dp: svc,
-	}
+	}, nil
 }
 
 // Client represents a client to the device shadow service

@@ -1,13 +1,13 @@
 package database
 
 import (
+	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
-	"log"
 )
 
 const (
@@ -45,17 +45,17 @@ type Device struct {
 }
 
 // New gets a new Client
-func New(sesh *session.Session) Client {
+func New(sesh *session.Session) (Client, error) {
 	// Create Amazon DynamoDB client
 	db := dynamodb.New(sesh)
 	if db == nil {
-		log.Fatal("Failed to create database client")
+		return nil, errors.New("Failed to create database client")
 	}
 	// Create our client wrapper
 	client := client{
 		db: db,
 	}
-	return &client
+	return &client, nil
 }
 
 func (d *client) GetDeviceById(id string) (*Device, error) {

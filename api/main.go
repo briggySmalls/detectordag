@@ -31,9 +31,15 @@ func init() {
 		log.Fatal(err.Error())
 	}
 	// Create a new Db client
-	db := database.New(sesh)
+	db, err := database.New(sesh)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	// Create a new shadow client
-	shadow := shadow.New(sesh)
+	shadow, err := shadow.New(sesh)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	// Create the server
 	server := swagger.NewRouter(c, db, shadow)
 	// Create an adapter for aws lambda
