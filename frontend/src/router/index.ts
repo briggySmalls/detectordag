@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import Review from '../views/Login.vue';
+import Review from '../views/Review.vue';
 import NotFound from '../views/NotFound.vue';
 import { storage, logger } from '../utils';
 import store from '../store';
