@@ -9,7 +9,7 @@ class Storage {
   }
 
   public clear() {
-    localStorage.remove(this.fieldName);
+    localStorage.removeItem(this.fieldName);
   }
 
   public get bundle(): AuthBundle | null {
