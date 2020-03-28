@@ -56,7 +56,7 @@ func New(sess *session.Session) Client {
 	ctrlSvc := iot.New(sess)
 	descResp, err := ctrlSvc.DescribeEndpoint(&iot.DescribeEndpointInput{})
 	if err != nil {
-		log.Fatal("failed to get dataplane endpoint", err)
+		log.Fatalf("failed to get dataplane endpoint: %v", err)
 	}
 	// Create a IoT data plane client using the endpoint address we retrieved
 	svc := iotdataplane.New(sess, &aws.Config{
