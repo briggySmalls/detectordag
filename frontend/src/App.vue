@@ -9,19 +9,12 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { BootstrapVue } from 'bootstrap-vue';
-import { ApiClient } from '../lib/client';
 
 // Install BootstrapVue
 Vue.use(BootstrapVue);
 
 @Component
-export default class App extends Vue {
-  constructor() {
-    super();
-    // Configure client endpoint
-    ApiClient.instance.basePath = 'http://localhost:8080/api/v1';
-  }
-}
+export default class App extends Vue {}
 </script>
 
 <style lang="scss">

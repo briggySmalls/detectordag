@@ -59,16 +59,16 @@ export default class Review extends Vue {
     this.error = null;
     this.isRefreshing = true;
     // Fetch the token/accountId
-    const { bundle } = this.storage;
+    const authBundle = storage.bundle;
     // Redirect to login if these are not present
-    if (bundle == null) {
+    if (authBundle == null) {
       this.$logger.debug('Token not available');
       this.$router.push('/login');
       return;
     }
     // Get the devices
     this.$logger.debug('Requesting account\'s devices');
-    this.client.getDevices(`Bearer ${bundle.token}`, bundle.accountId, this.handleDevices);
+    this.client.getDevices(`Bearer ${authBundle.token}`, authBundle.accountId, this.handleDevices);
   }
 
   private handleDevices(error: Error, data: Device[], response: any): any {
@@ -87,7 +87,7 @@ export default class Review extends Vue {
   }
 
   private get username() {
-    const account = this.$store.state.account;
+    const { account } = this.$store.state;
     return (account) ? account.username : '?';
   }
 }
