@@ -39,7 +39,10 @@ func init() {
 		log.Fatal(err.Error())
 	}
 	// Create a database client
-	db = database.New(sesh)
+	db, err = database.New(sesh)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }
 
 // HandleRequest handles a lambda call
