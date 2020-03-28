@@ -2,7 +2,7 @@
   <div class="review">
     <b-navbar class="justify-content-center">
       <b-navbar-brand href="#">
-        <img id="logo" alt="Detectordag logo" src="./assets/logo.svg"
+        <img id="logo" alt="Detectordag logo" src="../assets/logo.svg"
              class="d-inline-block">
         Detectordag
       </b-navbar-brand>
