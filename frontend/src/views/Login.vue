@@ -31,7 +31,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import {
-  AuthenticationApi, AccountsApi, Credentials, Token
+  AuthenticationApi, AccountsApi, Credentials, Token,
 } from '../../lib/client';
 import { Storage, AuthBundle } from '../utils';
 import ErrorComponent from '../components/Error.vue';
@@ -59,9 +59,9 @@ export default class Login extends Vue {
   public constructor() {
     // Call super
     super();
-    // Create client
+    // Create clients
     this.authClient = new AuthenticationApi();
-    this.accountsClient = new AccountsClient();
+    this.accountsClient = new AccountsApi();
     // Create storage helper
     this.storage = new Storage();
   }
@@ -116,7 +116,7 @@ export default class Login extends Vue {
 
   // Request the account and configure callback
   private requestAccount(bundle: Token) {
-    this.client.getAccount(`Bearer ${bundle.token}`, bundle.accountId, this.handleAccount);
+    this.accountsClient.getAccount(`Bearer ${bundle.token}`, bundle.accountId, this.handleAccount);
   }
 
   // Save the account and move on
