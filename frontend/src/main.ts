@@ -10,9 +10,6 @@ Vue.config.productionTip = false;
 // Configure client endpoint
 ApiClient.instance.basePath = 'http://localhost:8080/api/v1';
 
-// Add a logger to all vue instances
-Vue.prototype.$logger = logger;
-
 new Vue({
   router,
   store,
