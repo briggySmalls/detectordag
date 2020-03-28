@@ -1,14 +1,26 @@
 <template>
   <div class="review">
-    <b-navbar class="justify-content-center">
+    <b-navbar toggleable="lg">
       <b-navbar-brand href="#">
-        <img id="logo" alt="Detectordag logo" src="../assets/logo.svg"
-             class="d-inline-block">
-        Detectordag
+        <img
+          id="logo" alt="Detectordag logo" src="../assets/logo.svg"
+          class="d-inline-block">
+          Detectordag
       </b-navbar-brand>
-      <div>
-        {{ username }}
-      </div>
+      <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+      <b-collapse id="nav-collapse" is-nav>
+        <b-navbar-nav class="ml-auto">
+          <template v-if="$store.state.account">
+            <b-nav-text>{{ username }}</b-nav-text>
+            <b-nav-form>
+              <b-button size="sm" class="my-2 my-sm-0" type="submit">Logout</b-button>
+            </b-nav-form>
+          </template>
+          <template v-else>
+            Loading...
+          </template>
+        </b-navbar-nav>
+      </b-collapse>
     </b-navbar>
     <h1>Review dags</h1>
     <b-button class="mt-2 mb-2" v-on:click="request" :disabled="isRefreshing">Refresh</b-button>
@@ -92,3 +104,10 @@ export default class Review extends Vue {
   }
 }
 </script>
+
+<style lang="scss">
+#logo {
+  width: 5em;
+  height: 5em;
+}
+</style>
