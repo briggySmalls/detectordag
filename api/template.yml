@@ -61,5 +61,6 @@ Resources:
             - Effect: Allow
               Action:
                 - 'iot:GetThingShadow'
+                - 'iot:DescribeEndpoint'
               Resource:
-                - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
+                - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:*"
