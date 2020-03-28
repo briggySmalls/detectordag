@@ -44,17 +44,22 @@ Resources:
                 - 'dynamodb:GetItem'
                 - 'dynamodb:UpdateItem'
                 - 'dynamodb:Query'
-              Resource: "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/devices"
+              Resource:
+                - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/devices"
+                - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/devices/index/*"
         - Version: '2012-10-17'
           Statement:
-              - Effect: Allow
-                Action:
-                  - 'dynamodb:GetItem'
-                  - 'dynamodb:UpdateItem'
-                Resource: "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/accounts"
+            - Effect: Allow
+              Action:
+                - 'dynamodb:GetItem'
+                - 'dynamodb:UpdateItem'
+              Resource:
+                - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/accounts"
+                - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/accounts/index/*"
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
               Action:
                 - 'iot:GetThingShadow'
-              Resource: 'arn:aws:iot:${AWS::Partition}:${AWS::AccountId}:thing/*'
+              Resource:
+                - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
