@@ -1,5 +1,5 @@
 <template>
-  <b-alert class="mt-3" variant="danger" :show="error !== null">
+  <b-alert v-if="error !== null" class="mt-3" variant="danger" show>
     {{ error.message }}
   </b-alert>
 </template>
@@ -8,7 +8,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component
-export default class Device extends Vue {
-  @Prop() private error: Error | null;
+export default class ErrorComponent extends Vue {
+  @Prop() private readonly error!: Error;
 }
 </script>
