@@ -52,7 +52,7 @@ function handleAccountResponse(error: Error, data: Account, response: any) {
     return;
   }
   // Save the account deatils to the store
-  logger.debug(`Saving account details: ${data}`);
+  logger.debug('Saving account details');
   store.commit('setAccount', data);
 }
 
