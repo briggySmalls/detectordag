@@ -1,7 +1,9 @@
 import AuthBundle from './AuthBundle';
-import Storage from './Storage';
+import storage from './Storage';
+import logger from './logger';
 
 export {
   AuthBundle,
-  Storage,
+  storage,
+  logger,
 };

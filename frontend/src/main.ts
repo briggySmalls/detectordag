@@ -1,20 +1,13 @@
 import Vue from 'vue';
-import winston from 'winston';
-import 'setimmediate'; // Polyfill for winston browser console
 import App from './App.vue';
 import router from './router';
 import store from './store';
+import { logger } from './utils';
 
 Vue.config.productionTip = false;
 
 // Add a logger to all vue instances
-Vue.prototype.$logger = winston.createLogger({
-  level: (process.env.NODE_ENV !== 'production') ? 'debug' : 'error',
-  format: winston.format.simple(),
-  transports: [
-    new winston.transports.Console(),
-  ],
-});
+Vue.prototype.$logger = logger;
 
 new Vue({
   router,

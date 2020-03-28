@@ -12,6 +12,7 @@ export class AuthenticationApi {
 export class AccountsApi {
   constructor();
   getDevices(authorization: string, accountId: string, callback: (error: Error, data: Device[], response: any) => any): any;
+  getAccount(accountId: string, callback: (error: Error, data: Account, response: any) => any): any;
 }
 
 export class Credentials {
@@ -30,6 +31,12 @@ export class Device {
   updated: Date;
 }
 
+
 export class DeviceState {
   power: boolean;
+}
+
+export class Account {
+  username: string;
+  emails: string[];
 }

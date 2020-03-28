@@ -1,12 +1,5 @@
 <template>
   <div id="app">
-    <b-navbar class="justify-content-center">
-      <b-navbar-brand href="#">
-        <img id="logo" alt="Detectordag logo" src="./assets/logo.svg"
-             class="d-inline-block">
-        Detectordag
-      </b-navbar-brand>
-    </b-navbar>
     <b-container>
       <router-view/>
     </b-container>
