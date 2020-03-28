@@ -71,13 +71,16 @@ export default class Login extends Vue {
     const { bundle } = this.storage;
     if (bundle == null) {
       // There is no token, so display login
+      this.$logger.debug('No preexisting token found');
       return;
     }
     // Check if the token is valid
+    this.$logger.debug('Found token, requesting accounts');
     this.accountsClient.getAccount(`Bearer ${bundle.token}`, bundle.accountId, this.handleAccount);
   }
 
   public submit(event: Event) {
+    this.$logger.debug('Login submitted');
     // Create the request body
     const creds = new Credentials(this.email, this.password);
     // Submit the request
@@ -89,10 +92,7 @@ export default class Login extends Vue {
   private handleAccount(error: Error, data: Account, response: any) {
     // Handle any errors
     if (error) {
-      // Assign the error
-      this.error = error;
-      // Also log it
-      console.error(response.text);
+      this.handleErrorResponse(error, response);
       return;
     }
     // We have got the account, job done!
@@ -100,31 +100,33 @@ export default class Login extends Vue {
   }
 
   private handleLogin(error: Error, data: Token, response: any) {
+    // Handle any errors
     if (error) {
-      // Assign the error
-      this.error = error;
-      // Also log it
-      console.error(response.text);
+      this.handleErrorResponse(error, response);
       return;
     }
     // Record the token and account in local storage
     const bundle = new AuthBundle(data.accountId, data.token);
     this.storage.save(bundle);
     // Now we have a valid token, let's get the account details
-    this.requestAccount(bundle);
-  }
-
-  // Request the account and configure callback
-  private requestAccount(bundle: Token) {
     this.accountsClient.getAccount(`Bearer ${bundle.token}`, bundle.accountId, this.handleAccount);
   }
 
   // Save the account and move on
   private finishUp(account: Account) {
-    // We have got the account, so save it
+    // We have got the account, so save it to our store
     this.$store.commit('setAccount', account);
     // Redirect to the dashboard
     this.$router.push('/dashboard');
+  }
+
+  // Uniform method for handling errors
+  private handleErrorResponse(error: Error, response: any) {
+    // Log the real response
+    // See https://github.com/swagger-api/swagger-codegen/issues/2602
+    this.$logger.debug(response.text);
+    // Assign the error
+    this.error = error;
   }
 }
 </script>
