@@ -1,7 +1,8 @@
 <template>
-  <b-container id="login">
+  <b-container id="login" class="mt-5">
+    <img id="logo" class="my-1" alt="Detectordag logo" src="../assets/logo.svg">
     <h1>Login</h1>
-    <b-form @submit="submit">
+    <b-form v-if="!isRequesting" @submit="submit">
       <b-form-group
         id="email"
         label="Email:"
@@ -24,16 +25,15 @@
       </b-form-group>
       <b-button type="submit" >Submit</b-button>
     </b-form>
+    <b-spinner v-else label="Spinning"></b-spinner>
     <ErrorComponent :error="error" />
   </b-container>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import {
-  AuthenticationApi, AccountsApi, Credentials, Token,
-} from '../../lib/client';
-import { Storage, AuthBundle } from '../utils';
+import { AuthenticationApi, Credentials, Token } from '../../lib/client';
+import { storage, AuthBundle } from '../utils';
 import ErrorComponent from '../components/Error.vue';
 
 @Component({
@@ -50,89 +50,54 @@ export default class Login extends Vue {
 
   private authClient: AuthenticationApi;
 
-  private accountsClient: AccountsApi;
-
-  private storage: Storage;
-
   public error: Error | null = null;
+
+  private isRequesting = false;
 
   public constructor() {
     // Call super
     super();
-    // Create clients
+    // Create client
     this.authClient = new AuthenticationApi();
-    this.accountsClient = new AccountsApi();
-    // Create storage helper
-    this.storage = new Storage();
-  }
-
-  public created() {
-    // First we check if the user already has a token
-    const { bundle } = this.storage;
-    if (bundle == null) {
-      // There is no token, so display login
-      this.$logger.debug('No preexisting token found');
-      return;
-    }
-    // Check if the token is valid
-    this.$logger.debug('Found token, requesting accounts');
-    this.accountsClient.getAccount(`Bearer ${bundle.token}`, bundle.accountId, this.handleAccount);
   }
 
   public submit(event: Event) {
     this.$logger.debug('Login submitted');
-    // Create the request body
-    const creds = new Credentials(this.email, this.password);
-    // Submit the request
-    this.authClient.auth(creds, this.handleLogin);
+    // Request authentication
+    this.isRequesting = true;
+    this.error = null;
+    this.authClient.auth(new Credentials(this.email, this.password), this.handleLogin);
     // Do not actually perform a post action
     event.preventDefault();
   }
 
-  private handleAccount(error: Error, data: Account, response: any) {
-    // Handle any errors
-    if (error) {
-      this.handleErrorResponse(error, response);
-      return;
-    }
-    // We have got the account, job done!
-    this.finishUp(data);
-  }
-
   private handleLogin(error: Error, data: Token, response: any) {
     // Handle any errors
+    this.isRequesting = false;
     if (error) {
-      this.handleErrorResponse(error, response);
+      // Log the real response
+      // See https://github.com/swagger-api/swagger-codegen/issues/2602
+      this.$logger.debug(response.text);
+      // Assign the error
+      this.error = error;
       return;
     }
     // Record the token and account in local storage
+    this.$logger.debug('Account data received');
     const bundle = new AuthBundle(data.accountId, data.token);
-    this.storage.save(bundle);
-    // Now we have a valid token, let's get the account details
-    this.accountsClient.getAccount(`Bearer ${bundle.token}`, bundle.accountId, this.handleAccount);
-  }
-
-  // Save the account and move on
-  private finishUp(account: Account) {
-    // We have got the account, so save it to our store
-    this.$store.commit('setAccount', account);
-    // Redirect to the dashboard
-    this.$router.push('/dashboard');
-  }
-
-  // Uniform method for handling errors
-  private handleErrorResponse(error: Error, response: any) {
-    // Log the real response
-    // See https://github.com/swagger-api/swagger-codegen/issues/2602
-    this.$logger.debug(response.text);
-    // Assign the error
-    this.error = error;
+    storage.save(bundle);
+    // Redirect to review
+    this.$router.push('review');
   }
 }
 </script>
 
 <style lang="scss" scoped>
 #login {
+  max-width: 20em;
+}
+#logo {
   max-width: 30em;
 }
 </style>
+-

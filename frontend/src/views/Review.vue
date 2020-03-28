@@ -1,10 +1,50 @@
 <template>
   <div class="review">
+    <b-navbar toggleable="lg">
+      <!-- Logo -->
+      <b-navbar-brand href="#">
+        <img
+          id="logo" alt="Detectordag logo" src="../assets/logo.svg"
+          class="d-inline-block">
+          Detectordag
+      </b-navbar-brand>
+      <!-- Navbar -->
+      <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+      <b-collapse id="nav-collapse" is-nav>
+        <b-navbar-nav class="ml-auto">
+          <!-- Logged in navbar content -->
+          <template v-if="$store.state.account">
+            <b-nav-text>{{ username }}</b-nav-text>
+            <b-nav-item>
+              <b-button size="sm" v-on:click="logout">Logout</b-button>
+            </b-nav-item>
+          </template>
+          <!-- Loading -->
+          <template v-else>
+            <b-spinner></b-spinner>
+          </template>
+        </b-navbar-nav>
+      </b-collapse>
+    </b-navbar>
+    <!-- Main page -->
     <h1>Review dags</h1>
-    <b-button class="mt-2 mb-2" v-on:click="request" :disabled="isRefreshing">Refresh</b-button>
-    <b-card-group deck>
-      <DeviceComponent v-for="device in devices" :key="device.deviceId" :device="device" />
-    </b-card-group>
+    <b-button
+      class="mt-2 mb-2 d-inline-block"
+      v-on:click="request"
+      :disabled="isRefreshing">
+      Refresh
+    </b-button>
+    <b-container>
+      <!-- Device list -->
+      <b-card-group v-if="devices" deck>
+        <DeviceComponent
+          v-for="device in devices"
+          :key="device.deviceId"
+          :device="device" />
+      </b-card-group>
+      <!-- Loading -->
+      <b-spinner v-else></b-spinner>
+    </b-container>
     <ErrorComponent :error="error" />
   </div>
 </template>
@@ -12,7 +52,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { AccountsApi, Device } from '../../lib/client';
-import { Storage } from '../utils';
+import { storage } from '../utils';
 import DeviceComponent from '../components/Device.vue';
 import ErrorComponent from '../components/Error.vue';
 
@@ -29,8 +69,6 @@ export default class Review extends Vue {
 
   private client: AccountsApi;
 
-  private storage: Storage;
-
   private isRefreshing = false;
 
   public constructor() {
@@ -38,37 +76,45 @@ export default class Review extends Vue {
     super();
     // Create client
     this.client = new AccountsApi();
-    // Create storage helper
-    this.storage = new Storage();
   }
 
   public created() {
-    // Make a request immediately
+    // Make a request upon landing on the page
     this.request();
   }
 
-  public request() {
+  private request() {
     // Clear any existing devices
     this.devices = null;
     this.error = null;
     this.isRefreshing = true;
     // Fetch the token/accountId
-    const { bundle } = this.storage;
+    const authBundle = storage.bundle;
     // Redirect to login if these are not present
-    if (bundle == null) {
+    if (authBundle == null) {
+      this.$logger.debug('Token not available');
       this.$router.push('/login');
       return;
     }
     // Get the devices
-    this.client.getDevices(`Bearer ${bundle.token}`, bundle.accountId, this.handleDevices);
+    this.$logger.debug('Requesting account\'s devices');
+    this.client.getDevices(`Bearer ${authBundle.token}`, authBundle.accountId, this.handleDevices);
   }
 
-  public handleDevices(error: Error, data: Device[], response: any): any {
+  private logout() {
+    // Clear the token and account
+    storage.clear();
+    this.$store.commit('clearAccount');
+    // Redirect to the login page
+    this.$router.push('/login');
+  }
+
+  private handleDevices(error: Error, data: Device[], response: any): any {
     if (error) {
       // Assign the error
       this.error = error;
       // Also log it
-      console.error(response.text);
+      this.$logger.debug(response.text);
       // If we have authorization issues, redirect to login
       this.$router.push('/login');
       return;
@@ -77,5 +123,17 @@ export default class Review extends Vue {
     this.devices = data;
     this.isRefreshing = false;
   }
+
+  private get username() {
+    const { account } = this.$store.state;
+    return (account) ? account.username : '?';
+  }
 }
 </script>
+
+<style lang="scss" scoped>
+#logo {
+  width: 5em;
+  height: 5em;
+}
+</style>

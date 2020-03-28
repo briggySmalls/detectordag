@@ -11,6 +11,9 @@ export default new Vuex.Store({
     setAccount(state, newAccount) {
       state.account = newAccount;
     },
+    clearAccount(state) {
+      state.account = null;
+    },
   },
   actions: {
   },

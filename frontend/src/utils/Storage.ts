@@ -1,6 +1,7 @@
 import AuthBundle from './AuthBundle';
 
-export default class Storage {
+// Helper class for managing local storage
+class Storage {
   readonly fieldName = 'authBundle';
 
   public save(auth: AuthBundle) {
@@ -8,7 +9,7 @@ export default class Storage {
   }
 
   public clear() {
-    localStorage.remove(this.fieldName);
+    localStorage.removeItem(this.fieldName);
   }
 
   public get bundle(): AuthBundle | null {
@@ -20,3 +21,6 @@ export default class Storage {
     return JSON.parse(bundle);
   }
 }
+
+// Export our storage instance
+export default new Storage();
