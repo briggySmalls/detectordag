@@ -1,5 +1,5 @@
 <template>
-  <b-alert class="mt-3" variant="danger" :show="error">
+  <b-alert class="mt-3" variant="danger" :show="error !== null">
     {{ error.message }}
   </b-alert>
 </template>
