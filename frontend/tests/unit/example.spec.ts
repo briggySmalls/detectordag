@@ -1,13 +1,14 @@
 import { expect } from 'chai';
 import { shallowMount } from '@vue/test-utils';
-import HelloWorld from '@/components/HelloWorld.vue';
+import ErrorComponent from '@/components/Error.vue';
 
-describe('HelloWorld.vue', () => {
-  it('renders props.msg when passed', () => {
-    const msg = 'new message';
-    const wrapper = shallowMount(HelloWorld, {
-      propsData: { msg },
+describe('Error.vue', () => {
+  it('renders props.error when passed', () => {
+    const message = 'error message';
+    const error = new Error(message);
+    const wrapper = shallowMount(ErrorComponent, {
+      propsData: { error },
     });
-    expect(wrapper.text()).to.include(msg);
+    expect(wrapper.text()).to.include(message);
   });
 });
