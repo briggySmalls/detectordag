@@ -2,7 +2,7 @@
   <b-container id="login" class="mt-5">
     <img id="logo" class="my-1" alt="Detectordag logo" src="../assets/logo.svg">
     <h1>Login</h1>
-    <b-form @submit="submit">
+    <b-form v-if="!isRequesting" @submit="submit">
       <b-form-group
         id="email"
         label="Email:"
@@ -25,6 +25,7 @@
       </b-form-group>
       <b-button type="submit" >Submit</b-button>
     </b-form>
+    <b-spinner v-else label="Spinning"></b-spinner>
     <ErrorComponent :error="error" />
   </b-container>
 </template>
@@ -51,6 +52,8 @@ export default class Login extends Vue {
 
   public error: Error | null = null;
 
+  private isRequesting = false;
+
   public constructor() {
     // Call super
     super();
@@ -61,6 +64,8 @@ export default class Login extends Vue {
   public submit(event: Event) {
     this.$logger.debug('Login submitted');
     // Request authentication
+    this.isRequesting = true;
+    this.error = null;
     this.authClient.auth(new Credentials(this.email, this.password), this.handleLogin);
     // Do not actually perform a post action
     event.preventDefault();
@@ -68,6 +73,7 @@ export default class Login extends Vue {
 
   private handleLogin(error: Error, data: Token, response: any) {
     // Handle any errors
+    this.isRequesting = false;
     if (error) {
       // Log the real response
       // See https://github.com/swagger-api/swagger-codegen/issues/2602
