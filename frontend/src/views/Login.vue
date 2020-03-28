@@ -1,5 +1,6 @@
 <template>
-  <b-container id="login">
+  <b-container id="login" class="mt-5">
+    <img id="logo" class="my-1" alt="Detectordag logo" src="../assets/logo.svg">
     <h1>Login</h1>
     <b-form @submit="submit">
       <b-form-group
@@ -87,6 +88,9 @@ export default class Login extends Vue {
 
 <style lang="scss" scoped>
 #login {
+  max-width: 20em;
+}
+#logo {
   max-width: 30em;
 }
 </style>

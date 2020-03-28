@@ -1,32 +1,50 @@
 <template>
   <div class="review">
     <b-navbar toggleable="lg">
+      <!-- Logo -->
       <b-navbar-brand href="#">
         <img
           id="logo" alt="Detectordag logo" src="../assets/logo.svg"
           class="d-inline-block">
           Detectordag
       </b-navbar-brand>
+      <!-- Navbar -->
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
       <b-collapse id="nav-collapse" is-nav>
         <b-navbar-nav class="ml-auto">
+          <!-- Logged in navbar content -->
           <template v-if="$store.state.account">
             <b-nav-text>{{ username }}</b-nav-text>
-            <b-nav-form>
-              <b-button size="sm" class="my-2 my-sm-0" type="submit">Logout</b-button>
-            </b-nav-form>
+            <b-nav-item>
+              <b-button size="sm" v-on:click="logout">Logout</b-button>
+            </b-nav-item>
           </template>
+          <!-- Loading -->
           <template v-else>
-            Loading...
+            <b-spinner></b-spinner>
           </template>
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
+    <!-- Main page -->
     <h1>Review dags</h1>
-    <b-button class="mt-2 mb-2" v-on:click="request" :disabled="isRefreshing">Refresh</b-button>
-    <b-card-group deck>
-      <DeviceComponent v-for="device in devices" :key="device.deviceId" :device="device" />
-    </b-card-group>
+    <b-button
+      class="mt-2 mb-2 d-inline-block"
+      v-on:click="request"
+      :disabled="isRefreshing">
+      Refresh
+    </b-button>
+    <b-container>
+      <!-- Device list -->
+      <b-card-group v-if="devices" deck>
+        <DeviceComponent
+          v-for="device in devices"
+          :key="device.deviceId"
+          :device="device" />
+      </b-card-group>
+      <!-- Loading -->
+      <b-spinner v-else></b-spinner>
+    </b-container>
     <ErrorComponent :error="error" />
   </div>
 </template>
@@ -83,6 +101,14 @@ export default class Review extends Vue {
     this.client.getDevices(`Bearer ${authBundle.token}`, authBundle.accountId, this.handleDevices);
   }
 
+  private logout() {
+    // Clear the token and account
+    storage.clear();
+    this.$store.commit('clearAccount');
+    // Redirect to the login page
+    this.$router.push('/login');
+  }
+
   private handleDevices(error: Error, data: Device[], response: any): any {
     if (error) {
       // Assign the error
@@ -105,7 +131,7 @@ export default class Review extends Vue {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 #logo {
   width: 5em;
   height: 5em;
