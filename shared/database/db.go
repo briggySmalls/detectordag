@@ -171,7 +171,7 @@ func (d *client) UpdateAccountEmails(accountId string, emails []string) error {
 		return err
 	}
 	// Update the emails
-	_, err := d.db.UpdateItem(&dynamodb.UpdateItemInput{
+	_, err = d.db.UpdateItem(&dynamodb.UpdateItemInput{
 		TableName:                 aws.String(ACCOUNTS_TABLE),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
