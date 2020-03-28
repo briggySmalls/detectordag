@@ -60,7 +60,6 @@ export default class Review extends Vue {
       return;
     }
     // Get the devices
-    console.log(`Making request for devices on account ${bundle.accountId}`);
     this.client.getDevices(`Bearer ${bundle.token}`, bundle.accountId, this.handleDevices);
   }
 
@@ -72,11 +71,10 @@ export default class Review extends Vue {
       console.error(response.text);
       // If we have authorization issues, redirect to login
       this.$router.push('/login');
-    } else {
-      console.log(data);
-      // Display the requested devices
-      this.devices = data;
+      return;
     }
+    // Display the requested devices
+    this.devices = data;
     this.isRefreshing = false;
   }
 }

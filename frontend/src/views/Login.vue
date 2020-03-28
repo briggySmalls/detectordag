@@ -30,7 +30,9 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { AuthenticationApi, Credentials, Token } from '../../lib/client';
+import {
+  AuthenticationApi, AccountsApi, Credentials, Token,
+} from '../../lib/client';
 import { Storage, AuthBundle } from '../utils';
 import ErrorComponent from '../components/Error.vue';
 
@@ -39,12 +41,16 @@ import ErrorComponent from '../components/Error.vue';
     ErrorComponent,
   },
 })
+
+// The Login route is responsible for ensuring a user's token and account are stored
 export default class Login extends Vue {
   private email = '';
 
   private password = '';
 
-  private client: AuthenticationApi;
+  private authClient: AuthenticationApi;
+
+  private accountsClient: AccountsApi;
 
   private storage: Storage;
 
@@ -53,38 +59,72 @@ export default class Login extends Vue {
   public constructor() {
     // Call super
     super();
-    // Create client
-    this.client = new AuthenticationApi();
+    // Create clients
+    this.authClient = new AuthenticationApi();
+    this.accountsClient = new AccountsApi();
     // Create storage helper
     this.storage = new Storage();
   }
 
-  public submit(event: Event) { // eslint-disable-line class-methods-use-this
-    // Submit a request to the backend
-    console.log(`Submitting request, {"email": "${this.email}", "password": "${this.password}"}`);
+  public created() {
+    // First we check if the user already has a token
+    const { bundle } = this.storage;
+    if (bundle == null) {
+      // There is no token, so display login
+      return;
+    }
+    // Check if the token is valid
+    this.accountsClient.getAccount(`Bearer ${bundle.token}`, bundle.accountId, this.handleAccount);
+  }
+
+  public submit(event: Event) {
     // Create the request body
     const creds = new Credentials(this.email, this.password);
     // Submit the request
-    this.client.auth(creds, this.handleLogin);
+    this.authClient.auth(creds, this.handleLogin);
     // Do not actually perform a post action
     event.preventDefault();
   }
 
-  private handleLogin( // eslint-disable-line class-methods-use-this
-    error: Error, data: Token, response: any,
-  ) {
+  private handleAccount(error: Error, data: Account, response: any) {
+    // Handle any errors
     if (error) {
       // Assign the error
       this.error = error;
       // Also log it
       console.error(response.text);
-    } else {
-      console.log(data);
-      // Record the token and account
-      this.storage.save(new AuthBundle(data.accountId, data.token));
-      // Navigate home
-      this.$router.push('/');
+      return;
     }
+    // We have got the account, job done!
+    this.finishUp(data);
+  }
+
+  private handleLogin(error: Error, data: Token, response: any) {
+    if (error) {
+      // Assign the error
+      this.error = error;
+      // Also log it
+      console.error(response.text);
+      return;
+    }
+    // Record the token and account in local storage
+    const bundle = new AuthBundle(data.accountId, data.token);
+    this.storage.save(bundle);
+    // Now we have a valid token, let's get the account details
+    this.requestAccount(bundle);
+  }
+
+  // Request the account and configure callback
+  private requestAccount(bundle: Token) {
+    this.accountsClient.getAccount(`Bearer ${bundle.token}`, bundle.accountId, this.handleAccount);
+  }
+
+  // Save the account and move on
+  private finishUp(account: Account) {
+    // We have got the account, so save it
+    this.$store.commit('setAccount', account);
+    // Redirect to the dashboard
+    this.$router.push('/dashboard');
   }
 }
 </script>
