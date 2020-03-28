@@ -27,6 +27,7 @@ type Client interface {
 	GetAccountById(id string) (*Account, error)
 	GetAccountByUsername(username string) (*Account, error)
 	GetDevicesByAccount(id string) ([]Device, error)
+	UpdateAccountEmails(accountId string, emails []string) error
 }
 
 // account represents an 'accounts' table entry
@@ -156,6 +157,31 @@ func (d *client) GetAccountByUsername(username string) (*Account, error) {
 		return nil, fmt.Errorf("Unknown account: %s", username)
 	}
 	return unmarshalAccount(result.Items[0])
+}
+
+func (d *client) UpdateAccountEmails(accountId string, emails []string) error {
+	// Build an update expression
+	update := expression.Set(
+		expression.Name("emails"),
+		expression.Value(emails),
+	)
+	// Create the DynamoDB expression from the Update.
+	expr, err := expression.NewBuilder().WithUpdate(update).Build()
+	if err != nil {
+		return err
+	}
+	// Update the emails
+	_, err := d.db.UpdateItem(&dynamodb.UpdateItemInput{
+		TableName:                 aws.String(ACCOUNTS_TABLE),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		Key:                       map[string]*dynamodb.AttributeValue{"account-id": {S: aws.String(accountId)}},
+		UpdateExpression:          expr.Update(),
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func unmarshalAccount(item map[string]*dynamodb.AttributeValue) (*Account, error) {

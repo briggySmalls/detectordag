@@ -90,6 +90,27 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
+	// We return JSON no matter what
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusNotImplemented)
+	// Validate the sender is authorised
+	accountId := s.validateAccount(w, r)
+	if accountId == nil {
+		return
+	}
+	// Parse the emails from the request
+	var emails models.Emails
+	var err error
+	err = json.NewDecoder(r.Body).Decode(&emails)
+	if err != nil {
+		setError(w, err, http.StatusBadRequest)
+		return
+	}
+	// Update the database
+	err = s.db.UpdateAccountEmails(*accountId, emails.Emails)
+	if err != nil {
+		setError(w, err, http.StatusInternalServerError)
+		return
+	}
+	// Write the response
+	w.WriteHeader(http.StatusOK)
 }
