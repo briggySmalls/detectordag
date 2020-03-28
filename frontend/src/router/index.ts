@@ -52,6 +52,7 @@ function handleAccountResponse(error: Error, data: Account, response: any) {
     return;
   }
   // Save the account deatils to the store
+  logger.debug(`Saving account details: ${data}`);
   store.commit('setAccount', data);
 }
 
@@ -83,6 +84,7 @@ router.beforeEach((to, from, next) => {
     return;
   }
   // Request account details
+  logger.debug('Requesting account details');
   const accountsClient = new AccountsApi();
   accountsClient.getAccount(`Bearer ${authBundle.token}`, authBundle.accountId, handleAccountResponse);
   next();
