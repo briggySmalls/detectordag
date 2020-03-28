@@ -71,9 +71,11 @@ export default class Login extends Vue {
     const { bundle } = this.storage;
     if (bundle == null) {
       // There is no token, so display login
+      this.$logger.debug('No preexisting token found');
       return;
     }
     // Check if the token is valid
+    this.$logger.debug('Found token, requesting accounts');
     this.accountsClient.getAccount(`Bearer ${bundle.token}`, bundle.accountId, this.handleAccount);
   }
 
