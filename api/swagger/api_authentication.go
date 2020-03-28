@@ -62,20 +62,3 @@ func (s *server) Auth(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(body)
 }
-
-func setError(w http.ResponseWriter, err error, status int) {
-	// TODO: If 5xx error then hide message unless in debug
-	// Create the error struct
-	m := models.ModelError{
-		Error_: err.Error(),
-	}
-	// Marshal into string
-	content, err := json.Marshal(m)
-	if err != nil {
-		// What do ew
-		http.Error(w, "{\"error\": \"Failed to format error message\"}", http.StatusInternalServerError)
-		return
-	}
-	// Write the output
-	http.Error(w, string(content), status)
-}

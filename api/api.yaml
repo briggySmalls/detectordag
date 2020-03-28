@@ -137,14 +137,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - emails
-              properties:
-                emails:
-                  type: array
-                  items:
-                    type: string
+              $ref: '#/components/schemas/Emails'
       responses:
         200:
           description: successful operation
@@ -269,9 +262,23 @@ components:
         accountId:
           type: string
           format: uuid
+    Emails:
+      type: object
+      required:
+      - emails
+      properties:
+        emails:
+          type: array
+          items:
+            type: string
     Account:
       type: object
+      required:
+      - username
+      - emails
       properties:
+        username:
+          type: string
         emails:
           type: array
           items:
