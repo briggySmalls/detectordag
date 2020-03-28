@@ -66,7 +66,7 @@ router.beforeEach((to, from, next) => {
     return;
   }
   // Shortcircuit if we don't need to ensure we're logged in
-  if (to.matched.some((record) => record.meta.requiresAuth)) {
+  if (to.matched.some((record) => !record.meta.requiresAuth)) {
     next();
     return;
   }
