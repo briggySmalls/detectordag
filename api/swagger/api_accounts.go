@@ -69,10 +69,11 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 		if !ok {
 			setError(w, err, http.StatusInternalServerError)
 		}
+		// Build the payload
 		payload[i] = models.Device{
 			Name:     device.Name,
 			DeviceId: device.DeviceId,
-			Updated:  shdw.Timestamp.Time,
+			Updated:  shdw.Metadata.Reported["status"].Timestamp.Time,
 			State:    &models.DeviceState{Power: status},
 		}
 	}
