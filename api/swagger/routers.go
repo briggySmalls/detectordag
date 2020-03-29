@@ -44,13 +44,6 @@ func NewRouter(config *Config, db database.Client, shadow shadow.Client) *mux.Ro
 	// Prepare the routes
 	var routes = Routes{
 		Route{
-			"Index",
-			"GET",
-			"/v1/",
-			Index,
-		},
-
-		Route{
 			"GetAccount",
 			strings.ToUpper("Get"),
 			fmt.Sprintf("/v1/accounts/{accountId:%s}", uuidRegex),
@@ -105,10 +98,6 @@ func NewRouter(config *Config, db database.Client, shadow shadow.Client) *mux.Ro
 	router.Use(corsMiddleware)
 
 	return router
-}
-
-func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello World!")
 }
 
 func addOptionsRoutes(router *mux.Router, routes []Route) {
