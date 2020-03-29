@@ -15,7 +15,7 @@ class ClientWrapper {
 
 // Create the underlying client
 const client = new ApiClient();
-client.basePath = 'http://localhost:8080/api/v1';
+client.basePath = process.env.API_BASEPATH || `${process.env.BASE_URL}/api/v1`;
 
 // Create an instance of our wrapper
 const wrapper = new ClientWrapper(client);
