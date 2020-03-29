@@ -16,16 +16,31 @@ Resources:
           Properties:
             Path: /v1/auth
             Method: post
+        AuthOptions:
+          Type: Api
+          Properties:
+            Path: /v1/auth
+            Method: options
         UpdateDevice:
           Type: Api
           Properties:
             Path: /v1/device/{deviceId}
             Method: patch
+        DeviceOptions:
+          Type: Api
+          Properties:
+            Path: /v1/device/{deviceId}
+            Method: options
         GetAccount:
           Type: Api
           Properties:
             Path: /v1/accounts/{accountId}
             Method: get
+        AccountOptions:
+          Type: Api
+          Properties:
+            Path: /v1/accounts/{accountId}
+            Method: options
         UpdateAccount:
           Type: Api
           Properties:
@@ -36,6 +51,11 @@ Resources:
           Properties:
             Path: /v1/accounts/{accountId}/devices
             Method: get
+        AccountDevicesOptions:
+          Type: Api
+          Properties:
+            Path: /v1/accounts/{accountId}/devices
+            Method: options
       Policies:
         - Version: '2012-10-17'
           Statement:

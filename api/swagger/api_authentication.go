@@ -22,8 +22,6 @@ const (
 )
 
 func (s *server) Auth(w http.ResponseWriter, r *http.Request) {
-	// Whatever happens, we return JSON
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	// Try to parse the body
 	var creds models.Credentials
 	var err error

@@ -16,8 +16,6 @@ import (
 )
 
 func (s *server) GetAccount(w http.ResponseWriter, r *http.Request) {
-	// We return JSON no matter what
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	// Validate the sender is authorised
 	accountId := s.validateAccount(w, r)
 	if accountId == nil {
@@ -46,8 +44,6 @@ func (s *server) GetAccount(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 	var err error
-	// We return JSON no matter what
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	// Validate the sender is authorised
 	accountId := s.validateAccount(w, r)
 	if accountId == nil {
@@ -90,8 +86,6 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
-	// We return JSON no matter what
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	// Validate the sender is authorised
 	accountId := s.validateAccount(w, r)
 	if accountId == nil {
