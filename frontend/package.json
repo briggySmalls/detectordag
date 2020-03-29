@@ -11,11 +11,13 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
+    "@types/superagent": "^4.1.7",
     "bootstrap": "^4.4.1",
     "bootstrap-vue": "^2.9.0",
     "core-js": "^3.6.4",
     "detectordag": "file:lib/client/",
     "setimmediate": "^1.0.5",
+    "superagent": "^5.2.2",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.2",
     "vue-property-decorator": "^8.3.0",

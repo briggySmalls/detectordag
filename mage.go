@@ -67,6 +67,30 @@ func CreateThing() error {
 	return nil
 }
 
+// CreatePolicy creates a policy for the edge devices
+func CreatePolicy() error {
+	return sh.Run("aws", "iot", "create-policy",
+		"--policy-name", policyName,
+		"--policy-document", "file://config/policy.json")
+}
+
+// CreateRule creates a rule to fire a lambda function
+func CreateRule() error {
+	return sh.Run("aws", "iot", "create-topic-rule",
+		"--rule-name", "power_status_changed",
+		"--topic-rule-payload", "file://config/topicRule.json")
+}
+
+func CreateTables() error {
+	// Create accounts table
+	err := sh.Run("aws", "dynamodb", "create-table", "--table-name", "accounts", "--cli-json-input", "file://db/accounts.json")
+	if err != nil {
+		return err
+	}
+	// Create devices table
+	return sh.Run("aws", "dynamodb", "create-table", "--table-name", "devices", "--cli-json-input", "file://db/devices.json")
+}
+
 // CreateThing creates a new certificate
 func createCertificate() (*createCertificateResponse, error) {
 	// Create a new certificate
@@ -93,25 +117,9 @@ func createDevice(id string) error {
 	return nil
 }
 
-// createThing makes a new thing in AWS
-func createThing(thingName, certificateId string) error {
-	// Create a new thing
-	output, err := sh.Output("aws", "iot", "register-thing",
-		"--template-body", "file://config/thing.json",
-		"--parameters", fmt.Sprintf(
-			"ThingName=%s,CertificateId=%s,PolicyName=%s",
-			thingName, certificateId, policyName))
-	if err != nil {
-		return err
-	}
-	// Parse the JSON
-	var response createThingResponse
-	err = json.Unmarshal([]byte(output), &response)
-	if err != nil {
-		return err
-	}
-	log.Printf("Thing created: %s", response.ThingName)
-	return nil
+// Encode a string in base64
+func encode(input string) string {
+	return base64.StdEncoding.EncodeToString([]byte(input))
 }
 
 func setCertificates(id, cert, key string) error {
@@ -157,31 +165,23 @@ func createDbEntry(id string) error {
 		"--item", fmt.Sprintf("{\"device-id\": {\"S\": \"%s\"}}", id))
 }
 
-// CreatePolicy creates a policy for the edge devices
-func CreatePolicy() error {
-	return sh.Run("aws", "iot", "create-policy",
-		"--policy-name", policyName,
-		"--policy-document", "file://config/policy.json")
-}
-
-// CreateRule creates a rule to fire a lambda function
-func CreateRule() error {
-	return sh.Run("aws", "iot", "create-topic-rule",
-		"--rule-name", "power_status_changed",
-		"--topic-rule-payload", "file://config/topicRule.json")
-}
-
-func CreateTables() error {
-	// Create accounts table
-	err := sh.Run("aws", "dynamodb", "create-table", "--table-name", "accounts", "--cli-json-input", "file://db/accounts.json")
+// createThing makes a new thing in AWS
+func createThing(thingName, certificateId string) error {
+	// Create a new thing
+	output, err := sh.Output("aws", "iot", "register-thing",
+		"--template-body", "file://config/thing.json",
+		"--parameters", fmt.Sprintf(
+			"ThingName=%s,CertificateId=%s,PolicyName=%s",
+			thingName, certificateId, policyName))
 	if err != nil {
 		return err
 	}
-	// Create devices table
-	return sh.Run("aws", "dynamodb", "create-table", "--table-name", "devices", "--cli-json-input", "file://db/devices.json")
-}
-
-// Encode a string in base64
-func encode(input string) string {
-	return base64.StdEncoding.EncodeToString([]byte(input))
+	// Parse the JSON
+	var response createThingResponse
+	err = json.Unmarshal([]byte(output), &response)
+	if err != nil {
+		return err
+	}
+	log.Printf("Thing created: %s", response.ThingName)
+	return nil
 }
