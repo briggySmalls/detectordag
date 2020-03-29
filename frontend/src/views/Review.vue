@@ -6,7 +6,7 @@
         <img
           id="logo" alt="DetectorDag logo" src="../assets/logo.svg"
           class="d-inline-block">
-          Detectordag
+          DetectorDag
       </b-navbar-brand>
       <!-- Navbar -->
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
@@ -27,7 +27,7 @@
       </b-collapse>
     </b-navbar>
     <!-- Main page -->
-    <h1>Review dags</h1>
+    <h1>Review Dags</h1>
     <b-button
       class="mt-2 mb-2 d-inline-block"
       v-on:click="request"
