@@ -18,7 +18,7 @@ class ConfigMapper:
 class AppConfig:
     """Class that holds application configuration"""
     _PARSERS = {
-        'aws_thing_name': ConfigMapper('AWS_THING_NAME', 'uuid'),
+        'aws_thing_name': ConfigMapper('AWS_THING_NAME', 'str'),
         'aws_root_cert': ConfigMapper('AWS_ROOT_CERT', 'str'),
         'aws_thing_cert': ConfigMapper('AWS_THING_CERT', 'str'),
         'aws_thing_key': ConfigMapper('AWS_THING_KEY', 'str'),
@@ -56,6 +56,10 @@ class AppConfig:
                                                mapping.default)
             for name, mapping in cls._PARSERS.items()
         }
+        # Ensure we have all the expected variables
+        for key, value in parsed.items():
+            if not value:
+                raise RuntimeError(f"Env variable {key} is missing")
         # Save certs to files
         certs_dir = parsed['certs_dir'].expanduser()
         certs_dir.mkdir(exist_ok=True, parents=True)
