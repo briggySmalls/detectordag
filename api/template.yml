@@ -26,7 +26,7 @@ Resources:
           Properties:
             Path: /v1/device/{deviceId}
             Method: patch
-        UpdateDevice:
+        DeviceOptions:
           Type: Api
           Properties:
             Path: /v1/device/{deviceId}
@@ -36,7 +36,7 @@ Resources:
           Properties:
             Path: /v1/accounts/{accountId}
             Method: get
-        GetAccount:
+        AccountOptions:
           Type: Api
           Properties:
             Path: /v1/accounts/{accountId}
@@ -46,17 +46,12 @@ Resources:
           Properties:
             Path: /v1/accounts/{accountId}
             Method: patch
-        UpdateAccount:
-          Type: Api
-          Properties:
-            Path: /v1/accounts/{accountId}
-            Method: options
         GetAccountDevices:
           Type: Api
           Properties:
             Path: /v1/accounts/{accountId}/devices
             Method: get
-        GetAccountDevices:
+        AccountDevicesOptions:
           Type: Api
           Properties:
             Path: /v1/accounts/{accountId}/devices
