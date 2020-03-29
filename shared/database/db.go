@@ -40,6 +40,7 @@ type Account struct {
 
 // device is a 'device' table row
 type Device struct {
+	Name      string `dynamodbav:"name"`
 	DeviceId  string `dynamodbav:"device-id"`
 	AccountId string `dynamodbav:"account-id"`
 }
