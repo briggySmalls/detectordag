@@ -51,7 +51,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { AccountsApi, Device } from '../../lib/client';
+import { Device } from '../../lib/client';
 import { storage } from '../utils';
 import DeviceComponent from '../components/Device.vue';
 import ErrorComponent from '../components/Error.vue';
@@ -67,16 +67,7 @@ export default class Review extends Vue {
 
   private devices: Device[] | null = null;
 
-  private client: AccountsApi;
-
   private isRefreshing = false;
-
-  public constructor() {
-    // Call super
-    super();
-    // Create client
-    this.client = new AccountsApi();
-  }
 
   public created() {
     // Make a request upon landing on the page
@@ -98,7 +89,7 @@ export default class Review extends Vue {
     }
     // Get the devices
     this.$logger.debug('Requesting account\'s devices');
-    this.client.getDevices(`Bearer ${authBundle.token}`, authBundle.accountId, this.handleDevices);
+    this.$clients.accounts.getDevices(`Bearer ${authBundle.token}`, authBundle.accountId, this.handleDevices);
   }
 
   private logout() {

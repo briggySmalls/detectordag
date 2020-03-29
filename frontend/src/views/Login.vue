@@ -32,7 +32,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { AuthenticationApi, Credentials, Token } from '../../lib/client';
+import { Credentials, Token } from '../../lib/client';
 import { storage, AuthBundle } from '../utils';
 import ErrorComponent from '../components/Error.vue';
 
@@ -48,25 +48,16 @@ export default class Login extends Vue {
 
   private password = '';
 
-  private authClient: AuthenticationApi;
-
   public error: Error | null = null;
 
   private isRequesting = false;
-
-  public constructor() {
-    // Call super
-    super();
-    // Create client
-    this.authClient = new AuthenticationApi();
-  }
 
   public submit(event: Event) {
     this.$logger.debug('Login submitted');
     // Request authentication
     this.isRequesting = true;
     this.error = null;
-    this.authClient.auth(new Credentials(this.email, this.password), this.handleLogin);
+    this.$clients.authentication.auth(new Credentials(this.email, this.password), this.handleLogin);
     // Do not actually perform a post action
     event.preventDefault();
   }

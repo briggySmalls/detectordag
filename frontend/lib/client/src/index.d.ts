@@ -1,18 +1,20 @@
+import { Request, Response } from 'superagent';
+
 export as namespace detectordag
 
 export class ApiClient {
-  instance: ApiClient;
+  basePath: string;
 }
 
 export class AuthenticationApi {
-  constructor();
-  auth(body: Credentials, callback: (error: Error, data: Token, response: any) => any): any;
+  constructor(client: ApiClient);
+  auth(body: Credentials, callback: (error: Error, data: Token, response: Response) => void): Request;
 }
 
 export class AccountsApi {
-  constructor();
-  getDevices(authorization: string, accountId: string, callback: (error: Error, data: Device[], response: any) => any): any;
-  getAccount(authorization: string, accountId: string, callback: (error: Error, data: Account, response: any) => any): any;
+  constructor(client: ApiClient);
+  getDevices(authorization: string, accountId: string, callback: (error: Error, data: Device[], response: Response) => void): Request;
+  getAccount(authorization: string, accountId: string, callback: (error: Error, data: Account, response: Response) => void): Request;
 }
 
 export class Credentials {
@@ -30,7 +32,6 @@ export class Device {
   state: DeviceState;
   updated: Date;
 }
-
 
 export class DeviceState {
   power: boolean;

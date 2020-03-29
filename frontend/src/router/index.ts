@@ -1,10 +1,11 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+import { Response } from 'superagent';
 import Review from '../views/Review.vue';
 import NotFound from '../views/NotFound.vue';
-import { storage, logger } from '../utils';
+import { storage, logger, clients } from '../utils';
+import { Account } from '../../lib/client';
 import store from '../store';
-import { AccountsApi, Account } from '../../lib/client';
 
 Vue.use(VueRouter);
 
@@ -41,7 +42,7 @@ const router = new VueRouter({
 });
 
 // Save the account details to the store
-function handleAccountResponse(error: Error, data: Account, response: any) {
+function handleAccountResponse(error: Error, data: Account, response: Response) {
   // Handle errors
   if (error) {
     logger.debug(`Account request error: ${response.text}`);
@@ -85,8 +86,7 @@ router.beforeEach((to, from, next) => {
   }
   // Request account details
   logger.debug('Requesting account details');
-  const accountsClient = new AccountsApi();
-  accountsClient.getAccount(`Bearer ${authBundle.token}`, authBundle.accountId, handleAccountResponse);
+  clients.accounts.getAccount(`Bearer ${authBundle.token}`, authBundle.accountId, handleAccountResponse);
   next();
 });
 
