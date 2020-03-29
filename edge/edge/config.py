@@ -18,7 +18,7 @@ class ConfigMapper:
 class AppConfig:
     """Class that holds application configuration"""
     _PARSERS = {
-        'balena_device_id': ConfigMapper('BALENA_DEVICE_UUID', 'uuid'),
+        'aws_thing_name': ConfigMapper('AWS_THING_NAME', 'uuid'),
         'aws_root_cert': ConfigMapper('AWS_ROOT_CERT', 'str'),
         'aws_thing_cert': ConfigMapper('AWS_THING_CERT', 'str'),
         'aws_thing_key': ConfigMapper('AWS_THING_KEY', 'str'),
@@ -32,7 +32,7 @@ class AppConfig:
         'aws_thing_cert': 'thing.private.key',
     }
 
-    balena_device_id: str
+    aws_thing_name: str
     aws_root_cert: Path
     aws_thing_cert: Path
     aws_thing_key: Path
