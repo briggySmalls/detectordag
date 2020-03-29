@@ -1,4 +1,14 @@
 module.exports = {
+  // Set the title
+  chainWebpack: config => {
+    config
+    .plugin('html')
+    .tap(args => {
+      args[0].title = 'Detector Dag'
+      return args
+    })
+  },
+
   configureWebpack: {
     devtool: 'source-map',
   },
