@@ -70,6 +70,7 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 			setError(w, err, http.StatusInternalServerError)
 		}
 		payload[i] = models.Device{
+			Name:     device.Name,
 			DeviceId: device.DeviceId,
 			Updated:  shdw.Timestamp.Time,
 			State:    &models.DeviceState{Power: status},

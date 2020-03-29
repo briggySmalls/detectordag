@@ -1,5 +1,5 @@
 <template>
-  <b-card :title="device.deviceId">
+  <b-card :title="device.name">
     <b-card-text>
       Status: {{ powerStatus }}
     </b-card-text>
