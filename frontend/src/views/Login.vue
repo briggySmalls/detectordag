@@ -1,7 +1,7 @@
 <template>
   <b-container id="login" class="mt-5">
     <img id="logo" class="my-1" alt="Detectordag logo" src="../assets/logo.svg">
-    <h1>Login</h1>
+    <h1>Detector Dag</h1>
     <b-form v-if="!isRequesting" @submit="submit">
       <b-form-group
         id="email"
