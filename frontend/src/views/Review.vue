@@ -4,7 +4,7 @@
       <!-- Logo -->
       <b-navbar-brand href="#">
         <img
-          id="logo" alt="Detectordag logo" src="../assets/logo.svg"
+          id="logo" alt="DetectorDag logo" src="../assets/logo.svg"
           class="d-inline-block">
           Detectordag
       </b-navbar-brand>
