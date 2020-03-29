@@ -123,31 +123,10 @@ func encode(input string) string {
 }
 
 func setCertificates(id, cert, key string) error {
-	// Get the endpoint address
-	output, err := sh.Output("aws", "iot", "describe-endpoint")
-	if err != nil {
-		return err
-	}
-	var response endpointDescriptionResponse
-	err = json.Unmarshal([]byte(output), &response)
-	if err != nil {
-		return err
-	}
-	// Get the Amazon CA cert 1
-	resp, err := http.Get("https://www.amazontrust.com/repository/AmazonRootCA1.pem")
-	if err != nil {
-		return err
-	}
-	rootCert, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
 	// Convert the certificates to base64
 	envs := map[string]string{
-		"AWS_ENDPOINT":   response.Address,
 		"AWS_THING_CERT": encode(cert),
 		"AWS_THING_KEY":  encode(key),
-		"AWS_ROOT_CERT":  encode(string(rootCert)),
 	}
 	// Set the variables
 	for key, value := range envs {
