@@ -53,8 +53,6 @@ func handleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	log.Print("Context: ", ctx)
 	// Pass the request to the adapter
 	response, err := adapter.ProxyWithContext(ctx, event)
-	// Indicate on all requests that we allow the frontend access
-	response.Headers["Access-Control-Allow-Origin"] =
 	// Return the response
 	return response, err
 }

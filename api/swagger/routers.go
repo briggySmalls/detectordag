@@ -98,25 +98,41 @@ func NewRouter(config *Config, db database.Client, shadow shadow.Client) *mux.Ro
 			Handler(handler)
 	}
 
-	// Add OPTIONS routes for each one to allow CORS
-	for _, route := range routes {
-		// We cheat, and use the same handler for all options
-		// TODO: be more selective about methods per route
-		handler := http.HandlerFunc(s.optionsHandler)
+	// Add routes to allow CORS
+	addOptionsRoutes(router, routes)
 
-		router.
-			Methods("OPTIONS").
-			Path(route.Pattern).
-			Name(fmt.Sprintf("%sOptions", route.Name)).
-			Handler(handler)
-	}
-
-	// Add middleware to permit CORS
-	r.Use(corsMiddleware)
+	// Add CORS header on all responses
+	router.Use(corsMiddleware)
 
 	return router
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello World!")
+}
+
+func addOptionsRoutes(router *mux.Router, routes []Route) {
+	// Determine unique routes, and collect the methods on each
+	methods := make(map[string][]string)
+	for _, route := range routes {
+		// Append the method to the pattern
+		methods[route.Pattern] = append(methods[route.Pattern], route.Method)
+	}
+
+	// Add routes for the options method
+	for pattern, methods := range methods {
+		router.
+			Methods("OPTIONS").
+			Path(pattern).
+			Handler(OptionsHandlerFactory(methods))
+	}
+}
+
+//OptionsHandlerFactory creates a handler for a route
+func OptionsHandlerFactory(methods []string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Add header to permit methods
+		w.Header().Set("Access-Control-Allow-Methods", strings.Join(methods, ","))
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Authorization")
+	})
 }
