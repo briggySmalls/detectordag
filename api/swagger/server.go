@@ -63,6 +63,13 @@ func NewConfig() (*Config, error) {
 	return &c, nil
 }
 
+func (s *server) optionsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Authorization")
+	w.Header().Set("Access-Control-Allow-Methods-Type", "OPTIONS,GET,POST,PATCH")
+	w.WriteHeader(http.StatusOK)
+}
+
 func (s *server) validateAccount(w http.ResponseWriter, r *http.Request) *string {
 	// Ensure that there is a token sent
 	token, err := s.getToken(&r.Header)
