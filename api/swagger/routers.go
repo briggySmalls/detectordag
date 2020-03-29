@@ -35,7 +35,7 @@ type Routes []Route
 func NewRouter(config *Config, db database.Client, shadow shadow.Client) *mux.Router {
 	// Create the router
 	router := mux.NewRouter().StrictSlash(true)
-	// Create a handlerer
+	// Create a server struct
 	s := server{
 		config: *config,
 		db:     db,
@@ -100,6 +100,8 @@ func NewRouter(config *Config, db database.Client, shadow shadow.Client) *mux.Ro
 
 	// Add OPTIONS routes for each one to allow CORS
 	for _, route := range routes {
+		// We cheat, and use the same handler for all options
+		// TODO: be more selective about methods per route
 		handler := http.HandlerFunc(s.optionsHandler)
 
 		router.
@@ -108,6 +110,9 @@ func NewRouter(config *Config, db database.Client, shadow shadow.Client) *mux.Ro
 			Name(fmt.Sprintf("%sOptions", route.Name)).
 			Handler(handler)
 	}
+
+	// Add middleware to permit CORS
+	r.Use(corsMiddleware)
 
 	return router
 }

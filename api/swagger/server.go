@@ -64,7 +64,6 @@ func NewConfig() (*Config, error) {
 }
 
 func (s *server) optionsHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Authorization")
 	w.Header().Set("Access-Control-Allow-Methods-Type", "OPTIONS,GET,POST,PATCH")
 	w.WriteHeader(http.StatusOK)
