@@ -100,8 +100,7 @@ func NewRouter(config *Config, db database.Client, shadow shadow.Client) *mux.Ro
 
 	// Add OPTIONS routes for each one to allow CORS
 	for _, route := range routes {
-		var handler http.Handler
-		handler = s.optionsHandler
+		handler := http.HandlerFunc(s.optionsHandler)
 
 		router.
 			Methods("OPTIONS").
