@@ -134,5 +134,6 @@ func OptionsHandlerFactory(methods []string) http.Handler {
 		// Add header to permit methods
 		w.Header().Set("Access-Control-Allow-Methods", strings.Join(methods, ","))
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Authorization")
+		w.WriteHeader(http.StatusOK)
 	})
 }
