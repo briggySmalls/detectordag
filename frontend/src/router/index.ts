@@ -1,6 +1,6 @@
 import router from './router';
-import { storage, logger, clients } from '../utils';
-import { handleAccountResponse } from '../utils/clientHelpers';
+import { storage, logger } from '../utils';
+import { requestAccount } from '../utils/clientHelpers';
 import store from '../store';
 
 // Add guards to ensure we are logged in
@@ -31,8 +31,7 @@ router.beforeEach((to, from, next) => {
     return;
   }
   // Request account details
-  logger.debug('Requesting account details');
-  clients.accounts.getAccount(`Bearer ${authBundle.token}`, authBundle.accountId, handleAccountResponse);
+  requestAccount(authBundle);
   next();
 });
 

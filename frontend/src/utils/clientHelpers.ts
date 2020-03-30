@@ -3,6 +3,8 @@ import logger from './logger';
 import store from '../store';
 import storage from './Storage';
 import router from '../router/router';
+import AuthBundle from './AuthBundle';
+import clients from './clients';
 import { Account } from '../../lib/client';
 
 // Save the account details to the store
@@ -21,6 +23,13 @@ function handleAccountResponse(error: Error, data: Account, response: Response) 
   store.commit('setAccount', data);
 }
 
-export default {
+// Request account
+function requestAccount(auth: AuthBundle) {
+  logger.debug('Requesting account details');
+  clients.accounts.getAccount(`Bearer ${auth.token}`, auth.accountId, handleAccountResponse);
+}
+
+export {
+  requestAccount,
   handleAccountResponse,
 };
