@@ -45,8 +45,7 @@ class EdgeApp:
         self.client.__exit__(exc_type, exc_value, traceback)
 
     def _publish_update(self, device: DigitalInputDevice) -> None:
-        del device
         # Get the status
-        status = self.device.value
+        status = bool(device.value)
         # Publish
         self.client.power_status_changed(status)
