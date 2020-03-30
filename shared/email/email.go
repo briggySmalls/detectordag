@@ -15,6 +15,7 @@ const (
 
 type Client interface {
 	SendEmail(toAddresses []string, sender, subject, htmlBody, textBody string) error
+	VerifyEmail(email string) error
 }
 
 type client struct {
@@ -74,4 +75,14 @@ func (c *client) SendEmail(recipients []string, sender, subject, htmlBody, textB
 	// Log result
 	log.Printf("Message sent with ID: %s", *result.MessageId)
 	return nil
+}
+
+func (c *client) VerifyEmail(email string) error {
+	// Construct the input
+	input := &ses.VerifyEmailIdentityInput{
+		EmailAddress: aws.String(email),
+	}
+	// Ask to verify the email
+	_, err := c.ses.VerifyEmailIdentity(input)
+	return err
 }

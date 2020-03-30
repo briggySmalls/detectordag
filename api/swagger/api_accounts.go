@@ -102,7 +102,9 @@ func (s *server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Request that emails are verified
-
+	for _, email := range emails.Emails {
+		s.email.VerifyEmail(email)
+	}
 	// Update the database
 	err = s.db.UpdateAccountEmails(*accountId, emails.Emails)
 	if err != nil {

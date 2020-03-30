@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/briggysmalls/detectordag/shared/database"
+	"github.com/briggysmalls/detectordag/shared/email"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/gorilla/mux"
 )
@@ -32,7 +33,7 @@ type Route struct {
 
 type Routes []Route
 
-func NewRouter(config *Config, db database.Client, shadow shadow.Client) *mux.Router {
+func NewRouter(config *Config, db database.Client, shadow shadow.Client, email email.Client) *mux.Router {
 	// Create the router
 	router := mux.NewRouter().StrictSlash(true)
 	// Create a server struct
@@ -40,6 +41,7 @@ func NewRouter(config *Config, db database.Client, shadow shadow.Client) *mux.Ro
 		config: *config,
 		db:     db,
 		shadow: shadow,
+		email:  email,
 	}
 	// Prepare the routes
 	var routes = Routes{
