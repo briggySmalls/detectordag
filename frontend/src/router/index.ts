@@ -52,7 +52,7 @@ function handleAccountResponse(error: Error, data: Account, response: Response) 
     router.push('/login');
     return;
   }
-  // Save the account deatils to the store
+  // Save the account details to the store
   logger.debug('Saving account details');
   store.commit('setAccount', data);
 }
