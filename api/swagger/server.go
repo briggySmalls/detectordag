@@ -6,6 +6,7 @@ import (
 	"fmt"
 	models "github.com/briggysmalls/detectordag/api/swagger/go"
 	"github.com/briggysmalls/detectordag/shared/database"
+	"github.com/briggysmalls/detectordag/shared/email"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
@@ -32,6 +33,7 @@ type Config struct {
 type server struct {
 	db     database.Client
 	shadow shadow.Client
+	email  email.Client
 	config Config
 }
 

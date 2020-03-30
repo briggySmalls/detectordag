@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ses"
+	"github.com/briggysmalls/detectordag/shared/email"
 	"html/template"
 	"log"
 	"time"
@@ -14,9 +14,7 @@ const (
 	// Address from which emails will be sent
 	Sender = "briggySmalls90@gmail.com"
 	// The subject line for the email.
-	Subject = "🚨 Detectordag power update"
-	// The character encoding for the email.
-	CharSet    = "UTF-8"
+	Subject    = "🚨 Detectordag power update"
 	DateFormat = "15:04 2/1/06"
 )
 
@@ -75,9 +73,7 @@ type PowerStatusChangedEmailConfig struct {
 	Status    bool
 }
 
-//It is a best practice to instantiate AWS clients outside of the AWS Lambda function handler.
-//https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.Lambda.BestPracticesWithDynamoDB.html
-var svc *ses.SES
+var mailer email.Client
 var htmlTemplate *template.Template
 var textTemplate *template.Template
 
@@ -98,7 +94,10 @@ func init() {
 		log.Fatal(err)
 	}
 	// Create SES client
-	svc = ses.New(sesh)
+	mailer, err = email.New(sesh)
+	if err != nil {
+		log.Fatal(err)
+	}
 	// Create templates
 	htmlTemplate, err = template.New("htmlTemplate").Parse(htmlTemplateSource)
 	if err != nil {
@@ -123,42 +122,10 @@ func SendEmail(recipients []string, status PowerStatusChangedEmailConfig) error 
 	if err != nil {
 		return err
 	}
-	// Assembe the to addresses
-	toAddresses := make([]*string, len(recipients))
-	for i, recipient := range recipients {
-		toAddresses[i] = aws.String(recipient)
-	}
-	// Assemble the email.
-	input := &ses.SendEmailInput{
-		Destination: &ses.Destination{
-			CcAddresses: []*string{},
-			ToAddresses: toAddresses,
-		},
-		Message: &ses.Message{
-			Body: &ses.Body{
-				Html: &ses.Content{
-					Charset: aws.String(CharSet),
-					Data:    aws.String(htmlBody.String()),
-				},
-				Text: &ses.Content{
-					Charset: aws.String(CharSet),
-					Data:    aws.String(textBody.String()),
-				},
-			},
-			Subject: &ses.Content{
-				Charset: aws.String(CharSet),
-				Data:    aws.String(Subject),
-			},
-		},
-		Source: aws.String(Sender),
-	}
-	// Attempt to send the email.
-	log.Printf("Sending email")
-	result, err := svc.SendEmail(input)
+	// Send the email.
+	err = mailer.SendEmail(recipients, Sender, Subject, htmlBody.String(), textBody.String())
 	if err != nil {
 		return err
 	}
-	// Log result
-	log.Printf("Message sent with ID: %s", *result.MessageId)
 	return nil
 }

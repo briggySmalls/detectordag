@@ -6,10 +6,12 @@ import (
 	"context"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	"github.com/briggysmalls/detectordag/api/swagger"
 	"github.com/briggysmalls/detectordag/shared/database"
+	"github.com/briggysmalls/detectordag/shared/email"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"log"
 )
@@ -40,8 +42,24 @@ func init() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	// Create a new session just for emailing (we have to use a different region)
+	emailSesh, err := session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+		Config: aws.Config{
+			// There is no emailing service in eu-west-2
+			Region: aws.String("eu-west-1"),
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Create a new email client
+	email, err := email.New(emailSesh)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	// Create the server
-	server := swagger.NewRouter(c, db, shadow)
+	server := swagger.NewRouter(c, db, shadow, email)
 	// Create an adapter for aws lambda
 	adapter = gorillamux.New(server)
 }
