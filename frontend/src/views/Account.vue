@@ -43,6 +43,10 @@ import { handleAccountResponse } from '../utils/clientHelpers';
 export default class Review extends Vue {
   private emails: string[] | null = null;
 
+  public created() {
+    this.emails = this.storedEmails;
+  }
+
   // The emails from the store
   private get storedEmails() {
     const { account } = this.$store.state;
