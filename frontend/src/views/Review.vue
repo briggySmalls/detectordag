@@ -79,6 +79,8 @@ export default class Review extends Vue {
   }
 
   private handleDevices(error: Error, data: Device[], response: any): any {
+    // Indicate the request is finished
+    this.isRefreshing = false;
     if (error) {
       // Assign the error
       this.error = error;
@@ -90,7 +92,6 @@ export default class Review extends Vue {
     }
     // Display the requested devices
     this.devices = data;
-    this.isRefreshing = false;
   }
 }
 </script>
