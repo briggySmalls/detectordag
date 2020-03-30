@@ -78,13 +78,6 @@ class AppConfig:
         return AppConfig(**parsed)
 
     @staticmethod
-    def _write_certs(cert_dir: Path, root_cert: str, thing_cert: str,
-                     thing_key: str) -> None:
-        AppConfig._write_cert(root_cert, cert_dir / "root-CA.crt")
-        AppConfig._write_cert(thing_cert, cert_dir / "thing.cert.pem")
-        AppConfig._write_cert(thing_key, cert_dir / "thing.private.key")
-
-    @staticmethod
     def _write_cert(cert: str, file: Path) -> None:
         # Turn base64 encoded string into a certificate file
         with file.open('wb') as output_file:
