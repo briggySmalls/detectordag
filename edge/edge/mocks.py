@@ -15,12 +15,12 @@ class MockDigitalInputDevice:
     def high(self) -> None:
         """Simulate reading a 'high' value
         """
-        self.set_status(True)
+        self.set_status(1)
 
     def low(self) -> None:
         """Simulate reading a 'low' value
         """
-        self.set_status(False)
+        self.set_status(0)
 
     def toggle(self) -> None:
         """Simulate the input toggling value
@@ -28,11 +28,11 @@ class MockDigitalInputDevice:
         self.set_status(not self._status)
 
     @property
-    def value(self) -> bool:
+    def value(self) -> int:
         """Get the simulated value of the input"""
         return self._status
 
-    def set_status(self, status: bool) -> None:
+    def set_status(self, status: int) -> None:
         """Simulate reading a new status"""
         self._status = status
         if status:
