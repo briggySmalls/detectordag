@@ -27,7 +27,7 @@ type Client interface {
 	GetAccountById(id string) (*Account, error)
 	GetAccountByUsername(username string) (*Account, error)
 	GetDevicesByAccount(id string) ([]Device, error)
-	UpdateAccountEmails(accountId string, emails []string) error
+	UpdateAccountEmails(accountId string, emails []string) (*Account, error)
 }
 
 // account represents an 'accounts' table entry
@@ -160,7 +160,7 @@ func (d *client) GetAccountByUsername(username string) (*Account, error) {
 	return unmarshalAccount(result.Items[0])
 }
 
-func (d *client) UpdateAccountEmails(accountId string, emails []string) error {
+func (d *client) UpdateAccountEmails(accountId string, emails []string) (*Account, error) {
 	// Build an update expression
 	update := expression.Set(
 		expression.Name("emails"),
@@ -169,20 +169,21 @@ func (d *client) UpdateAccountEmails(accountId string, emails []string) error {
 	// Create the DynamoDB expression from the Update.
 	expr, err := expression.NewBuilder().WithUpdate(update).Build()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	// Update the emails
-	_, err = d.db.UpdateItem(&dynamodb.UpdateItemInput{
+	// Update the emails (request updated response)
+	result, err := d.db.UpdateItem(&dynamodb.UpdateItemInput{
 		TableName:                 aws.String(ACCOUNTS_TABLE),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		Key:                       map[string]*dynamodb.AttributeValue{"account-id": {S: aws.String(accountId)}},
 		UpdateExpression:          expr.Update(),
+		ReturnValues:              aws.String(dynamodb.ReturnValueAllNew),
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return unmarshalAccount(result.Attributes)
 }
 
 func unmarshalAccount(item map[string]*dynamodb.AttributeValue) (*Account, error) {
