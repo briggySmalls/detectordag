@@ -70,14 +70,6 @@ export default class Review extends Vue {
     this.$clients.accounts.getDevices(`Bearer ${authBundle.token}`, authBundle.accountId, this.handleDevices);
   }
 
-  private logout() {
-    // Clear the token and account
-    storage.clear();
-    this.$store.commit('clearAccount');
-    // Redirect to the login page
-    this.$router.push('/login');
-  }
-
   private handleDevices(error: Error, data: Device[], response: any): any {
     // Indicate the request is finished
     this.isRefreshing = false;

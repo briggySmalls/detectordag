@@ -28,13 +28,24 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
+import { storage } from '../utils';
 
 @Component
 export default class Navbar extends Vue {
+  // Provide the username from the store
   private get username() {
     const { account } = this.$store.state;
     return (account) ? account.username : '?';
+  }
+
+  // Log the user out
+  private logout() {
+    // Clear the token and account
+    storage.clear();
+    this.$store.commit('clearAccount');
+    // Redirect to the login page
+    this.$router.push('/login');
   }
 }
 </script>
