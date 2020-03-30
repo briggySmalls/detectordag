@@ -101,6 +101,8 @@ func (s *server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 		setError(w, err, http.StatusBadRequest)
 		return
 	}
+	// Request that emails are verified
+
 	// Update the database
 	err = s.db.UpdateAccountEmails(*accountId, emails.Emails)
 	if err != nil {
