@@ -20,15 +20,21 @@ def test_present(monkeypatch, tmp_path):
     monkeypatch.setenv("CERT_DIR", str(tmp_path))
     # Create the config
     config = AppConfig.from_env()
+    # Assert certificates are created
+    aws_root_cert_path = tmp_path / "root-CA.crt"
+    aws_root_cert_path.exists()
+    aws_thing_cert_path = tmp_path / "thing.cert.pem"
+    aws_thing_cert_path.exists()
+    aws_thing_key_path = tmp_path / "thing.private.key"
+    aws_thing_key_path.exists()
     # Assert values
     assert config.aws_endpoint == aws_endpoint
     assert config.certs_dir == tmp_path
+    assert config.aws_root_cert == aws_root_cert_path
+    assert config.aws_thing_cert == aws_thing_cert_path
+    assert config.aws_thing_key == aws_thing_key_path
     assert config.aws_port == 8883
     assert config.aws_thing_name == aws_thing_name
-    # Assert certificates are created
-    assert (tmp_path / "root-CA.crt").exists()
-    assert (tmp_path / "thing.cert.pem").exists()
-    assert (tmp_path / "thing.private.key").exists()
 
 
 def test_missing(monkeypatch, tmp_path):
