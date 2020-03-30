@@ -10,6 +10,7 @@ Resources:
           DETECTORDAG_JWT_SECRET: "dummy-secret"
       Handler: api
       Runtime: go1.x
+      Timeout: 5
       Events:
         Auth:
           Type: Api

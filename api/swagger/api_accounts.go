@@ -12,6 +12,7 @@ package swagger
 import (
 	"encoding/json"
 	models "github.com/briggysmalls/detectordag/api/swagger/go"
+	"github.com/briggysmalls/detectordag/shared/database"
 	"net/http"
 )
 
@@ -28,18 +29,14 @@ func (s *server) GetAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Build the response
-	payload := models.Account{
-		Username: account.Username,
-		Emails:   account.Emails,
-	}
-	// Prepare the JSON response
-	body, err := json.Marshal(payload)
+	payload, err := s.createAccountPayload(account)
 	if err != nil {
 		setError(w, err, http.StatusInternalServerError)
+		return
 	}
 	// Write the response
 	w.WriteHeader(http.StatusOK)
-	w.Write(body)
+	w.Write(payload)
 }
 
 func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
@@ -106,11 +103,37 @@ func (s *server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 		s.email.VerifyEmail(email)
 	}
 	// Update the database
-	err = s.db.UpdateAccountEmails(*accountId, emails.Emails)
+	account, err := s.db.UpdateAccountEmails(*accountId, emails.Emails)
+	if err != nil {
+		setError(w, err, http.StatusInternalServerError)
+		return
+	}
+	// Build the response
+	payload, err := s.createAccountPayload(account)
 	if err != nil {
 		setError(w, err, http.StatusInternalServerError)
 		return
 	}
 	// Write the response
 	w.WriteHeader(http.StatusOK)
+	w.Write(payload)
+}
+
+// Create account payload from database response
+func (s *server) createAccountPayload(account *database.Account) ([]byte, error) {
+	// Build the response
+	payload := models.Account{
+		Username: account.Username,
+		Emails:   account.Emails,
+	}
+	// Ensure empty slices appear as '[]' in JSON
+	if payload.Emails == nil {
+		payload.Emails = make([]string, 0)
+	}
+	// Prepare the JSON response
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
 }
