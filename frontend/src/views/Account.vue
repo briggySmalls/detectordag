@@ -72,6 +72,10 @@ export default class Review extends Vue {
     }
     // Submit account update
     this.$logger.debug(`Submitting emails for update: ${this.emails}`);
+    if (this.emails == null) {
+      // TODO: Handle this error case better
+      return;
+    }
     this.$clients.accounts.updateAccount(
       new Emails(this.emails), `Bearer ${auth.token}`, auth.accountId, handleAccountResponse,
     );

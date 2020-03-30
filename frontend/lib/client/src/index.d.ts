@@ -6,7 +6,7 @@ export class ApiClient {
   basePath: string;
 }
 
-type Callback<T> = (error: Error, data: T, response: Response) => void): Request;
+type Callback<T> = (error: Error, data: T, response: Response) => void;
 
 export class AuthenticationApi {
   constructor(client: ApiClient);
