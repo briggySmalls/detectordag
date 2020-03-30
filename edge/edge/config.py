@@ -7,6 +7,10 @@ from typing import Any, Optional
 from environs import Env
 
 
+class ConfigError(Exception):
+    pass
+
+
 @dataclass
 class ConfigMapper:
     identifier: str
@@ -59,7 +63,7 @@ class AppConfig:
         # Ensure we have all the expected variables
         for key, value in parsed.items():
             if not value:
-                raise RuntimeError(f"Env variable {key} is missing")
+                raise ConfigError(f"Env variable {key} is missing")
         # Save certs to files
         certs_dir = parsed['certs_dir'].expanduser()
         certs_dir.mkdir(exist_ok=True, parents=True)
