@@ -43,20 +43,17 @@ import ErrorComponent from '../components/Error.vue';
 export default class Review extends Vue {
   private error: Error | null = null;
 
-  private devices: Device[] | null = null;
-
-  private isRefreshing = false;
-
   public created() {
-    // Make a request upon landing on the page
-    this.request();
+    // Ensure we get some device info
+    if (this.devices === null) {
+      this.request();
+    }
   }
 
   private request() {
     // Clear any existing devices
-    this.devices = null;
+    this.$store.commit('clearDevices');
     this.error = null;
-    this.isRefreshing = true;
     // Fetch the token/accountId
     const authBundle = storage.bundle;
     // Redirect to login if these are not present
@@ -72,7 +69,6 @@ export default class Review extends Vue {
 
   private handleDevices(error: Error, data: Device[], response: any): any {
     // Indicate the request is finished
-    this.isRefreshing = false;
     if (error) {
       // Assign the error
       this.error = error;
@@ -83,7 +79,15 @@ export default class Review extends Vue {
       return;
     }
     // Display the requested devices
-    this.devices = data;
+    this.$store.commit('setDevices', data);
+  }
+
+  private get devices(): Device[] | null {
+    return this.$store.state.devices;
+  }
+
+  private get isRefreshing() {
+    return this.$store.state.devices === null;
   }
 }
 </script>

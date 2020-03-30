@@ -6,6 +6,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     account: null,
+    devices: null,
   },
   mutations: {
     setAccount(state, newAccount) {
@@ -13,6 +14,12 @@ export default new Vuex.Store({
     },
     clearAccount(state) {
       state.account = null;
+    },
+    setDevices(state, devices) {
+      state.devices = devices;
+    },
+    clearDevices(state, devices) {
+      state.devices = null;
     },
   },
   actions: {
