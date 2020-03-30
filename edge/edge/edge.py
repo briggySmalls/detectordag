@@ -17,7 +17,7 @@ class EdgeApp:
     def __init__(self, device: DigitalInputDevice, config: AppConfig) -> None:
         self.config = config
         # Prepare configuration for the client
-        config = ClientConfig(device_id=config.balena_device_id.hex,
+        config = ClientConfig(device_id=config.aws_thing_name,
                               endpoint=config.aws_endpoint,
                               port=config.aws_port,
                               root_cert=config.aws_root_cert,
@@ -45,8 +45,7 @@ class EdgeApp:
         self.client.__exit__(exc_type, exc_value, traceback)
 
     def _publish_update(self, device: DigitalInputDevice) -> None:
-        del device
         # Get the status
-        status = self.device.value
+        status = bool(device.value)
         # Publish
         self.client.power_status_changed(status)

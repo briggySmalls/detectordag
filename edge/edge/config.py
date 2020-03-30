@@ -7,6 +7,10 @@ from typing import Any, Optional
 from environs import Env
 
 
+class ConfigError(Exception):
+    pass
+
+
 @dataclass
 class ConfigMapper:
     identifier: str
@@ -18,7 +22,7 @@ class ConfigMapper:
 class AppConfig:
     """Class that holds application configuration"""
     _PARSERS = {
-        'balena_device_id': ConfigMapper('BALENA_DEVICE_UUID', 'uuid'),
+        'aws_thing_name': ConfigMapper('AWS_THING_NAME', 'str'),
         'aws_root_cert': ConfigMapper('AWS_ROOT_CERT', 'str'),
         'aws_thing_cert': ConfigMapper('AWS_THING_CERT', 'str'),
         'aws_thing_key': ConfigMapper('AWS_THING_KEY', 'str'),
@@ -28,11 +32,11 @@ class AppConfig:
     }
     _CERTS = {
         'aws_root_cert': 'root-CA.crt',
-        'aws_thing_key': 'thing.cert.pem',
-        'aws_thing_cert': 'thing.private.key',
+        'aws_thing_key': 'thing.private.key',
+        'aws_thing_cert': 'thing.cert.pem',
     }
 
-    balena_device_id: str
+    aws_thing_name: str
     aws_root_cert: Path
     aws_thing_cert: Path
     aws_thing_key: Path
@@ -56,6 +60,10 @@ class AppConfig:
                                                mapping.default)
             for name, mapping in cls._PARSERS.items()
         }
+        # Ensure we have all the expected variables
+        for key, value in parsed.items():
+            if not value:
+                raise ConfigError(f"Env variable {key} is missing")
         # Save certs to files
         certs_dir = parsed['certs_dir'].expanduser()
         certs_dir.mkdir(exist_ok=True, parents=True)
@@ -68,13 +76,6 @@ class AppConfig:
             parsed[cert] = cert_path
         # Return a new config object
         return AppConfig(**parsed)
-
-    @staticmethod
-    def _write_certs(cert_dir: Path, root_cert: str, thing_cert: str,
-                     thing_key: str) -> None:
-        AppConfig._write_cert(root_cert, cert_dir / "root-CA.crt")
-        AppConfig._write_cert(thing_cert, cert_dir / "thing.cert.pem")
-        AppConfig._write_cert(thing_key, cert_dir / "thing.private.key")
 
     @staticmethod
     def _write_cert(cert: str, file: Path) -> None:
