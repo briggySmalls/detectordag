@@ -1,10 +1,9 @@
+import { Response } from 'superagent';
 import logger from './logger';
 import store from '../store';
-import storage from './storage';
-import router from '../router';
-import { Response } from 'superagent';
-import { Account, Response } from '../../lib/client';
-
+import storage from './Storage';
+import router from '../router/router';
+import { Account } from '../../lib/client';
 
 // Save the account details to the store
 function handleAccountResponse(error: Error, data: Account, response: Response) {
@@ -22,6 +21,6 @@ function handleAccountResponse(error: Error, data: Account, response: Response) 
   store.commit('setAccount', data);
 }
 
-export {
+export default {
   handleAccountResponse,
-}
+};
