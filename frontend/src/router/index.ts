@@ -1,10 +1,9 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import { Response } from 'superagent';
 import Review from '../views/Review.vue';
 import NotFound from '../views/NotFound.vue';
 import { storage, logger, clients } from '../utils';
-import { Account } from '../../lib/client';
+import { handleAccountResponse } from '../utils/clientHelpers';
 import store from '../store';
 
 Vue.use(VueRouter);
@@ -40,22 +39,6 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes,
 });
-
-// Save the account details to the store
-function handleAccountResponse(error: Error, data: Account, response: Response) {
-  // Handle errors
-  if (error) {
-    logger.debug(`Account request error: ${response.text}`);
-    // Clear the token (we're assuming that's why we failed)
-    storage.clear();
-    // Get the user to reauthenticate
-    router.push('/login');
-    return;
-  }
-  // Save the account details to the store
-  logger.debug('Saving account details');
-  store.commit('setAccount', data);
-}
 
 // Add guards to ensure we are logged in
 router.beforeEach((to, from, next) => {
