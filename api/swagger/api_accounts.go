@@ -99,7 +99,7 @@ func (s *server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Request that emails are verified
-	err := emails.VerifyEmailsIfNecessary(emails.Emails)
+	err = s.email.VerifyEmailsIfNecessary(emails.Emails)
 	if err != nil {
 		setError(w, err, http.StatusInternalServerError)
 		return
