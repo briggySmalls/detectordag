@@ -17,7 +17,7 @@ class EdgeApp:
     def __init__(self, device: DigitalInputDevice, config: AppConfig) -> None:
         self.config = config
         # Prepare configuration for the client
-        config = ClientConfig(device_id=config.aws_thing_name.hex,
+        config = ClientConfig(device_id=config.aws_thing_name,
                               endpoint=config.aws_endpoint,
                               port=config.aws_port,
                               root_cert=config.aws_root_cert,
