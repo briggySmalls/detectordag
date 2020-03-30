@@ -38,3 +38,10 @@ export default class Navbar extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+#logo {
+  width: 5em;
+  height: 5em;
+}
+</style>
