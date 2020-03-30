@@ -1,61 +1,7 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
-import { Response } from 'superagent';
-import Review from '../views/Review.vue';
-import NotFound from '../views/NotFound.vue';
-import { storage, logger, clients } from '../utils';
-import { Account } from '../../lib/client';
+import router from './router';
+import { storage, logger } from '../utils';
+import { requestAccount } from '../utils/clientHelpers';
 import store from '../store';
-
-Vue.use(VueRouter);
-
-const routes = [
-  {
-    path: '/review',
-    alias: '/',
-    name: 'Review',
-    component: Review,
-    meta: {
-      requiresAuth: true,
-    },
-  },
-  {
-    path: '/login',
-    name: 'Login',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/Login.vue'),
-  },
-  {
-    path: '*',
-    name: 'NotFound',
-    component: NotFound,
-  },
-];
-
-// Create the router
-const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes,
-});
-
-// Save the account details to the store
-function handleAccountResponse(error: Error, data: Account, response: Response) {
-  // Handle errors
-  if (error) {
-    logger.debug(`Account request error: ${response.text}`);
-    // Clear the token (we're assuming that's why we failed)
-    storage.clear();
-    // Get the user to reauthenticate
-    router.push('/login');
-    return;
-  }
-  // Save the account deatils to the store
-  logger.debug('Saving account details');
-  store.commit('setAccount', data);
-}
 
 // Add guards to ensure we are logged in
 router.beforeEach((to, from, next) => {
@@ -85,8 +31,7 @@ router.beforeEach((to, from, next) => {
     return;
   }
   // Request account details
-  logger.debug('Requesting account details');
-  clients.accounts.getAccount(`Bearer ${authBundle.token}`, authBundle.accountId, handleAccountResponse);
+  requestAccount(authBundle);
   next();
 });
 

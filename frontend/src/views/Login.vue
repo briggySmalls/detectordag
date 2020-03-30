@@ -74,7 +74,7 @@ export default class Login extends Vue {
       return;
     }
     // Record the token and account in local storage
-    this.$logger.debug('Account data received');
+    this.$logger.debug('Auth response received');
     const bundle = new AuthBundle(data.accountId, data.token);
     storage.save(bundle);
     // Redirect to review

@@ -6,6 +6,8 @@ export class ApiClient {
   basePath: string;
 }
 
+type Callback<T> = (error: Error, data: T, response: Response) => void): Request;
+
 export class AuthenticationApi {
   constructor(client: ApiClient);
   auth(body: Credentials, callback: (error: Error, data: Token, response: Response) => void): Request;
@@ -13,8 +15,9 @@ export class AuthenticationApi {
 
 export class AccountsApi {
   constructor(client: ApiClient);
-  getDevices(authorization: string, accountId: string, callback: (error: Error, data: Device[], response: Response) => void): Request;
-  getAccount(authorization: string, accountId: string, callback: (error: Error, data: Account, response: Response) => void): Request;
+  getDevices(authorization: string, accountId: string, callback: Callback<Device[]>);
+  getAccount(authorization: string, accountId: string, callback: Callback<Account>);
+  updateAccount(body: Emails, authorization: string, accountId: string, callback: Callback<Account>);
 }
 
 export class Credentials {
@@ -40,4 +43,8 @@ export class DeviceState {
 export class Account {
   username: string;
   emails: string[];
+}
+
+export class Emails {
+  constructor(emails: string[]);
 }
