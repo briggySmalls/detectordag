@@ -32,8 +32,8 @@ class AppConfig:
     }
     _CERTS = {
         'aws_root_cert': 'root-CA.crt',
-        'aws_thing_key': 'thing.cert.pem',
-        'aws_thing_cert': 'thing.private.key',
+        'aws_thing_key': 'thing.private.key',
+        'aws_thing_cert': 'thing.cert.pem',
     }
 
     aws_thing_name: str
