@@ -10,14 +10,14 @@ type Callback<T> = (error: Error, data: T, response: Response) => void): Request
 
 export class AuthenticationApi {
   constructor(client: ApiClient);
-  auth(body: Credentials, callback: (error: Error, data: Token, response: Response) => void): Request;
+  auth(body: Credentials, callback: Callback<Token>): Request;
 }
 
 export class AccountsApi {
   constructor(client: ApiClient);
-  getDevices(authorization: string, accountId: string, callback: Callback<Device[]>);
-  getAccount(authorization: string, accountId: string, callback: Callback<Account>);
-  updateAccount(body: Emails, authorization: string, accountId: string, callback: Callback<Account>);
+  getDevices(authorization: string, accountId: string, callback: Callback<Device[]>): Request;
+  getAccount(authorization: string, accountId: string, callback: Callback<Account>): Request;
+  updateAccount(body: Emails, authorization: string, accountId: string, callback: Callback<Account>): Request;
 }
 
 export class Credentials {
