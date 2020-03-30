@@ -126,6 +126,10 @@ func (s *server) createAccountPayload(account *database.Account) ([]byte, error)
 		Username: account.Username,
 		Emails:   account.Emails,
 	}
+	// Ensure empty slices appear as '[]' in JSON
+	if payload.Emails == nil {
+		payload.Emails = make([]string, 0)
+	}
 	// Prepare the JSON response
 	body, err := json.Marshal(payload)
 	if err != nil {
