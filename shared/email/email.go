@@ -2,7 +2,6 @@ package email
 
 import (
 	"errors"
-	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
@@ -17,7 +16,8 @@ const (
 type Client interface {
 	SendEmail(toAddresses []string, sender, subject, htmlBody, textBody string) error
 	VerifyEmail(email string) error
-	GetVerificationStatus(emails []string) map[string]string
+	GetVerificationStatuses(emails []string) (map[string]string, error)
+	VerifyEmailsIfNecessary(emails []string) error
 }
 
 type client struct {
@@ -79,25 +79,26 @@ func (c *client) SendEmail(recipients []string, sender, subject, htmlBody, textB
 	return nil
 }
 
-func (c *client) GetVerificationStatus(emails []string) map[string]string {
+// GetVerificationStatuses gets verification status of the provided emails
+// Note: If the email has never been seen before, it will be omitted from the result
+func (c *client) GetVerificationStatuses(emails []string) (map[string]string, error) {
 	// Convert to AWS type
 	emailPtrs := make([]*string, len(emails))
 	for i, email := range emails {
 		emailPtrs[i] = aws.String(email)
 	}
-	// Construct the input
-	input := &ses.GetIdentityVerificationAttributesInput{Identities: emailPtrs}
 	// Make the request
-	result, err := svc.GetIdentityVerificationAttributes(input)
+	input := &ses.GetIdentityVerificationAttributesInput{Identities: emailPtrs}
+	result, err := c.ses.GetIdentityVerificationAttributes(input)
 	if err != nil {
 		return nil, err
 	}
 	// Pull out the relevant stuff
 	statuses := make(map[string]string, len(result.VerificationAttributes))
 	for email, data := range result.VerificationAttributes {
-		statuses[email] = data.VerificationStatus
+		statuses[email] = *data.VerificationStatus
 	}
-	return statuses
+	return statuses, nil
 }
 
 func (c *client) VerifyEmail(email string) error {
@@ -112,19 +113,15 @@ func (c *client) VerifyEmail(email string) error {
 
 func (c *client) VerifyEmailsIfNecessary(emails []string) error {
 	// Get the verification statuses
-	statuses, err := c.GetVerificationStatus(emails)
+	statuses, err := c.GetVerificationStatuses(emails)
 	if err != nil {
 		return err
 	}
 	// Send verification for all those that need it
-	for email := range emails {
+	for _, email := range emails {
 		status, ok := statuses[email]
-		if !ok {
-			// We have somehow not got the right status
-			return errors.New("Failed to get status for email: %s", email)
-		}
-		if status == ses.VerificationStatusSuccess {
-			// Skip emails that are already verified
+		// Skip emails that are already verified
+		if ok && status == ses.VerificationStatusSuccess {
 			continue
 		}
 		// Ask to verify email
