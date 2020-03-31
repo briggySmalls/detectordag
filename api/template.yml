@@ -91,3 +91,10 @@ Resources:
               Action:
                 - 'iot:DescribeEndpoint'
               Resource: '*'
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'ses:VerifyEmailIdentity'
+                - 'ses:GetIdentityVerificationAttributes'
+              Resource: '*'

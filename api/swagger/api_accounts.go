@@ -99,8 +99,10 @@ func (s *server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Request that emails are verified
-	for _, email := range emails.Emails {
-		s.email.VerifyEmail(email)
+	err = s.email.VerifyEmailsIfNecessary(emails.Emails)
+	if err != nil {
+		setError(w, err, http.StatusInternalServerError)
+		return
 	}
 	// Update the database
 	account, err := s.db.UpdateAccountEmails(*accountId, emails.Emails)

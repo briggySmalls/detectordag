@@ -16,6 +16,8 @@ const (
 type Client interface {
 	SendEmail(toAddresses []string, sender, subject, htmlBody, textBody string) error
 	VerifyEmail(email string) error
+	GetVerificationStatuses(emails []string) (map[string]string, error)
+	VerifyEmailsIfNecessary(emails []string) error
 }
 
 type client struct {
@@ -77,6 +79,28 @@ func (c *client) SendEmail(recipients []string, sender, subject, htmlBody, textB
 	return nil
 }
 
+// GetVerificationStatuses gets verification status of the provided emails
+// Note: If the email has never been seen before, it will be omitted from the result
+func (c *client) GetVerificationStatuses(emails []string) (map[string]string, error) {
+	// Convert to AWS type
+	emailPtrs := make([]*string, len(emails))
+	for i, email := range emails {
+		emailPtrs[i] = aws.String(email)
+	}
+	// Make the request
+	input := &ses.GetIdentityVerificationAttributesInput{Identities: emailPtrs}
+	result, err := c.ses.GetIdentityVerificationAttributes(input)
+	if err != nil {
+		return nil, err
+	}
+	// Pull out the relevant stuff
+	statuses := make(map[string]string, len(result.VerificationAttributes))
+	for email, data := range result.VerificationAttributes {
+		statuses[email] = *data.VerificationStatus
+	}
+	return statuses, nil
+}
+
 func (c *client) VerifyEmail(email string) error {
 	// Construct the input
 	input := &ses.VerifyEmailIdentityInput{
@@ -85,4 +109,26 @@ func (c *client) VerifyEmail(email string) error {
 	// Ask to verify the email
 	_, err := c.ses.VerifyEmailIdentity(input)
 	return err
+}
+
+func (c *client) VerifyEmailsIfNecessary(emails []string) error {
+	// Get the verification statuses
+	statuses, err := c.GetVerificationStatuses(emails)
+	if err != nil {
+		return err
+	}
+	// Send verification for all those that need it
+	for _, email := range emails {
+		status, ok := statuses[email]
+		// Skip emails that are already verified
+		if ok && status == ses.VerificationStatusSuccess {
+			continue
+		}
+		// Ask to verify email
+		err := c.VerifyEmail(email)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
