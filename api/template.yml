@@ -96,5 +96,5 @@ Resources:
             - Effect: Allow
               Action:
                 - 'ses:VerifyEmailIdentity'
-              Resource:
-                - !Sub "*"
+                - 'ses:GetIdentityVerificationAttributes'
+              Resource: '*'
