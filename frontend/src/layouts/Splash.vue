@@ -1,5 +1,5 @@
 <template>
-  <b-container id="splash" class="mt-5">
+  <b-container id="splash" class="mt-5" fluid="sm">
     <!-- Logo -->
     <img id="logo" class="my-1" alt="Detectordag logo" src="../assets/logo.svg">
     <!-- Title -->
@@ -28,7 +28,13 @@ export default class Splash extends Vue {
 </script>
 
 <style lang="scss" scoped>
-#logo {
-  max-width: 30em;
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+
+@include media-breakpoint-up(sm) {
+  #content-container {
+    max-width: map-get($grid-breakpoints, sm);
+  }
 }
 </style>

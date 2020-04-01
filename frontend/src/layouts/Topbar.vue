@@ -2,7 +2,7 @@
   <div id="topbar">
     <!-- Display a navbar when logged in -->
     <NavbarComponent />
-    <b-container>
+    <b-container id= "content-container" fluid="sm">
       <!-- Title -->
       <h1>{{ title }}</h1>
       <!-- Content -->
@@ -30,3 +30,15 @@ export default class Topbar extends Vue {
   @Prop() private readonly title!: string;
 }
 </script>
+
+<style lang="scss" scoped>
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+
+@include media-breakpoint-up(sm) {
+  #content-container {
+    max-width: map-get($grid-breakpoints, sm);
+  }
+}
+</style>
