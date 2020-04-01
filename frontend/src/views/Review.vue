@@ -1,16 +1,12 @@
 <template>
-  <div class="review">
-    <!-- Navbar -->
-    <NavbarComponent />
-    <!-- Main page -->
-    <h1>Review Dags</h1>
+  <Topbar :title="title" :error="error" >
     <b-button
       class="mt-2 mb-2 d-inline-block"
       v-on:click="request"
       :disabled="isRefreshing">
       Refresh
     </b-button>
-    <b-container>
+    <div>
       <!-- Device list -->
       <b-card-group v-if="devices" deck>
         <DeviceComponent
@@ -20,9 +16,8 @@
       </b-card-group>
       <!-- Loading -->
       <b-spinner v-else></b-spinner>
-    </b-container>
-    <ErrorComponent :error="error" />
-  </div>
+    </div>
+  </Topbar>
 </template>
 
 <script lang="ts">
@@ -30,17 +25,19 @@ import { Component, Vue } from 'vue-property-decorator';
 import { Device } from '../../lib/client';
 import { storage } from '../utils';
 import DeviceComponent from '../components/Device.vue';
-import NavbarComponent from '../components/Navbar.vue';
-import ErrorComponent from '../components/Error.vue';
+import Topbar from '../layouts/Topbar.vue';
 
 @Component({
   components: {
     DeviceComponent,
-    ErrorComponent,
-    NavbarComponent,
+    Topbar,
   },
 })
 export default class Review extends Vue {
+  // The page title
+  private readonly title = 'Review Dags';
+
+  // Errors in API requests
   private error: Error | null = null;
 
   public created() {
