@@ -47,6 +47,7 @@
     "sass": "^1.25.0",
     "sass-loader": "^8.0.2",
     "typescript": "~3.7.5",
+    "vue-cli-plugin-s3-deploy": "^4.0.0-rc3",
     "vue-template-compiler": "^2.6.11"
   }
 }
