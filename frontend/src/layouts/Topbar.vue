@@ -32,9 +32,7 @@ export default class Topbar extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import "~bootstrap/scss/functions";
-@import "~bootstrap/scss/variables";
-@import "~bootstrap/scss/mixins";
+@import "../app.scss";
 
 @include media-breakpoint-up(sm) {
   #content-container {
