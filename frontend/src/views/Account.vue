@@ -1,47 +1,42 @@
 <template>
-  <div class="review">
-    <!-- Navbar -->
-    <NavbarComponent />
-    <!-- Main page -->
-    <h1>Account Details</h1>
-    <b-container>
-      <!-- Email list -->
-      <b-form v-if="emails" @submit.prevent="submit">
-        <b-form-group>
-          <label for="tags">Notification emails:</label>
-          <b-form-tags
-            input-id="tags"
-            v-model="emails"
-            placeholder="Add email"
-            name=""
-            class="mb-2">
-          </b-form-tags>
-        </b-form-group>
-        <b-button type="submit">Submit</b-button>
-      </b-form>
-      <!-- Loading -->
-      <b-spinner v-else></b-spinner>
-    </b-container>
-    <ErrorComponent :error="error" />
-  </div>
+  <Topbar :error="error" :title="title">
+    <!-- Email list -->
+    <b-form v-if="emails" @submit.prevent="submit">
+      <b-form-group>
+        <label for="tags">Notification emails:</label>
+        <b-form-tags
+          input-id="tags"
+          v-model="emails"
+          placeholder="Add email"
+          name=""
+          class="mb-2">
+        </b-form-tags>
+      </b-form-group>
+      <b-button type="submit">Submit</b-button>
+    </b-form>
+    <!-- Loading -->
+    <b-spinner v-else></b-spinner>
+  </Topbar>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator';
-import NavbarComponent from '../components/Navbar.vue';
-import ErrorComponent from '../components/Error.vue';
+import Topbar from '../layouts/Topbar.vue';
 import { Emails, Account } from '../../lib/client';
 import { storage } from '../utils';
 import { handleAccountResponse } from '../utils/clientHelpers';
 
 @Component({
   components: {
-    ErrorComponent,
-    NavbarComponent,
+    Topbar,
   },
 })
-export default class Review extends Vue {
+export default class AccountView extends Vue {
+  // Emails to display in the form
   private emails: string[] | null = null;
+
+  // The page title
+  private readonly title = 'Account Details';
 
   public created() {
     this.emails = this.storedEmails;

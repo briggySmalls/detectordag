@@ -1,7 +1,5 @@
 <template>
-  <b-container id="login" class="mt-5">
-    <img id="logo" class="my-1" alt="Detectordag logo" src="../assets/logo.svg">
-    <h1 class="my-2">DetectorDag</h1>
+  <Splash id="login" :title="title" :error="error">
     <b-form v-if="!isRequesting" @submit="submit">
       <b-form-group
         id="email"
@@ -26,24 +24,24 @@
       <b-button type="submit" >Submit</b-button>
     </b-form>
     <b-spinner v-else label="Spinning"></b-spinner>
-    <ErrorComponent :error="error" />
-  </b-container>
+  </Splash>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { Credentials, Token } from '../../lib/client';
 import { storage, AuthBundle } from '../utils';
-import ErrorComponent from '../components/Error.vue';
+import Splash from '../layouts/Splash.vue';
 
 @Component({
   components: {
-    ErrorComponent,
+    Splash,
   },
 })
-
-// The Login route is responsible for ensuring a user's token and account are stored
 export default class Login extends Vue {
+  // Page title
+  private readonly title = 'DetectorDag'
+
   private email = '';
 
   private password = '';
@@ -86,9 +84,6 @@ export default class Login extends Vue {
 <style lang="scss" scoped>
 #login {
   max-width: 20em;
-}
-#logo {
-  max-width: 30em;
 }
 </style>
 -

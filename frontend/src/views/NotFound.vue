@@ -1,10 +1,19 @@
 <template>
-  <div class="not-found">
-    <h1>Page not found!</h1>
-  </div>
+  <Splash :title='title' :error='error' />
 </template>
 
-<script>
-export default {
-};
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator';
+import Splash from '../layouts/Splash.vue';
+
+@Component({
+  components: {
+    Splash,
+  },
+})
+export default class NotFound extends Vue {
+  private readonly title = 'Page not found!';
+
+  private readonly error = null;
+}
 </script>
