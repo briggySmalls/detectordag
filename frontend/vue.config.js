@@ -1,12 +1,12 @@
 module.exports = {
   // Set the title
-  chainWebpack: config => {
+  chainWebpack: (config) => {
     config
-    .plugin('html')
-    .tap(args => {
-      args[0].title = 'Detector Dag'
-      return args
-    })
+      .plugin('html')
+      .tap((args) => {
+        args[0].title = 'Detector Dag';
+        return args;
+      });
   },
 
   configureWebpack: {
@@ -40,9 +40,11 @@ module.exports = {
       deployPath: '/',
       acl: 'public-read',
       pwa: false,
-      enableCloudfront: false,
+      enableCloudfront: true,
+      cloudfrontId: 'E2PZG09FJQNGCG',
       pluginVersion: '4.0.0-rc3',
-      uploadConcurrency: 5
-    }
-  }
+      uploadConcurrency: 5,
+      gzip: true,
+    },
+  },
 };

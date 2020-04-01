@@ -1,4 +1,6 @@
 import Review from '../views/Review.vue';
+import Login from '../views/Login.vue';
+import Account from '../views/Account.vue';
 import NotFound from '../views/NotFound.vue';
 
 export default [
@@ -15,10 +17,7 @@ export default [
     path: '/account',
     alias: '/',
     name: 'Account',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/Account.vue'),
+    component: Account,
     meta: {
       requiresAuth: true,
     },
@@ -26,10 +25,7 @@ export default [
   {
     path: '/login',
     name: 'Login',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/Login.vue'),
+    component: Login,
   },
   {
     path: '*',

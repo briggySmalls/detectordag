@@ -31,7 +31,7 @@ router.beforeEach((to, from, next) => {
     return;
   }
   // Request account details
-  requestAccount(authBundle);
+  requestAccount(router, authBundle);
   next();
 });
 

@@ -18,7 +18,7 @@ export default new Vuex.Store({
     setDevices(state, devices) {
       state.devices = devices;
     },
-    clearDevices(state, devices) {
+    clearDevices(state) {
       state.devices = null;
     },
   },

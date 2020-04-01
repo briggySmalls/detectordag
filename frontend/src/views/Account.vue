@@ -22,9 +22,9 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import Topbar from '../layouts/Topbar.vue';
-import { Emails, Account } from '../../lib/client';
+import { Emails } from '../../lib/client';
 import { storage } from '../utils';
-import { handleAccountResponse } from '../utils/clientHelpers';
+import { handleAccountResponseFactory } from '../utils/clientHelpers';
 
 @Component({
   components: {
@@ -50,12 +50,14 @@ export default class AccountView extends Vue {
 
   // Assign emails from the store (when changed)
   @Watch('storedEmails')
-  private onPropertyChanged(value: string[], oldvalue: string[]) {
+  private onPropertyChanged(
+    value: string[], _: string[], // eslint-disable-line @typescript-eslint/no-unused-vars
+  ) {
     this.emails = value;
   }
 
   // Submit update to API
-  private submit(event: Event) {
+  private submit(_: Event) { // eslint-disable-line @typescript-eslint/no-unused-vars
     this.$logger.debug('Emails submitted');
     // Get auth token
     const auth = storage.bundle;
@@ -72,7 +74,7 @@ export default class AccountView extends Vue {
       return;
     }
     this.$clients.accounts.updateAccount(
-      new Emails(this.emails), `Bearer ${auth.token}`, auth.accountId, handleAccountResponse,
+      new Emails(this.emails), `Bearer ${auth.token}`, auth.accountId, handleAccountResponseFactory(this.$router),
     );
     // Indicate that our emails are updating
     this.emails = null;

@@ -3,7 +3,7 @@
     <b-button
       class="mt-2 mb-2 d-inline-block"
       v-on:click="request"
-      :disabled="isRefreshing">
+      :disabled="loading">
       Refresh
     </b-button>
     <div>
@@ -15,7 +15,7 @@
           :device="device" />
       </b-card-group>
       <!-- Loading -->
-      <b-spinner v-else></b-spinner>
+      <b-spinner v-if="loading"></b-spinner>
     </div>
   </Topbar>
 </template>
@@ -45,6 +45,15 @@ export default class Review extends Vue {
     if (this.devices === null) {
       this.request();
     }
+  }
+
+  // Says if wer are loading device content
+  private get loading() {
+    return (this.devices === null) && (this.error === null);
+  }
+
+  private get devices(): Device[] | null {
+    return this.$store.state.devices;
   }
 
   private request() {
@@ -77,14 +86,6 @@ export default class Review extends Vue {
     }
     // Display the requested devices
     this.$store.commit('setDevices', data);
-  }
-
-  private get devices(): Device[] | null {
-    return this.$store.state.devices;
-  }
-
-  private get isRefreshing() {
-    return this.$store.state.devices === null;
   }
 }
 </script>
