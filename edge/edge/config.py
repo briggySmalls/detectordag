@@ -2,9 +2,9 @@
 import base64
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Dict, List
 
-from environs import Env
+from environs import Env, EnvValidationError
 
 
 class ConfigError(Exception):
@@ -52,18 +52,36 @@ class AppConfig:
             AppConfig: Application configuration
         """
         env = Env()
-        # Read environment variables from .env file (if present)
-        env.read_env()
         # Parse our variables
-        parsed = {
-            name: getattr(env, mapping.parser)(mapping.identifier,
-                                               mapping.default)
-            for name, mapping in cls._PARSERS.items()
-        }
-        # Ensure we have all the expected variables
-        for key, value in parsed.items():
-            if not value:
-                raise ConfigError(f"Env variable {key} is missing")
+        parsed = {}
+        for name, mapping in cls._PARSERS.items():
+            # This may fail if env vars are not present
+            try:
+                if mapping.default is None:
+                    # Parse a variable without a default
+                    parsed[name] = getattr(env, mapping.parser)(mapping.identifier)
+                else:
+                    # Parse a variable with a default
+                    parsed[name] = getattr(env, mapping.parser)(mapping.identifier, default=mapping.default)
+            except EnvValidationError as exc:
+                raise ConfigError(exc)
+
+        # Write to a file
+        cls._convert_certs(parsed)
+        # Return a new config object
+        return AppConfig(**parsed)
+
+    @classmethod
+    def variables(cls) -> List[str]:
+        """Get the variables this config looks for
+
+        Returns:
+            List[str]: Identifiers of all variables searched for
+        """
+        return [mapper.identifier for mapper in cls._PARSERS.values()]
+
+    @classmethod
+    def _convert_certs(cls, parsed: Dict[str, Any]) -> None:
         # Save certs to files
         certs_dir = parsed['certs_dir'].expanduser()
         certs_dir.mkdir(exist_ok=True, parents=True)
@@ -74,8 +92,6 @@ class AppConfig:
             cls._write_cert(parsed[cert], cert_path)
             # Replace the env variable content with the path to the certificate
             parsed[cert] = cert_path
-        # Return a new config object
-        return AppConfig(**parsed)
 
     @staticmethod
     def _write_cert(cert: str, file: Path) -> None:
