@@ -70,7 +70,7 @@ def test_missing(monkeypatch, tmp_path, to_drop):
         if k == to_drop:
             continue
         # Set the variable in the environment
-        monkeypatch.setenv(k, v)
+        monkeypatch.setenv(k, str(v))
     # Always set the cert dir
     monkeypatch.setenv("CERT_DIR", str(tmp_path))
     # Expect an error
