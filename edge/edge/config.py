@@ -64,6 +64,13 @@ class AppConfig:
         for key, value in parsed.items():
             if not value:
                 raise ConfigError(f"Env variable {key} is missing")
+        # Write to a file
+        cls._convert_certs(parsed)
+        # Return a new config object
+        return AppConfig(**parsed)
+
+    @classmethod
+    def _convert_certs(cls, parsed: Dict[str, Any]) -> None:
         # Save certs to files
         certs_dir = parsed['certs_dir'].expanduser()
         certs_dir.mkdir(exist_ok=True, parents=True)
@@ -74,8 +81,6 @@ class AppConfig:
             cls._write_cert(parsed[cert], cert_path)
             # Replace the env variable content with the path to the certificate
             parsed[cert] = cert_path
-        # Return a new config object
-        return AppConfig(**parsed)
 
     @staticmethod
     def _write_cert(cert: str, file: Path) -> None:
