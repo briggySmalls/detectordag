@@ -55,15 +55,15 @@ class AppConfig:
         # Read environment variables from .env file (if present)
         env.read_env()
         # Parse our variables
-        parsed = {
-            name: getattr(env, mapping.parser)(mapping.identifier,
-                                               mapping.default)
-            for name, mapping in cls._PARSERS.items()
-        }
-        # Ensure we have all the expected variables
-        for key, value in parsed.items():
-            if not value:
-                raise ConfigError(f"Env variable {key} is missing")
+        parsed = {}
+        for name, mapping in cls._PARSERS.items():
+            try:
+                if mapping.default is None:
+                    parsed[name] = getattr(env, mapping.parser)(mapping.identifier)
+                else:
+                    parsed[name] = getattr(env, mapping.parser)(mapping.identifier, default=mapping.default)
+            except EnvValidationError as exc:
+                raise ConfigError(exc)
         # Write to a file
         cls._convert_certs(parsed)
         # Return a new config object
