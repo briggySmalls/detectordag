@@ -22,7 +22,7 @@ const textTemplateSource = `
 Power status update.
 
 Your trusty detectordag has noticed a change in your power status.
-Device: {{ .DeviceId }}
+Device: {{ .DeviceName }}
 Time: {{ .Timestamp.Format "15:04 02-Jan-2006" }}
 Status: {{ if .Status }}⚡️On{{else}}❗️Off{{end}}
 
@@ -42,7 +42,7 @@ const htmlTemplateSource = `
 <table>
   <tr>
     <td>Device</td>
-    <td>{{ .DeviceId }}</td>
+    <td>{{ .DeviceName }}</td>
   </tr>
   <tr>
     <td>Time</td>
@@ -68,9 +68,9 @@ const htmlTemplateSource = `
 `
 
 type PowerStatusChangedEmailConfig struct {
-	DeviceId  string
-	Timestamp time.Time
-	Status    bool
+	DeviceName string
+	Timestamp  time.Time
+	Status     bool
 }
 
 var mailer email.Client

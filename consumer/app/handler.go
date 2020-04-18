@@ -60,9 +60,9 @@ func HandleRequest(ctx context.Context, event StatusUpdatedEvent) {
 	}
 	// Construct an event to pass to the emailer
 	update := PowerStatusChangedEmailConfig{
-		DeviceId:  event.DeviceId,
-		Timestamp: time.Unix(event.Updated.Status.Timestamp, 0),
-		Status:    event.State.Status,
+		DeviceName: device.Name,
+		Timestamp:  time.Unix(event.Updated.Status.Timestamp, 0),
+		Status:     event.State.Status,
 	}
 	// Send 'power status updated' emails
 	log.Printf("Send emails to: %s", account.Emails)
