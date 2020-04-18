@@ -1,5 +1,6 @@
 """Main module."""
 import logging
+from threading import Timer
 
 from edge.aws import ClientConfig, CloudClient
 from edge.config import AppConfig
@@ -26,6 +27,8 @@ class EdgeApp:
         self.device = device
         # Create the client
         self.client = CloudClient(config)
+        # Preallocate the timer
+        self.timer = None
 
     def __enter__(self) -> 'EdgeApp':
         self.client.__enter__()
@@ -40,12 +43,22 @@ class EdgeApp:
         # Send messages when power status changes
         self.device.when_activated = self._publish_update
         self.device.when_deactivated = self._publish_update
+        # Start the alive timer
+        self._tick()
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.client.__exit__(exc_type, exc_value, traceback)
+        if self.timer is not None:
+            self.timer.cancel()
 
     def _publish_update(self, device: DigitalInputDevice) -> None:
         # Get the status
         status = bool(device.value)
         # Publish
         self.client.power_status_changed(status)
+
+    def _tick(self) -> None:
+        # Publish an update
+        self._publish_update(self.device)
+        # Schedule another tick
+        self.timer = Timer(self.config.alive_interval, self._tick).start()
