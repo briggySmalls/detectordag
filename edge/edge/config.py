@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional, Dict, List
 
-from environs import Env
+from environs import Env, EnvValidationError
 
 
 class ConfigError(Exception):
@@ -52,18 +52,20 @@ class AppConfig:
             AppConfig: Application configuration
         """
         env = Env()
-        # Read environment variables from .env file (if present)
-        env.read_env()
         # Parse our variables
         parsed = {}
         for name, mapping in cls._PARSERS.items():
+            # This may fail if env vars are not present
             try:
                 if mapping.default is None:
+                    # Parse a variable without a default
                     parsed[name] = getattr(env, mapping.parser)(mapping.identifier)
                 else:
+                    # Parse a variable with a default
                     parsed[name] = getattr(env, mapping.parser)(mapping.identifier, default=mapping.default)
             except EnvValidationError as exc:
                 raise ConfigError(exc)
+
         # Write to a file
         cls._convert_certs(parsed)
         # Return a new config object
