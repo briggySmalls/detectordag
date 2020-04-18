@@ -29,7 +29,7 @@ class AppConfig:
         'aws_endpoint': ConfigMapper('AWS_ENDPOINT', 'str'),
         'aws_port': ConfigMapper('AWS_PORT', 'int', default=8883),
         'certs_dir': ConfigMapper('CERT_DIR', 'path', '~/.detectordag/certs'),
-        'alive_interval': ConfigMapper('ALIVE_INTERVAL', 'int'),
+        'alive_interval': ConfigMapper('ALIVE_INTERVAL', 'int', default=3600),
     }
     _CERTS = {
         'aws_root_cert': 'root-CA.crt',
