@@ -2,7 +2,7 @@
 import base64
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Dict, List
 
 from environs import Env
 
