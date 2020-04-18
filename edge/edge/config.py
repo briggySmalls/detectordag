@@ -70,6 +70,15 @@ class AppConfig:
         return AppConfig(**parsed)
 
     @classmethod
+    def variables(cls) -> List[str]:
+        """Get the variables this config looks for
+
+        Returns:
+            List[str]: Identifiers of all variables searched for
+        """
+        return [mapper.identifier for mapper in cls._PARSERS.values()]
+
+    @classmethod
     def _convert_certs(cls, parsed: Dict[str, Any]) -> None:
         # Save certs to files
         certs_dir = parsed['certs_dir'].expanduser()
