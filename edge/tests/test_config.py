@@ -67,10 +67,9 @@ def test_missing(monkeypatch, tmp_path, to_drop):
         monkeypatch.delenv(var, raising=False)
     # Now set all variables, skipping variable under test
     for k, v in _VARIABLES.items():
-        if k == to_drop:
-            continue
-        # Set the variable in the environment
-        monkeypatch.setenv(k, str(v))
+        if k != to_drop:
+            # Set the variable in the environment
+            monkeypatch.setenv(k, str(v))
     # Always set the cert dir
     monkeypatch.setenv("CERT_DIR", str(tmp_path))
     # Expect an error
