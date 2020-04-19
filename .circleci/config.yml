@@ -1,0 +1,63 @@
+version: 2
+
+commands:
+  python-deps:
+    steps:
+      - run:
+          working_directory: ./edge
+          command: |  # use pipenv to install dependencies
+            sudo pip install pipenv
+            pipenv install --dev
+      - save_cache:  # Save a cache of dependencies, tied to lockfile
+          key: deps9-{{ .Branch }}-{{ checksum "./edge/Pipfile.lock" }}
+          paths:
+            - ".venv"
+            - "/usr/local/bin"
+            - "/usr/local/lib/python3.6/site-packages"
+
+executors:
+  python-executor:
+    docker:
+      - image: circleci/python:3.7
+        environment:
+          PIPENV_VENV_IN_PROJECT: true
+
+jobs:
+  # Ensure edge code is formatted correctly
+  edge-format:
+    executor: python-executor
+    steps:
+      - checkout
+      - python-deps
+      - run:
+          working_directory: ./edge
+          name: Run format check
+          command: pipenv run invoke format --check
+  # Ensure edge code is linting correctly
+  edge-lint:
+    executor: python-executor
+    steps:
+      - checkout
+      - python-deps
+      - run:
+          working_directory: ./edge
+          name: Run linting
+          command: pipenv run invoke lint
+  # Ensure edge code is passing tests
+  edge-test:
+    executor: python-executor
+    steps:
+      - checkout
+      - python-deps
+      - run:
+          working_directory: ./edge
+          name: Run tests
+          command: pipenv run invoke test
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - edge-format
+      - edge-lint
+      - edge-test
