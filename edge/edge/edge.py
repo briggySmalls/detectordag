@@ -61,4 +61,5 @@ class EdgeApp:
         # Publish an update
         self._publish_update(self.device)
         # Schedule another tick
-        self.timer = Timer(self.config.alive_interval, self._tick).start()
+        self.timer = Timer(self.config.alive_interval, self._tick)
+        self.timer.start()
