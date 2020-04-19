@@ -62,4 +62,4 @@ def mock(ctx):
 
 if __name__ == "__main__":
     # Configure logging
-    sys.exit(main())  # pragma: no cover
+    sys.exit(main())  # pragma: no cover pylint: disable=no-value-for-parameter
