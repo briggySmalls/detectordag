@@ -11,7 +11,7 @@ commands:
       - save_cache:  # Save a cache of dependencies, tied to lockfile
           key: deps9-{{ .Branch }}-{{ checksum "./edge/Pipfile.lock" }}
           paths:
-            - ".venv"
+            - "./edge/.venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.6/site-packages"
 
