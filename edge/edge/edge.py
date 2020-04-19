@@ -47,7 +47,9 @@ class EdgeApp:
         self._tick()
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
+        # Teardown the AWS client
         self.client.__exit__(exc_type, exc_value, traceback)
+        # Cancel any running timers
         if self.timer is not None:
             self.timer.cancel()
 
