@@ -1,6 +1,7 @@
 """Console script for edge."""
 import logging
 import sys
+from typing import Any
 
 import click
 
@@ -12,7 +13,7 @@ _POWER_PIN = 4
 
 @click.group()
 @click.pass_context
-def main(ctx):
+def main(ctx: Any) -> None:
     """Entrypoint for the edge application"""
     # ensure that ctx.obj exists and is a dict (in case `cli()` is called
     # by means other than the `if` block below
@@ -26,7 +27,7 @@ def main(ctx):
 
 @main.command()
 @click.pass_context
-def app(ctx):
+def app(ctx: Any) -> None:
     """Run the 'production' edge software"""
     # Track power status GPIO
     from gpiozero import DigitalInputDevice  # noqa: E501, pylint: disable=import-error,import-outside-toplevel
@@ -39,7 +40,7 @@ def app(ctx):
 
 @main.command()
 @click.pass_context
-def mock(ctx):
+def mock(ctx: Any) -> None:
     """Run the mock edge software"""
     # Create a mock device
     from edge.mocks import MockDigitalInputDevice  # noqa: E501, pylint: disable=import-outside-toplevel
