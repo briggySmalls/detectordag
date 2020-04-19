@@ -8,11 +8,12 @@ from environs import Env, EnvValidationError
 
 
 class ConfigError(Exception):
-    pass
+    """Exception to indicate that there is a configuration error"""
 
 
 @dataclass
 class ConfigMapper:
+    """Helper class for parsing configuration from the environment"""
     identifier: str
     parser: str
     default: Optional[Any] = None
@@ -21,7 +22,8 @@ class ConfigMapper:
 @dataclass
 class AppConfig:
     """Class that holds application configuration"""
-    _PARSERS = {
+    # pylint: disable=too-many-instance-attributes
+    _parsers = {
         'aws_thing_name': ConfigMapper('AWS_THING_NAME', 'str'),
         'aws_root_cert': ConfigMapper('AWS_ROOT_CERT', 'str'),
         'aws_thing_cert': ConfigMapper('AWS_THING_CERT', 'str'),
@@ -31,7 +33,7 @@ class AppConfig:
         'certs_dir': ConfigMapper('CERT_DIR', 'path', '~/.detectordag/certs'),
         'alive_interval': ConfigMapper('ALIVE_INTERVAL', 'int', default=3600),
     }
-    _CERTS = {
+    _certs = {
         'aws_root_cert': 'root-CA.crt',
         'aws_thing_key': 'thing.private.key',
         'aws_thing_cert': 'thing.cert.pem',
@@ -56,7 +58,7 @@ class AppConfig:
         env = Env()
         # Parse our variables
         parsed = {}
-        for name, mapping in cls._PARSERS.items():
+        for name, mapping in cls._parsers.items():
             # This may fail if env vars are not present
             try:
                 if mapping.default is None:
@@ -82,14 +84,14 @@ class AppConfig:
         Returns:
             List[str]: Identifiers of all variables searched for
         """
-        return [mapper.identifier for mapper in cls._PARSERS.values()]
+        return [mapper.identifier for mapper in cls._parsers.values()]
 
     @classmethod
     def _convert_certs(cls, parsed: Dict[str, Any]) -> None:
         # Save certs to files
         certs_dir = parsed['certs_dir'].expanduser()
         certs_dir.mkdir(exist_ok=True, parents=True)
-        for cert, filename in cls._CERTS.items():
+        for cert, filename in cls._certs.items():
             # Establish the path of the new certificate file
             cert_path = certs_dir / filename
             # Create the file from the environment variable

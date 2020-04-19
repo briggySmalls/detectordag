@@ -23,9 +23,16 @@ class ClientConfig:
 
 @dataclass
 class DeviceShadowState:
+    """Helper function for capturing a device shadow update"""
+
     status: bool
 
     def to_json(self) -> str:
+        """Convert shadow state to a JSON payload
+
+        Returns:
+            str: Description
+        """
         payload = {'state': {'reported': asdict(self)}}
         return json.dumps(payload)
 
