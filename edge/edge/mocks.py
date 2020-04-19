@@ -5,12 +5,10 @@ _LOGGER = logging.getLogger(__file__)
 
 
 class MockDigitalInputDevice:
-    """A mock DigitalInputDevice"""
+    """A mock gpiozero.DigitalInputDevice"""
     def __init__(self, pin: int) -> None:
         _LOGGER.debug("Creating MockDigitalInputDevice with pin: %s", pin)
-        self.when_activated = None
-        self.when_deactivated = None
-        self._status = False
+        self._status = 0
 
     def high(self) -> None:
         """Simulate reading a 'high' value
@@ -25,7 +23,7 @@ class MockDigitalInputDevice:
     def toggle(self) -> None:
         """Simulate the input toggling value
         """
-        self.set_status(not self._status)
+        self.set_status(1 if self._status == 0 else 0)
 
     @property
     def value(self) -> int:
@@ -36,6 +34,12 @@ class MockDigitalInputDevice:
         """Simulate reading a new status"""
         self._status = status
         if status:
-            self.when_activated(self)  # pylint: disable=not-callable
+            self.when_activated()
         else:
-            self.when_deactivated(self)  # pylint: disable=not-callable
+            self.when_deactivated()
+
+    def when_activated(self) -> None:
+        """Faked handler for original DigitalInputDevice"""
+
+    def when_deactivated(self) -> None:
+        """Faked handler for original DigitalInputDevice"""

@@ -3,6 +3,8 @@ import json
 import logging
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from types import TracebackType
+from typing import Optional, Type
 
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 
@@ -23,9 +25,16 @@ class ClientConfig:
 
 @dataclass
 class DeviceShadowState:
+    """Helper function for capturing a device shadow update"""
+
     status: bool
 
     def to_json(self) -> str:
+        """Convert shadow state to an AWS shadow JSON payload
+
+        Returns:
+            str: AWS shadow JSON payload
+        """
         payload = {'state': {'reported': asdict(self)}}
         return json.dumps(payload)
 
@@ -63,7 +72,9 @@ class CloudClient:
         # Return this
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
+    def __exit__(self, exc_type: Optional[Type[BaseException]],
+                 exc_value: Optional[BaseException],
+                 traceback: Optional[TracebackType]) -> None:
         del exc_type, exc_value, traceback
         self.client.disconnect()
 
@@ -82,6 +93,16 @@ class CloudClient:
     @staticmethod
     def shadow_update_handler(payload: str, response_status: str,
                               token: str) -> None:
+        """Handle a device shadow update response
+
+        Args:
+            payload (str): Response body
+            response_status (str): Response status
+            token (str): Request identifier
+
+        Raises:
+            RuntimeError: Unexpected response
+        """
         del token
         if response_status == 'accepted':
             _LOGGER.info("Shadow update accepted: payload=%s", payload)
