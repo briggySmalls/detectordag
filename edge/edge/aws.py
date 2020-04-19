@@ -28,10 +28,10 @@ class DeviceShadowState:
     status: bool
 
     def to_json(self) -> str:
-        """Convert shadow state to a JSON payload
+        """Convert shadow state to an AWS shadow JSON payload
 
         Returns:
-            str: Description
+            str: AWS shadow JSON payload
         """
         payload = {'state': {'reported': asdict(self)}}
         return json.dumps(payload)
@@ -89,6 +89,16 @@ class CloudClient:
     @staticmethod
     def shadow_update_handler(payload: str, response_status: str,
                               token: str) -> None:
+        """Handle a device shadow update response
+
+        Args:
+            payload (str): Response body
+            response_status (str): Response status
+            token (str): Request identifier
+
+        Raises:
+            RuntimeError: Unexpected response
+        """
         del token
         if response_status == 'accepted':
             _LOGGER.info("Shadow update accepted: payload=%s", payload)
