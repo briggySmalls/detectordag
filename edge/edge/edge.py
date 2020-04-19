@@ -29,6 +29,7 @@ class EdgeApp:
         self._client = CloudClient(config)
         # Preallocate the timer
         self._timer = None
+        self._is_cancelled = False
 
     def __enter__(self) -> 'EdgeApp':
         self._client.__enter__()
@@ -52,6 +53,7 @@ class EdgeApp:
         # Cancel any running timers
         if self._timer is not None:
             self._timer.cancel()
+            self._is_cancelled = True
 
     def _publish_update(self, device: DigitalInputDevice) -> None:
         # Get the status
@@ -60,6 +62,9 @@ class EdgeApp:
         self._client.power_status_changed(status)
 
     def _tick(self) -> None:
+        if self._is_cancelled:
+            # Short-circuit if we've cancelled already
+            return
         # Publish an update
         self._publish_update(self._device)
         # Schedule another tick
