@@ -4,14 +4,14 @@ commands:
   python-deps:
     steps:
       - run:
-          working_directory: ./edge
+          working_directory: ./edge/detector
           command: |  # use pipenv to install dependencies
             sudo pip install pipenv
             pipenv install --dev
       - save_cache:  # Save a cache of dependencies, tied to lockfile
-          key: deps9-{{ .Branch }}-{{ checksum "./edge/Pipfile.lock" }}
+          key: deps9-{{ .Branch }}-{{ checksum "./edge/detector/Pipfile.lock" }}
           paths:
-            - "./edge/.venv"
+            - "./edge/detector/.venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.6/site-packages"
 
@@ -30,7 +30,7 @@ jobs:
       - checkout
       - python-deps
       - run:
-          working_directory: ./edge
+          working_directory: ./edge/detector
           name: Run format check
           command: pipenv run invoke format --check
   # Ensure edge code is linting correctly
@@ -40,7 +40,7 @@ jobs:
       - checkout
       - python-deps
       - run:
-          working_directory: ./edge
+          working_directory: ./edge/detector
           name: Run linting
           command: pipenv run invoke lint
   # Ensure edge code is passing tests
@@ -50,7 +50,7 @@ jobs:
       - checkout
       - python-deps
       - run:
-          working_directory: ./edge
+          working_directory: ./edge/detector
           name: Run tests
           command: pipenv run invoke test
 
