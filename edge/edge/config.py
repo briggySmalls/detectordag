@@ -2,7 +2,7 @@
 import base64
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional, Dict, List
+from typing import Any, Dict, List, Optional
 
 from environs import Env, EnvValidationError
 
@@ -61,10 +61,12 @@ class AppConfig:
             try:
                 if mapping.default is None:
                     # Parse a variable without a default
-                    parsed[name] = getattr(env, mapping.parser)(mapping.identifier)
+                    parsed[name] = getattr(env,
+                                           mapping.parser)(mapping.identifier)
                 else:
                     # Parse a variable with a default
-                    parsed[name] = getattr(env, mapping.parser)(mapping.identifier, default=mapping.default)
+                    parsed[name] = getattr(env, mapping.parser)(
+                        mapping.identifier, default=mapping.default)
             except EnvValidationError as exc:
                 raise ConfigError(exc)
 
