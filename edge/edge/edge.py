@@ -1,6 +1,8 @@
 """Main module."""
 import logging
 from threading import Timer
+from types import TracebackType
+from typing import Optional, Type
 
 from edge.aws import ClientConfig, CloudClient
 from edge.config import AppConfig
@@ -18,15 +20,15 @@ class EdgeApp:
     def __init__(self, device: DigitalInputDevice, config: AppConfig) -> None:
         self.config = config
         # Prepare configuration for the client
-        config = ClientConfig(device_id=config.aws_thing_name,
-                              endpoint=config.aws_endpoint,
-                              port=config.aws_port,
-                              root_cert=config.aws_root_cert,
-                              thing_cert=config.aws_thing_cert,
-                              thing_key=config.aws_thing_key)
+        client_config = ClientConfig(device_id=config.aws_thing_name,
+                                     endpoint=config.aws_endpoint,
+                                     port=config.aws_port,
+                                     root_cert=config.aws_root_cert,
+                                     thing_cert=config.aws_thing_cert,
+                                     thing_key=config.aws_thing_key)
         self._device = device
         # Create the client
-        self._client = CloudClient(config)
+        self._client = CloudClient(client_config)
         # Preallocate the timer
         self._timer = None
         self._is_cancelled = False
@@ -47,7 +49,9 @@ class EdgeApp:
         # Start the alive timer
         self._tick()
 
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
+    def __exit__(self, exc_type: Optional[Type[BaseException]],
+                 exc_value: Optional[BaseException],
+                 traceback: Optional[TracebackType]) -> None:
         # Teardown the AWS client
         self._client.__exit__(exc_type, exc_value, traceback)
         # Cancel any running timers

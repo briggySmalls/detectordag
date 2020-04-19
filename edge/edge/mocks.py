@@ -40,8 +40,6 @@ class MockDigitalInputDevice:
 
     def when_activated(self) -> None:
         """Faked handler for original DigitalInputDevice"""
-        pass
 
     def when_deactivated(self) -> None:
         """Faked handler for original DigitalInputDevice"""
-        pass

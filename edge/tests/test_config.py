@@ -1,12 +1,15 @@
 """Tests for `edge` package."""
 # pylint: disable=redefined-outer-name
 
+from pathlib import Path
+from typing import Any
+
 import pytest
 
 from edge.config import AppConfig, ConfigError
 
 
-def test_variables():
+def test_variables() -> None:
     """Test that config is looking for expected variables"""
 
     _variable_ids = [
@@ -22,7 +25,7 @@ def test_variables():
     assert set(_variable_ids) == set(AppConfig.variables())
 
 
-def test_present(monkeypatch, tmp_path):
+def test_present(monkeypatch: Any, tmp_path: Path) -> None:
     """Test 'happy path' of all variables present
 
     Args:
@@ -87,7 +90,7 @@ _VARIABLES = {
 
 
 @pytest.mark.parametrize("to_drop", _VARIABLES.keys())
-def test_missing(monkeypatch, tmp_path, to_drop):
+def test_missing(monkeypatch: Any, tmp_path: Path, to_drop: bool) -> None:
     """Run a test, dropping each of the keys in turn"""
     # Delete existing environment variables
     for var in AppConfig.variables():
