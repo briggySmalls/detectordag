@@ -30,7 +30,7 @@ class EdgeApp:
         # Create the client
         self._client = CloudClient(client_config)
         # Preallocate the timer
-        self._timer = None
+        self._timer = None  # type: Optional[Timer]
         self._is_cancelled = False
 
     def __enter__(self) -> 'EdgeApp':
