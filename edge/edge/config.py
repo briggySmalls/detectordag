@@ -2,7 +2,7 @@
 import base64
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional, Dict, List
+from typing import Any, Dict, List, Optional
 
 from environs import Env, EnvValidationError
 
@@ -29,6 +29,7 @@ class AppConfig:
         'aws_endpoint': ConfigMapper('AWS_ENDPOINT', 'str'),
         'aws_port': ConfigMapper('AWS_PORT', 'int', default=8883),
         'certs_dir': ConfigMapper('CERT_DIR', 'path', '~/.detectordag/certs'),
+        'alive_interval': ConfigMapper('ALIVE_INTERVAL', 'int', default=3600),
     }
     _CERTS = {
         'aws_root_cert': 'root-CA.crt',
@@ -43,6 +44,7 @@ class AppConfig:
     aws_endpoint: str
     aws_port: int
     certs_dir: Path
+    alive_interval: int
 
     @classmethod
     def from_env(cls) -> 'AppConfig':
@@ -59,10 +61,12 @@ class AppConfig:
             try:
                 if mapping.default is None:
                     # Parse a variable without a default
-                    parsed[name] = getattr(env, mapping.parser)(mapping.identifier)
+                    parsed[name] = getattr(env,
+                                           mapping.parser)(mapping.identifier)
                 else:
                     # Parse a variable with a default
-                    parsed[name] = getattr(env, mapping.parser)(mapping.identifier, default=mapping.default)
+                    parsed[name] = getattr(env, mapping.parser)(
+                        mapping.identifier, default=mapping.default)
             except EnvValidationError as exc:
                 raise ConfigError(exc)
 

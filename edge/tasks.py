@@ -87,7 +87,7 @@ def test(c):
     """
     Run tests
     """
-    pty = platform.system() == 'Linux'
+    pty = platform.system() != 'Windows'
     c.run("python {} test".format(SETUP_FILE), pty=pty)
 
 
