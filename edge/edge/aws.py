@@ -3,6 +3,8 @@ import json
 import logging
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Type, Optional
+from types import TracebackType
 
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 
@@ -70,9 +72,10 @@ class CloudClient:
         # Return this
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
+    def __exit__(self, exc_type: Optional[Type[BaseException]], exc_value: Optional[BaseException], traceback: Optional[TracebackType]) -> Optional[bool]:
         del exc_type, exc_value, traceback
         self.client.disconnect()
+        return None
 
     def power_status_changed(self, status: bool) -> None:
         """Send a messaging indicating the power status has updated
