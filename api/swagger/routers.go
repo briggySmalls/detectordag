@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/briggysmalls/detectordag/api/swagger/server"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
 	"github.com/briggysmalls/detectordag/shared/shadow"
@@ -31,18 +32,17 @@ type Route struct {
 	HandlerFunc http.HandlerFunc
 }
 
+type RouterConfig struct {
+	db     database.Client
+	shadow shadow.Client
+	email  email.Client
+}
+
 type Routes []Route
 
-func NewRouter(config *Config, db database.Client, shadow shadow.Client, email email.Client) *mux.Router {
+func NewRouter(s server.Server) *mux.Router {
 	// Create the router
 	router := mux.NewRouter().StrictSlash(true)
-	// Create a server struct
-	s := server{
-		config: *config,
-		db:     db,
-		shadow: shadow,
-		email:  email,
-	}
 	// Prepare the routes
 	var routes = Routes{
 		Route{

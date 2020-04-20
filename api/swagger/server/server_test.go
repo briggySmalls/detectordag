@@ -1,4 +1,4 @@
-package swagger
+package server
 
 import (
 	"fmt"
@@ -26,7 +26,6 @@ func TestCreateToken(t *testing.T) {
 	}
 	for _, params := range testParams {
 		// Create a server
-
 		srv := server{
 			config: Config{JwtSecret: params.secret, JwtDuration: params.duration},
 		}

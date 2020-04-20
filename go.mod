@@ -25,6 +25,7 @@ require (
 	github.com/spf13/viper v1.6.2
 	github.com/stianeikeland/go-rpio/v4 v4.4.0
 	github.com/streadway/amqp v0.0.0-20200108173154-1c71cc93ed71
+	github.com/stretchr/testify v1.4.0
 	golang.org/x/crypto v0.0.0-20191205180655-e7c4368fe9dd
 	golang.org/x/sys v0.0.0-20200124204421-9fbb57f87de9 // indirect
 )

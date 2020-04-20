@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	"github.com/briggysmalls/detectordag/api/swagger"
+	"github.com/briggysmalls/detectordag/api/swagger/server"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
 	"github.com/briggysmalls/detectordag/shared/shadow"
@@ -20,7 +21,7 @@ var adapter *gorillamux.GorillaMuxAdapter
 
 func init() {
 	// Get config from environment
-	c, err := swagger.NewConfig()
+	c, err := server.LoadConfig()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -59,9 +60,18 @@ func init() {
 		log.Fatal(err.Error())
 	}
 	// Create the server
-	server := swagger.NewRouter(c, db, shadow, email)
+	serverParams := server.Params{
+		Db:     db,
+		Shadow: shadow,
+		Email:  email,
+		Config: *c,
+	}
+	s := server.New(serverParams)
+	// Create the router
+	router := swagger.NewRouter(s)
+	// Create a router
 	// Create an adapter for aws lambda
-	adapter = gorillamux.New(server)
+	adapter = gorillamux.New(router)
 }
 
 // HandleRequest handles a lambda call
