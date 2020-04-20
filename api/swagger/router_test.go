@@ -10,10 +10,12 @@ import (
 	"testing"
 )
 
+type expectFunc func(*MockServer)
+
 type testParams struct {
 	method     string
 	route      string
-	expectFunc func(*MockServer)
+	expectFunc expectFunc
 }
 
 func TestValidRoutes(t *testing.T) {
@@ -37,28 +39,31 @@ func TestValidRoutes(t *testing.T) {
 	}
 
 	for _, params := range tps {
-		runTest(t, params, http.StatusOK)
+		// Create a request
+		r, err := http.NewRequest(params.method, params.route, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		// Run the request
+		w := runTest(t, r, params.expectFunc)
+		// Ensure we get a 200
+		if s := w.Code; s != http.StatusOK {
+			t.Errorf("handler returned wrong status code: got %d", s)
+		}
 	}
 }
 
-func runTest(t *testing.T, params testParams, status int) {
+func runTest(t *testing.T, r *http.Request, expect expectFunc) (w *httptest.ResponseRecorder) {
 	// Create router
 	server, router := createTestRouter(t)
-	// Create a request
-	r, err := http.NewRequest(params.method, params.route, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
 	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
-	w := httptest.NewRecorder()
+	w = httptest.NewRecorder()
 	// Configure the expectations
-	params.expectFunc(server)
+	expect(server)
 	// Get the router to handle the request
 	router.ServeHTTP(w, r)
-	// Ensure we get a 200
-	if s := w.Code; s != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %d wanted %d", s, status)
-	}
+	// Return the response for checking
+	return w
 }
 
 func setStatusOk(w http.ResponseWriter, r *http.Request) {
