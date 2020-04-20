@@ -60,9 +60,18 @@ func init() {
 		log.Fatal(err.Error())
 	}
 	// Create the server
-	server := swagger.NewRouter(c, db, shadow, email)
+	serverParams := server.Params{
+		Db:     db,
+		Shadow: shadow,
+		Email:  email,
+		Config: *c,
+	}
+	s := server.New(serverParams)
+	// Create the router
+	router := swagger.NewRouter(s)
+	// Create a router
 	// Create an adapter for aws lambda
-	adapter = gorillamux.New(server)
+	adapter = gorillamux.New(router)
 }
 
 // HandleRequest handles a lambda call

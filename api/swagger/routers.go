@@ -40,17 +40,9 @@ type RouterConfig struct {
 
 type Routes []Route
 
-func NewRouter(config *server.Config, db database.Client, shadow shadow.Client, email email.Client) *mux.Router {
+func NewRouter(s server.Server) *mux.Router {
 	// Create the router
 	router := mux.NewRouter().StrictSlash(true)
-	// Create a server struct
-	serverParams := server.Params{
-		Db:     db,
-		Shadow: shadow,
-		Email:  email,
-		Config: *config,
-	}
-	s := server.New(serverParams)
 	// Prepare the routes
 	var routes = Routes{
 		Route{
