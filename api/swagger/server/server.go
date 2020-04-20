@@ -1,4 +1,4 @@
-package swagger
+package server
 
 import (
 	"encoding/json"
@@ -10,7 +10,6 @@ import (
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
-	"github.com/kelseyhightower/envconfig"
 	"net/http"
 	"strings"
 	"time"
@@ -25,11 +24,6 @@ var (
 	ErrMalformattedAuthHeader = errors.New("Authorization header badly formed")
 )
 
-type Config struct {
-	JwtSecret   string `split_words:"true"`
-	JwtDuration string `split_words:"true"`
-}
-
 type server struct {
 	db     database.Client
 	shadow shadow.Client
@@ -37,38 +31,26 @@ type server struct {
 	config Config
 }
 
+type Server interface {
+	Auth(w http.ResponseWriter, r *http.Request)
+	GetAccount(w http.ResponseWriter, r *http.Request)
+	GetDevices(w http.ResponseWriter, r *http.Request)
+	UpdateAccount(w http.ResponseWriter, r *http.Request)
+	UpdateDevice(w http.ResponseWriter, r *http.Request)
+}
+
 type CustomAuthClaims struct {
 	AccountId string `json:"accountId"`
 	jwt.StandardClaims
 }
 
-func (c *Config) ParseDuration() (time.Duration, error) {
-	return time.ParseDuration(c.JwtDuration)
-}
-
-func NewConfig() (*Config, error) {
-	// Load config
-	var c Config
-	var err error
-	err = envconfig.Process("detectordag", &c)
-	if err != nil {
-		return nil, err
+func New(db database.Client, shadow shadow.Client, email email.Client, config Config) Server {
+	return &server{
+		db:     db,
+		shadow: shadow,
+		email:  email,
+		config: config,
 	}
-	// Ensure duration is valid
-	dur, err := c.ParseDuration()
-	if err != nil {
-		return nil, err
-	}
-	if dur.Seconds() < 1 {
-		return nil, fmt.Errorf("JWT expiry duration insufficient: %f", dur.Seconds())
-	}
-	return &c, nil
-}
-
-func (s *server) optionsHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Authorization")
-	w.Header().Set("Access-Control-Allow-Methods-Type", "OPTIONS,GET,POST,PATCH")
-	w.WriteHeader(http.StatusOK)
 }
 
 func (s *server) validateAccount(w http.ResponseWriter, r *http.Request) *string {

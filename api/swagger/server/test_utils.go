@@ -1,7 +1,7 @@
-package swagger
+package server
 
-//go:generate mockgen -destination mock_db.go -package swagger -mock_names Client=MockDBClient github.com/briggysmalls/detectordag/shared/database Client
-//go:generate mockgen -destination mock_shadow.go -package swagger -mock_names Client=MockShadowClient github.com/briggysmalls/detectordag/shared/shadow Client
+//go:generate mockgen -destination mock_db.go -package server -mock_names Client=MockDBClient github.com/briggysmalls/detectordag/shared/database Client
+//go:generate mockgen -destination mock_shadow.go -package server -mock_names Client=MockShadowClient github.com/briggysmalls/detectordag/shared/shadow Client
 
 import (
 	"bytes"
