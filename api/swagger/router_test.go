@@ -45,7 +45,7 @@ func TestValidRoutes(t *testing.T) {
 		// Run the request
 		w := runTest(t, r, params.expectFunc)
 		// Ensure we get a 200
-		if s := w.Code; s != http.StatusOK {
+		if s := w.StatusCode; s != http.StatusOK {
 			t.Errorf("handler returned wrong status code: got %d", s)
 		}
 	}
@@ -54,11 +54,11 @@ func TestValidRoutes(t *testing.T) {
 func TestOptionsRoutes(t *testing.T) {
 	// Create requests to check
 	tps := []struct {
-		route string
+		route   string
+		methods []string
 	}{
 		{route: "/v1/auth"},
 		{route: "/v1/accounts/33b782d3-a2c8-40be-8aef-db5b44119bd5"},
-		{route: "/v1/accounts/cfe7d5ed-826e-4e31-bb46-d62aa1cb58a7"},
 		{route: "/v1/accounts/f88948e6-5f93-4f11-8d58-15d48075069d/devices"},
 		{route: "/v1/devices/c0e94a1b-a835-4cc2-9574-642bea13805a"},
 	}
@@ -72,17 +72,18 @@ func TestOptionsRoutes(t *testing.T) {
 		// Run the request
 		w := runTest(t, r, nil)
 		// Ensure we get a 200
-		if s := w.Code; s != http.StatusOK {
+		if s := w.StatusCode; s != http.StatusOK {
 			t.Errorf("handler returned wrong status code: got %d", s)
 		}
+		// Ensure we have the expected headers
 	}
 }
 
-func runTest(t *testing.T, r *http.Request, expect expectFunc) (w *httptest.ResponseRecorder) {
+func runTest(t *testing.T, r *http.Request, expect expectFunc) *http.Response {
 	// Create router
 	server, router := createTestRouter(t)
 	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
-	w = httptest.NewRecorder()
+	w := httptest.NewRecorder()
 	// Configure the expectations
 	if expect != nil {
 		expect(server)
@@ -90,7 +91,7 @@ func runTest(t *testing.T, r *http.Request, expect expectFunc) (w *httptest.Resp
 	// Get the router to handle the request
 	router.ServeHTTP(w, r)
 	// Return the response for checking
-	return w
+	return w.Result()
 }
 
 func setStatusOk(w http.ResponseWriter, r *http.Request) {
