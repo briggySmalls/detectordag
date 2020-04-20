@@ -47,9 +47,9 @@ func TestValidRoutes(t *testing.T) {
 		// Ensure we get a 200
 		assert.Equal(t, http.StatusOK, w.StatusCode)
 		// Assert Content-Type is set
-		assert.Equal(t, getHeaderValue(t, w.Header, "Content-Type"), "application/json; charset=UTF-8")
+		assert.Equal(t, "application/json; charset=UTF-8", getHeaderValue(t, w.Header, "Content-Type"))
 		// Assert Access-Control-Allow-Origin is set
-		assert.Equal(t, getHeaderValue(t, w.Header, "Access-Control-Allow-Origin"), "*")
+		assert.Equal(t, "*", getHeaderValue(t, w.Header, "Access-Control-Allow-Origin"))
 	}
 }
 
