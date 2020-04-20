@@ -44,12 +44,12 @@ type CustomAuthClaims struct {
 	jwt.StandardClaims
 }
 
-func New(db database.Client, shadow shadow.Client, email email.Client, config Config) Server {
+func New(params Params) Server {
 	return &server{
-		db:     db,
-		shadow: shadow,
-		email:  email,
-		config: config,
+		db:     params.Db,
+		shadow: params.Shadow,
+		email:  params.Email,
+		config: params.Config,
 	}
 }
 

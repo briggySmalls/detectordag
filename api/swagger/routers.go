@@ -44,7 +44,13 @@ func NewRouter(config *server.Config, db database.Client, shadow shadow.Client, 
 	// Create the router
 	router := mux.NewRouter().StrictSlash(true)
 	// Create a server struct
-	s := server.New(db, shadow, email, *config)
+	serverParams := server.Params{
+		Db:     db,
+		Shadow: shadow,
+		Email:  email,
+		Config: *config,
+	}
+	s := server.New(serverParams)
 	// Prepare the routes
 	var routes = Routes{
 		Route{
