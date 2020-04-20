@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	"github.com/briggysmalls/detectordag/api/swagger"
+	"github.com/briggysmalls/detectordag/api/swagger/server"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
 	"github.com/briggysmalls/detectordag/shared/shadow"
@@ -20,7 +21,7 @@ var adapter *gorillamux.GorillaMuxAdapter
 
 func init() {
 	// Get config from environment
-	c, err := swagger.NewConfig()
+	c, err := server.NewConfig()
 	if err != nil {
 		log.Fatal(err.Error())
 	}

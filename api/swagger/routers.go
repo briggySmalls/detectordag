@@ -32,18 +32,19 @@ type Route struct {
 	HandlerFunc http.HandlerFunc
 }
 
+type RouterConfig struct {
+	db     database.Client
+	shadow shadow.Client
+	email  email.Client
+}
+
 type Routes []Route
 
-func NewRouter(config *Config, db database.Client, shadow shadow.Client, email email.Client) *mux.Router {
+func NewRouter(config *server.Config, db database.Client, shadow shadow.Client, email email.Client) *mux.Router {
 	// Create the router
 	router := mux.NewRouter().StrictSlash(true)
 	// Create a server struct
-	s := server.New(
-		db:     db,
-		shadow: shadow,
-		email:  email,
-		config: *config,
-	)
+	s := server.New(db, shadow, email, *config)
 	// Prepare the routes
 	var routes = Routes{
 		Route{
