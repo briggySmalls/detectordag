@@ -47,35 +47,35 @@ func NewRouter(s server.Server) *mux.Router {
 	var routes = Routes{
 		Route{
 			"GetAccount",
-			strings.ToUpper("Get"),
+			http.MethodGet,
 			fmt.Sprintf("/v1/accounts/{accountId:%s}", uuidRegex),
 			s.GetAccount,
 		},
 
 		Route{
 			"GetDevices",
-			strings.ToUpper("Get"),
+			http.MethodGet,
 			fmt.Sprintf("/v1/accounts/{accountId:%s}/devices", uuidRegex),
 			s.GetDevices,
 		},
 
 		Route{
 			"UpdateAccount",
-			strings.ToUpper("Patch"),
+			http.MethodPatch,
 			fmt.Sprintf("/v1/accounts/{accountId:%s}", uuidRegex),
 			s.UpdateAccount,
 		},
 
 		Route{
 			"Auth",
-			strings.ToUpper("Post"),
+			http.MethodPost,
 			"/v1/auth",
 			s.Auth,
 		},
 
 		Route{
 			"UpdateDevice",
-			strings.ToUpper("Patch"),
+			http.MethodPatch,
 			"/v1/devices/{deviceId}",
 			s.UpdateDevice,
 		},
