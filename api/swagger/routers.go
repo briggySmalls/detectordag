@@ -44,59 +44,66 @@ func NewRouter(s server.Server) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	// Create subrouter for 'v1'
 	api := router.PathPrefix("/v1").Subrouter()
-	// Prepare the routes
-	var routes = Routes{
-		Route{
-			"GetAccount",
-			http.MethodGet,
-			fmt.Sprintf("/accounts/{accountId:%s}", uuidRegex),
-			s.GetAccount,
-		},
-
-		Route{
-			"GetDevices",
-			http.MethodGet,
-			fmt.Sprintf("/accounts/{accountId:%s}/devices", uuidRegex),
-			s.GetDevices,
-		},
-
-		Route{
-			"UpdateAccount",
-			http.MethodPatch,
-			fmt.Sprintf("/accounts/{accountId:%s}", uuidRegex),
-			s.UpdateAccount,
-		},
-
+	// Add the non-auth routes
+	nonAuthRoutes := Routes{
 		Route{
 			"Auth",
 			http.MethodPost,
 			"/auth",
 			s.Auth,
 		},
+	}
+	addRoutes(api, nonAuthRoutes)
 
+	// Create subrouter for accounts
+	accounts := api.PathPrefix("/accounts").Subrouter()
+	addRoutes(accounts, Routes{
+		Route{
+			"GetAccount",
+			http.MethodGet,
+			fmt.Sprintf("/{accountId:%s}", uuidRegex),
+			s.GetAccount,
+		},
+		Route{
+			"GetDevices",
+			http.MethodGet,
+			fmt.Sprintf("/{accountId:%s}/devices", uuidRegex),
+			s.GetDevices,
+		},
+		Route{
+			"UpdateAccount",
+			http.MethodPatch,
+			fmt.Sprintf("/{accountId:%s}", uuidRegex),
+			s.UpdateAccount,
+		},
+	})
+
+	// Create subrouter for devices
+	devices := api.PathPrefix("/devices").Subrouter()
+	addRoutes(devices, Routes{
 		Route{
 			"UpdateDevice",
 			http.MethodPatch,
-			"/devices/{deviceId}",
+			"/{deviceId}",
 			s.UpdateDevice,
 		},
-	}
-
-	// Build the router
-	for _, route := range routes {
-		var handler http.Handler
-		handler = route.HandlerFunc
-
-		api.
-			Methods(route.Method, http.MethodOptions).
-			Path(route.Pattern).
-			Name(route.Name).
-			Handler(handler)
-	}
+	})
 
 	// Add CORS header on all responses
 	api.Use(mux.CORSMethodMiddleware(api))
 	api.Use(corsMiddleware)
 
 	return router
+}
+
+func addRoutes(router *mux.Router, routes []Route) {
+	for _, route := range routes {
+		var handler http.Handler
+		handler = route.HandlerFunc
+		router.
+			Methods(route.Method, http.MethodOptions).
+			Path(route.Pattern).
+			Name(route.Name).
+			Handler(handler)
+	}
 }
