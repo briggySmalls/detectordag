@@ -42,40 +42,42 @@ type Routes []Route
 func NewRouter(s server.Server) *mux.Router {
 	// Create the router
 	router := mux.NewRouter().StrictSlash(true)
+	// Create subrouter for 'v1'
+	api := router.PathPrefix("/v1").Subrouter()
 	// Prepare the routes
 	var routes = Routes{
 		Route{
 			"GetAccount",
 			http.MethodGet,
-			fmt.Sprintf("/v1/accounts/{accountId:%s}", uuidRegex),
+			fmt.Sprintf("/accounts/{accountId:%s}", uuidRegex),
 			s.GetAccount,
 		},
 
 		Route{
 			"GetDevices",
 			http.MethodGet,
-			fmt.Sprintf("/v1/accounts/{accountId:%s}/devices", uuidRegex),
+			fmt.Sprintf("/accounts/{accountId:%s}/devices", uuidRegex),
 			s.GetDevices,
 		},
 
 		Route{
 			"UpdateAccount",
 			http.MethodPatch,
-			fmt.Sprintf("/v1/accounts/{accountId:%s}", uuidRegex),
+			fmt.Sprintf("/accounts/{accountId:%s}", uuidRegex),
 			s.UpdateAccount,
 		},
 
 		Route{
 			"Auth",
 			http.MethodPost,
-			"/v1/auth",
+			"/auth",
 			s.Auth,
 		},
 
 		Route{
 			"UpdateDevice",
 			http.MethodPatch,
-			"/v1/devices/{deviceId}",
+			"/devices/{deviceId}",
 			s.UpdateDevice,
 		},
 	}
@@ -85,7 +87,7 @@ func NewRouter(s server.Server) *mux.Router {
 		var handler http.Handler
 		handler = route.HandlerFunc
 
-		router.
+		api.
 			Methods(route.Method, http.MethodOptions).
 			Path(route.Pattern).
 			Name(route.Name).
@@ -93,8 +95,8 @@ func NewRouter(s server.Server) *mux.Router {
 	}
 
 	// Add CORS header on all responses
-	router.Use(mux.CORSMethodMiddleware(router))
-	router.Use(corsMiddleware)
+	api.Use(mux.CORSMethodMiddleware(api))
+	api.Use(corsMiddleware)
 
 	return router
 }
