@@ -12,7 +12,6 @@ package swagger
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/briggysmalls/detectordag/api/swagger/server"
 	"github.com/briggysmalls/detectordag/shared/database"
@@ -87,44 +86,15 @@ func NewRouter(s server.Server) *mux.Router {
 		handler = route.HandlerFunc
 
 		router.
-			Methods(route.Method).
+			Methods(route.Method, http.MethodOptions).
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(handler)
 	}
 
-	// Add routes to allow CORS
-	addOptionsRoutes(router, routes)
-
 	// Add CORS header on all responses
+	router.Use(mux.CORSMethodMiddleware(router))
 	router.Use(corsMiddleware)
 
 	return router
-}
-
-func addOptionsRoutes(router *mux.Router, routes []Route) {
-	// Determine unique routes, and collect the methods on each
-	methods := make(map[string][]string)
-	for _, route := range routes {
-		// Append the method to the pattern
-		methods[route.Pattern] = append(methods[route.Pattern], route.Method)
-	}
-
-	// Add routes for the options method
-	for pattern, methods := range methods {
-		router.
-			Methods("OPTIONS").
-			Path(pattern).
-			Handler(OptionsHandlerFactory(methods))
-	}
-}
-
-//OptionsHandlerFactory creates a handler for a route
-func OptionsHandlerFactory(methods []string) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Add header to permit methods
-		w.Header().Set("Access-Control-Allow-Methods", strings.Join(methods, ","))
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Authorization")
-		w.WriteHeader(http.StatusOK)
-	})
 }
