@@ -6,6 +6,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -39,6 +40,7 @@ func TestValidRoutes(t *testing.T) {
 	}
 	// Run the test iterations
 	for _, params := range tps {
+		log.Printf("Testing route (%s) '%s'", params.method, params.route)
 		// Create a request
 		r, err := http.NewRequest(params.method, params.route, nil)
 		assert.NoError(t, err)
@@ -66,6 +68,7 @@ func TestOptionsRoutes(t *testing.T) {
 	}
 	// Run the test iterations
 	for _, params := range tps {
+		log.Printf("Testing route '%s'", params.route)
 		// Create a request
 		r, err := http.NewRequest(http.MethodOptions, params.route, nil)
 		assert.NoError(t, err)
