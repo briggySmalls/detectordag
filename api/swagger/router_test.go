@@ -46,6 +46,10 @@ func TestValidRoutes(t *testing.T) {
 		w := runTest(t, r, params.expectFunc)
 		// Ensure we get a 200
 		assert.Equal(t, http.StatusOK, w.StatusCode)
+		// Assert Content-Type is set
+		assert.Equal(t, getHeaderValue(t, w.Header, "Content-Type"), "application/json; charset=UTF-8")
+		// Assert Access-Control-Allow-Origin is set
+		assert.Equal(t, getHeaderValue(t, w.Header, "Access-Control-Allow-Origin"), "*")
 	}
 }
 
@@ -70,16 +74,12 @@ func TestOptionsRoutes(t *testing.T) {
 		// Ensure we get a 200
 		assert.Equal(t, http.StatusOK, w.StatusCode)
 		// Ensure we have the expected allowed headers
-		assert.Contains(t, w.Header, "Access-Control-Allow-Headers")
-		assert.Len(t, w.Header["Access-Control-Allow-Headers"], 1)
-		allowedHeaders := strings.Split(w.Header["Access-Control-Allow-Headers"][0], ",")
+		allowedHeaders := strings.Split(getHeaderValue(t, w.Header, "Access-Control-Allow-Headers"), ",")
 		assert.Contains(t, allowedHeaders, "Content-Type")
 		assert.Contains(t, allowedHeaders, "Authorization")
 		assert.Len(t, allowedHeaders, 2)
 		// Ensure we have the expected methods
-		assert.Contains(t, w.Header, "Access-Control-Allow-Methods")
-		assert.Len(t, w.Header["Access-Control-Allow-Methods"], 1)
-		allowedMethods := strings.Split(w.Header["Access-Control-Allow-Methods"][0], ",")
+		allowedMethods := strings.Split(getHeaderValue(t, w.Header, "Access-Control-Allow-Headers"), ",")
 		for _, method := range params.methods {
 			assert.Contains(t, allowedMethods, method)
 		}
@@ -112,4 +112,10 @@ func createTestRouter(t *testing.T) (*MockServer, *mux.Router) {
 	// Create mock server
 	s := NewMockServer(ctrl)
 	return s, NewRouter(s)
+}
+
+func getHeaderValue(t *testing.T, header http.Header, key string) string {
+	assert.Contains(t, header, key)
+	assert.Len(t, header[key], 1)
+	return header[key][0]
 }
