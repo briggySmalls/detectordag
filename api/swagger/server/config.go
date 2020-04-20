@@ -11,7 +11,7 @@ type Config struct {
 	JwtDuration string `split_words:"true"`
 }
 
-func NewConfig() (*Config, error) {
+func LoadConfig() (*Config, error) {
 	// Load config
 	var c Config
 	var err error

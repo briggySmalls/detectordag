@@ -21,7 +21,7 @@ var adapter *gorillamux.GorillaMuxAdapter
 
 func init() {
 	// Get config from environment
-	c, err := server.NewConfig()
+	c, err := server.LoadConfig()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
