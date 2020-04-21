@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	models "github.com/briggysmalls/detectordag/api/swagger/go"
+	"github.com/briggysmalls/detectordag/api/swagger/tokens"
 	"github.com/briggysmalls/detectordag/shared/database"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
 )
@@ -27,11 +28,7 @@ func TestAuthSuccess(t *testing.T) {
 	// Create a mock client
 	db, shadow := createMocks(t)
 	// Create unit under test
-	s := server{
-		db:     db,
-		config: Config{JwtSecret: jwtSecret, JwtDuration: jwtDuration},
-		shadow: shadow,
-	}
+	s := server{db: db, tokens: tokens.New(jwtSecret, testDuration), shadow: shadow}
 	// Configure the mock db client to expect a call to fetch the account
 	account := database.Account{AccountId: accountId, Username: username, Password: hashedPassword}
 	db.EXPECT().GetAccountByUsername(gomock.Eq(username)).Return(&account, nil)
@@ -52,15 +49,7 @@ func TestAuthSuccess(t *testing.T) {
 		t.Fatalf("handler returned unexpected account ID: got %s want %s", resp.AccountId, accountId)
 	}
 	// Parse the token contents
-	token, err := jwt.ParseWithClaims(resp.Token, &CustomAuthClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(jwtSecret), nil
-	})
-	// Check the claims
-	if claims, ok := token.Claims.(*CustomAuthClaims); ok && token.Valid {
-		if claims.AccountId != resp.AccountId {
-			t.Fatalf("Token did not correspond with authenticated user")
-		}
-	} else {
-		t.Fatalf(err.Error())
-	}
+	parsedAccountID, err := s.tokens.Validate(resp.Token)
+	assert.NoError(t, err)
+	assert.Equal(t, accountId, parsedAccountID)
 }

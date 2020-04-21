@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	models "github.com/briggysmalls/detectordag/api/swagger/go"
+	"github.com/briggysmalls/detectordag/api/swagger/tokens"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/shadow"
-	"github.com/gorilla/mux"
-
 	"github.com/golang/mock/gomock"
+	"github.com/gorilla/mux"
 	"net/http"
 	"testing"
 )
@@ -22,7 +22,7 @@ func TestGetDevicesSuccess(t *testing.T) {
 	// Create a client
 	db, shdw := createMocks(t)
 	// Create unit under test
-	s := server{db: db, config: Config{JwtSecret: jwtSecret}, shadow: shdw}
+	s := server{db: db, tokens: tokens.New(jwtSecret, testDuration), shadow: shdw}
 	// Configure the mock db client to expect a call to query for devices in an account
 	devices := []database.Device{
 		{AccountId: "35581BF4-32C8-4908-8377-2E6A021D3D2B", DeviceId: "63eda5eb-7f56-417f-88ed-44a9eb9e5f67"},

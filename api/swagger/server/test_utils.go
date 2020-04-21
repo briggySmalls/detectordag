@@ -6,11 +6,22 @@ package server
 import (
 	"bytes"
 	"github.com/golang/mock/gomock"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 )
+
+var testDuration time.Duration
+
+func init() {
+	var err error
+	testDuration, err = time.ParseDuration("1ms")
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+}
 
 func createMocks(t *testing.T) (*MockDBClient, *MockShadowClient) {
 	// Create mock controller
