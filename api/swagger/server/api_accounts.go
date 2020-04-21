@@ -18,21 +18,21 @@ import (
 
 func (s *server) GetAccount(w http.ResponseWriter, r *http.Request) {
 	// Ensure the auth middleware provided us with the account ID
-	accountID := r.Context().Value("accountID")
-	if accountID != nil {
-		setError(w, ErrAccountIDMissing, http.StatusInternalServerError)
+	accountID, err := getAccountId(r.Context())
+	if err != nil {
+		SetError(w, ErrAccountIDMissing, http.StatusInternalServerError)
 		return
 	}
 	// Request the account
-	account, err := s.db.GetAccountById(*accountID)
+	account, err := s.db.GetAccountById(string(accountID))
 	if err != nil {
-		setError(w, err, http.StatusInternalServerError)
+		SetError(w, err, http.StatusInternalServerError)
 		return
 	}
 	// Build the response
 	payload, err := s.createAccountPayload(account)
 	if err != nil {
-		setError(w, err, http.StatusInternalServerError)
+		SetError(w, err, http.StatusInternalServerError)
 		return
 	}
 	// Write the response
@@ -41,17 +41,16 @@ func (s *server) GetAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
-	var err error
 	// Ensure the auth middleware provided us with the account ID
-	accountID := r.Context().Value("accountID")
-	if accountID != nil {
-		setError(w, ErrAccountIDMissing, http.StatusInternalServerError)
+	accountID, err := getAccountId(r.Context())
+	if err != nil {
+		SetError(w, ErrAccountIDMissing, http.StatusInternalServerError)
 		return
 	}
 	// Fetch the devices associated with the account
-	devices, err := s.db.GetDevicesByAccount(*accountID)
+	devices, err := s.db.GetDevicesByAccount(string(accountID))
 	if err != nil {
-		setError(w, err, http.StatusInternalServerError)
+		SetError(w, err, http.StatusInternalServerError)
 		return
 	}
 	// Request each device's shadow
@@ -60,13 +59,13 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 		// Request the shadow
 		shdw, err := s.shadow.Get(device.DeviceId)
 		if err != nil {
-			setError(w, err, http.StatusInternalServerError)
+			SetError(w, err, http.StatusInternalServerError)
 			return
 		}
 		// Coerce the data into the right form
 		status, ok := shdw.State.Reported["status"].(bool)
 		if !ok {
-			setError(w, err, http.StatusInternalServerError)
+			SetError(w, err, http.StatusInternalServerError)
 		}
 		// Build the payload
 		payload[i] = models.Device{
@@ -79,7 +78,7 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 	// Prepare the JSON response
 	body, err := json.Marshal(payload)
 	if err != nil {
-		setError(w, err, http.StatusInternalServerError)
+		SetError(w, err, http.StatusInternalServerError)
 	}
 	// Write the response
 	w.WriteHeader(http.StatusOK)
@@ -88,35 +87,34 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 	// Ensure the auth middleware provided us with the account ID
-	accountID := r.Context().Value("accountID")
-	if accountID != nil {
-		setError(w, ErrAccountIDMissing, http.StatusInternalServerError)
+	accountID, err := getAccountId(r.Context())
+	if err != nil {
+		SetError(w, ErrAccountIDMissing, http.StatusInternalServerError)
 		return
 	}
 	// Parse the emails from the request
 	var emails models.Emails
-	var err error
 	err = json.NewDecoder(r.Body).Decode(&emails)
 	if err != nil {
-		setError(w, err, http.StatusBadRequest)
+		SetError(w, err, http.StatusBadRequest)
 		return
 	}
 	// Request that emails are verified
 	err = s.email.VerifyEmailsIfNecessary(emails.Emails)
 	if err != nil {
-		setError(w, err, http.StatusInternalServerError)
+		SetError(w, err, http.StatusInternalServerError)
 		return
 	}
 	// Update the database
-	account, err := s.db.UpdateAccountEmails(*accountID, emails.Emails)
+	account, err := s.db.UpdateAccountEmails(string(accountID), emails.Emails)
 	if err != nil {
-		setError(w, err, http.StatusInternalServerError)
+		SetError(w, err, http.StatusInternalServerError)
 		return
 	}
 	// Build the response
 	payload, err := s.createAccountPayload(account)
 	if err != nil {
-		setError(w, err, http.StatusInternalServerError)
+		SetError(w, err, http.StatusInternalServerError)
 		return
 	}
 	// Write the response

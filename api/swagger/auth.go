@@ -2,9 +2,13 @@ package swagger
 
 import (
 	"context"
+	"errors"
+	"github.com/briggysmalls/detectordag/api/swagger/server"
 	"github.com/briggysmalls/detectordag/api/swagger/tokens"
 	"github.com/briggysmalls/detectordag/shared/database"
+	"github.com/gorilla/mux"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -29,44 +33,44 @@ type accountFetcher func(r *http.Request) (string, error)
 func (a *auth) middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Ensure there is a token
-		token, err := getToken(r.Header)
+		token, err := getToken(&r.Header)
 		if err != nil {
-			setError()
+			server.SetError(w, err, http.StatusInternalServerError)
 		}
 		// Check that the token is valid
-		tokenAccountID, err = a.tokens.Validate(token)
+		tokenAccountID, err := a.tokens.Validate(token)
 		switch err {
 		case tokens.ErrBadToken:
-			setError(w, err, http.StatusForbidden)
+			server.SetError(w, err, http.StatusForbidden)
 			return
 		case tokens.ErrInternalError:
-			setError(w, err, http.StatusInternalServerError)
+			server.SetError(w, err, http.StatusInternalServerError)
 			return
 		default:
 			break
 		}
 		// Fetch the account associated with the resource request
-		accountId, err := getAccount(r)
+		accountID, err := a.getAccount(r)
 		// Ensure we were able to get the account
 		switch err {
 		case errPathParameterMissing:
 			// We shouldn't ever get this, gorilla should handle it
-			setError(w, err, http.StatusInternalServerError)
+			server.SetError(w, err, http.StatusInternalServerError)
 			return
 		default:
 			// Something else went wrong, e.g. accessing database
-			setError(w, err, http.StatusInternalServerError)
+			server.SetError(w, err, http.StatusInternalServerError)
 			return
 		}
 		// Ensure we are authorised to access the account's resources
-		if accountId != tokenAccountID {
-			setError(w, err, http.StatusUnauthorized)
+		if accountID != tokenAccountID {
+			server.SetError(w, err, http.StatusUnauthorized)
 			return
 		}
 		// Record the account ID in the context, in case people want it
-		ctx := context.WithValue(r.Context(), "accountID", accountID)
+		ctx := context.WithValue(r.Context(), server.AccountIdKey{}, accountID)
 		// Call the next handler, which can be another middleware in the chain, or the final handler.
-		next.ServeHTTP(w, r.WithContext(c))
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 

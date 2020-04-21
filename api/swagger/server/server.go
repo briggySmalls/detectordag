@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	models "github.com/briggysmalls/detectordag/api/swagger/go"
@@ -14,6 +15,9 @@ import (
 var (
 	ErrAccountIDMissing = errors.New("AccountID missing from context")
 )
+
+type AccountIdKey struct {
+}
 
 type server struct {
 	db     database.Client
@@ -39,7 +43,7 @@ func New(params Params) Server {
 	}
 }
 
-func setError(w http.ResponseWriter, err error, status int) {
+func SetError(w http.ResponseWriter, err error, status int) {
 	// TODO: If 5xx error then hide message unless in debug
 	// Create the error struct
 	m := models.ModelError{
@@ -54,4 +58,18 @@ func setError(w http.ResponseWriter, err error, status int) {
 	}
 	// Write the output
 	http.Error(w, string(content), status)
+}
+
+func getAccountId(context context.Context) (string, error) {
+	// Ensure the auth middleware provided us with the account ID
+	accountID := context.Value(AccountIdKey{})
+	if accountID == nil {
+		return "", ErrAccountIDMissing
+	}
+	// Cast the value to a string
+	accountIDString, ok := accountID.(string)
+	if !ok {
+		return "", ErrAccountIDMissing
+	}
+	return accountIDString, nil
 }

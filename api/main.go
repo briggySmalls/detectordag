@@ -11,9 +11,11 @@ import (
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	"github.com/briggysmalls/detectordag/api/swagger"
 	"github.com/briggysmalls/detectordag/api/swagger/server"
+	"github.com/briggysmalls/detectordag/api/swagger/tokens"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
 	"github.com/briggysmalls/detectordag/shared/shadow"
+	"github.com/gorilla/mux"
 	"log"
 )
 
@@ -40,8 +42,10 @@ func init() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	// Create the tokens
+	tokens := createTokens()
 	// Create the server
-	s := createServer(db, shadow, email)
+	s := createServer(db, shadow, email, tokens)
 	// Create the router
 	r := createRouter(db, s)
 	// Create an adapter for aws lambda
@@ -68,12 +72,24 @@ func createSession(config aws.Config) *session.Session {
 	// Create a new session just for emailing (we have to use a different region)
 	sesh, err := session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
-		Config: config
+		Config:            config,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 	return sesh
+}
+
+func createTokens() tokens.Tokens {
+	// Load config from environment
+	c, err := loadConfig()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	// Get the token duration
+	tokenDuration, _ := c.ParseDuration()
+	// Create a tokens
+	return tokens.New(c.JwtSecret, tokenDuration)
 }
 
 func createServer(db database.Client, shadow shadow.Client, email email.Client, tokens tokens.Tokens) server.Server {
@@ -87,15 +103,6 @@ func createServer(db database.Client, shadow shadow.Client, email email.Client, 
 }
 
 func createRouter(db database.Client, server server.Server) *mux.Router {
-	// Load config from environment
-	c, err := loadConfig()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	// Get the token duration
-	tokenDuration, _ := c.ParseDuration()
-	// Create a tokens
-	tokens := tokens.New(c.JwtSecret, tokenDuration)
 	// Create the router
-	router := swagger.NewRouter(db, server, tokens)
+	return swagger.NewRouter(db, server, createTokens())
 }

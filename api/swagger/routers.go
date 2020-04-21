@@ -14,9 +14,8 @@ import (
 	"net/http"
 
 	"github.com/briggysmalls/detectordag/api/swagger/server"
+	"github.com/briggysmalls/detectordag/api/swagger/tokens"
 	"github.com/briggysmalls/detectordag/shared/database"
-	"github.com/briggysmalls/detectordag/shared/email"
-	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/gorilla/mux"
 )
 
