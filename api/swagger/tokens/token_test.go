@@ -61,7 +61,7 @@ func TestCreateToken(t *testing.T) {
 	}
 }
 
-func TestCheckAuthorized(t *testing.T) {
+func TestCheckValid(t *testing.T) {
 	// Create a dummy expiry duration
 	duration, err := time.ParseDuration("10s")
 	assert.NoError(t, err)
@@ -100,9 +100,10 @@ func TestCheckAuthorized(t *testing.T) {
 		tokens := New(params.secret, duration)
 		// Check if the token authorises the supplied account
 		at(params.now, func() {
-			err := tokens.Validate(params.token, params.accountID)
+			accountID, err := tokens.Validate(params.token)
 			if err == nil && params.errors == 0 {
 				// We weren't expecting an error
+				assert.Equal(t, params.accountID, accountID)
 				return
 			}
 			vErr, ok := err.(*jwt.ValidationError)

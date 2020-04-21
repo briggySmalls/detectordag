@@ -1,8 +1,9 @@
 package tokens
 
 import (
-	"fmt"
+	"errors"
 	"github.com/dgrijalva/jwt-go"
+	"log"
 	"time"
 )
 
@@ -10,9 +11,15 @@ const (
 	issuer = "detectordag"
 )
 
+var (
+	ErrUnexpectedSigningMethod = errors.New("Cannot parse JWT claims")
+	ErrCannotParseClaims       = errors.New("Cannot parse JWT claims")
+	ErrInvalidJWT              = errors.New("JWT is invalid")
+)
+
 type Tokens interface {
 	Create(accountID string) (string, error)
-	Validate(token, accountID string) error
+	Validate(token string) (string, error)
 }
 
 type tokens struct {
@@ -48,27 +55,27 @@ func (t *tokens) Create(accountID string) (string, error) {
 }
 
 // Validate checks that the provided token is valid
-func (t *tokens) Validate(tokenString, accountID string) error {
+func (t *tokens) Validate(tokenString string) (string, error) {
 	// Parse takes the token string and a function for looking up the key.
 	token, err := jwt.ParseWithClaims(tokenString, &CustomAuthClaims{}, func(token *jwt.Token) (interface{}, error) {
 		// Validate the alg is what we expect
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			log.Printf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, ErrUnexpectedSigningMethod
 		}
 		// Return our secret
 		return []byte(t.secret), nil
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
 	// Check the token contents
-	if claims, ok := token.Claims.(*CustomAuthClaims); ok && token.Valid {
-		// Confirm the account IDs match
-		if claims.AccountId != accountID {
-			return fmt.Errorf("Not authorized to access account: %s", accountID)
-		}
-		// The token authorises access
-		return nil
+	claims, ok := token.Claims.(*CustomAuthClaims)
+	if !ok {
+		return "", ErrCannotParseClaims
 	}
-	return err
+	if !token.Valid {
+		return "", ErrInvalidJWT
+	}
+	return claims.AccountId, nil
 }
