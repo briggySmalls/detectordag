@@ -52,12 +52,3 @@ func createTime(t *testing.T, timeString string) time.Time {
 	}
 	return tme
 }
-
-// Override time value for tests.  Restore default value after.
-func at(t time.Time, f func()) {
-	jwt.TimeFunc = func() time.Time {
-		return t
-	}
-	f()
-	jwt.TimeFunc = time.Now
-}

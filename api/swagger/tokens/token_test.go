@@ -71,28 +71,28 @@ func TestCheckValid(t *testing.T) {
 		token     string
 		now       time.Time
 		accountID string
-		errors    uint32
+		error     error
 	}{
 		{
 			secret:    "mysecret",
 			accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B",
 			token:     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiIzNTU4MUJGNC0zMkM4LTQ5MDgtODM3Ny0yRTZBMDIxRDNEMkIiLCJleHAiOjE1ODQ3OTk0NzQsImlzcyI6ImRldGVjdG9yZGFnIn0.qqMDypPk5BT1dz_8KT6S9eNLABWcYIfnaRr_BroisKo",
 			now:       createTime(t, "2020/03/21 12:06:00"),
-			errors:    0,
+			error:     nil,
 		},
 		{
 			secret:    "mysecret",
 			accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B",
 			token:     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiIzNTU4MUJGNC0zMkM4LTQ5MDgtODM3Ny0yRTZBMDIxRDNEMkIiLCJleHAiOjE1ODQ3OTk0NzQsImlzcyI6ImRldGVjdG9yZGFnIn0.qqMDypPk5BT1dz_8KT6S9eNLABWcYIfnaRr_BroisKo",
 			now:       createTime(t, "2020/03/22 12:06:00"),
-			errors:    jwt.ValidationErrorExpired,
+			error:     ErrUnauthorized,
 		},
 		{
 			secret:    "mysecret",
 			accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B",
 			token:     "",
 			now:       createTime(t, "2020/03/22 12:06:00"),
-			errors:    jwt.ValidationErrorMalformed,
+			error:     ErrUnauthorized,
 		},
 	}
 	for _, params := range testParams {
@@ -101,16 +101,11 @@ func TestCheckValid(t *testing.T) {
 		// Check if the token authorises the supplied account
 		at(params.now, func() {
 			accountID, err := tokens.Validate(params.token)
-			if err == nil && params.errors == 0 {
+			assert.Equal(t, params.error, err)
+			if err == nil {
 				// We weren't expecting an error
 				assert.Equal(t, params.accountID, accountID)
 				return
-			}
-			vErr, ok := err.(*jwt.ValidationError)
-			if !ok {
-				t.Errorf("Unexpected error format: %v", err)
-			} else if vErr.Errors&params.errors == 0 {
-				t.Errorf("Unexpected error: %v", err)
 			}
 		})
 	}

@@ -12,9 +12,9 @@ const (
 )
 
 var (
-	ErrUnexpectedSigningMethod = errors.New("Cannot parse JWT claims")
-	ErrCannotParseClaims       = errors.New("Cannot parse JWT claims")
-	ErrInvalidJWT              = errors.New("JWT is invalid")
+	ErrInternalError           = errors.New("Package failed to behave correctly")
+	ErrUnexpectedSigningMethod = errors.New("Unexpected signing method")
+	ErrUnauthorized            = errors.New("The token was found to fail validation")
 )
 
 type Tokens interface {
@@ -66,16 +66,25 @@ func (t *tokens) Validate(tokenString string) (string, error) {
 		// Return our secret
 		return []byte(t.secret), nil
 	})
-	if err != nil {
-		return "", err
+	// Short-circuit on the happy path
+	if err == nil {
+		// Check the token contents
+		claims, ok := token.Claims.(*CustomAuthClaims)
+		if !ok || !token.Valid {
+			// We'd expect to have already returned due to 'err'
+			return "", ErrInternalError
+		}
+		return claims.AccountId, nil
 	}
-	// Check the token contents
-	claims, ok := token.Claims.(*CustomAuthClaims)
+	// Parse the JWS library error
+	vErr, ok := err.(*jwt.ValidationError)
 	if !ok {
-		return "", ErrCannotParseClaims
+		return "", ErrInternalError
 	}
-	if !token.Valid {
-		return "", ErrInvalidJWT
+	// Remap errors to ones we care about
+	if vErr.Errors&jwt.ValidationErrorUnverifiable != 0 || vErr.Errors&jwt.ValidationErrorSignatureInvalid != 0 {
+		return "", ErrInternalError
 	}
-	return claims.AccountId, nil
+	// The token was parsed fine, but failed some claim
+	return "", ErrUnauthorized
 }

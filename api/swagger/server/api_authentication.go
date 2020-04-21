@@ -16,11 +16,6 @@ import (
 	"net/http"
 )
 
-const (
-	expiryDuration = 1500
-	issuer         = "detectordag"
-)
-
 func (s *server) Auth(w http.ResponseWriter, r *http.Request) {
 	// Try to parse the body
 	var creds models.Credentials
