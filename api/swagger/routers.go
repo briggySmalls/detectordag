@@ -31,15 +31,9 @@ type Route struct {
 	HandlerFunc http.HandlerFunc
 }
 
-type RouterConfig struct {
-	db     database.Client
-	shadow shadow.Client
-	email  email.Client
-}
-
 type Routes []Route
 
-func NewRouter(s server.Server) *mux.Router {
+func NewRouter(db database.Client, server server.Server, tokens tokens.Tokens) *mux.Router {
 	// Create the router
 	router := mux.NewRouter().StrictSlash(true)
 	// Create subrouter for 'v1'
@@ -50,7 +44,7 @@ func NewRouter(s server.Server) *mux.Router {
 			"Auth",
 			http.MethodPost,
 			"/auth",
-			s.Auth,
+			server.Auth,
 		},
 	}
 	addRoutes(api, nonAuthRoutes)
@@ -62,19 +56,19 @@ func NewRouter(s server.Server) *mux.Router {
 			"GetAccount",
 			http.MethodGet,
 			fmt.Sprintf("/{accountId:%s}", uuidRegex),
-			s.GetAccount,
+			server.GetAccount,
 		},
 		Route{
 			"GetDevices",
 			http.MethodGet,
 			fmt.Sprintf("/{accountId:%s}/devices", uuidRegex),
-			s.GetDevices,
+			server.GetDevices,
 		},
 		Route{
 			"UpdateAccount",
 			http.MethodPatch,
 			fmt.Sprintf("/{accountId:%s}", uuidRegex),
-			s.UpdateAccount,
+			server.UpdateAccount,
 		},
 	})
 
@@ -85,7 +79,7 @@ func NewRouter(s server.Server) *mux.Router {
 			"UpdateDevice",
 			http.MethodPatch,
 			"/{deviceId}",
-			s.UpdateDevice,
+			server.UpdateDevice,
 		},
 	})
 
@@ -93,6 +87,15 @@ func NewRouter(s server.Server) *mux.Router {
 	api.Use(mux.CORSMethodMiddleware(api))
 	api.Use(corsMiddleware)
 
+	// Add authentication middleware
+	a := auth{
+		tokens: tokens,
+		db:     db,
+	}
+	accounts.Use(a.middleware)
+	devices.Use(a.middleware)
+
+	// Return the router
 	return router
 }
 

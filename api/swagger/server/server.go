@@ -3,22 +3,23 @@ package server
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	models "github.com/briggysmalls/detectordag/api/swagger/go"
+	"github.com/briggysmalls/detectordag/api/swagger/tokens"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
 	"github.com/briggysmalls/detectordag/shared/shadow"
-	"github.com/gorilla/mux"
 	"net/http"
-	"strings"
-	"time"
+)
+
+var (
+	ErrAccountIDMissing = errors.New("AccountID missing from context")
 )
 
 type server struct {
 	db     database.Client
 	shadow shadow.Client
 	email  email.Client
-	config Config
+	tokens tokens.Tokens
 }
 
 type Server interface {
@@ -34,31 +35,8 @@ func New(params Params) Server {
 		db:     params.Db,
 		shadow: params.Shadow,
 		email:  params.Email,
-		config: params.Config,
+		tokens: params.Tokens,
 	}
-}
-
-func (s *server) validateAccount(w http.ResponseWriter, r *http.Request) *string {
-	// Ensure that there is a token sent
-	token, err := s.getToken(&r.Header)
-	if err != nil {
-		setError(w, err, http.StatusUnauthorized)
-		return nil
-	}
-	// Pull out the account ID
-	vars := mux.Vars(r)
-	accountId, ok := vars["accountId"]
-	if !ok {
-		setError(w, errors.New("Account ID not supplied in path"), http.StatusBadRequest)
-		return nil
-	}
-	// Check the user is authorised
-	err = s.checkAuthorized(token, accountId)
-	if err != nil {
-		setError(w, err, http.StatusForbidden)
-		return nil
-	}
-	return &accountId
 }
 
 func setError(w http.ResponseWriter, err error, status int) {

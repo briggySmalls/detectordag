@@ -17,13 +17,14 @@ import (
 )
 
 func (s *server) GetAccount(w http.ResponseWriter, r *http.Request) {
-	// Validate the sender is authorised
-	accountId := s.validateAccount(w, r)
-	if accountId == nil {
+	// Ensure the auth middleware provided us with the account ID
+	accountID := r.Context().Value("accountID")
+	if accountID != nil {
+		setError(w, ErrAccountIDMissing, http.StatusInternalServerError)
 		return
 	}
 	// Request the account
-	account, err := s.db.GetAccountById(*accountId)
+	account, err := s.db.GetAccountById(*accountID)
 	if err != nil {
 		setError(w, err, http.StatusInternalServerError)
 		return
@@ -41,13 +42,14 @@ func (s *server) GetAccount(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 	var err error
-	// Validate the sender is authorised
-	accountId := s.validateAccount(w, r)
-	if accountId == nil {
+	// Ensure the auth middleware provided us with the account ID
+	accountID := r.Context().Value("accountID")
+	if accountID != nil {
+		setError(w, ErrAccountIDMissing, http.StatusInternalServerError)
 		return
 	}
 	// Fetch the devices associated with the account
-	devices, err := s.db.GetDevicesByAccount(*accountId)
+	devices, err := s.db.GetDevicesByAccount(*accountID)
 	if err != nil {
 		setError(w, err, http.StatusInternalServerError)
 		return
@@ -85,9 +87,10 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
-	// Validate the sender is authorised
-	accountId := s.validateAccount(w, r)
-	if accountId == nil {
+	// Ensure the auth middleware provided us with the account ID
+	accountID := r.Context().Value("accountID")
+	if accountID != nil {
+		setError(w, ErrAccountIDMissing, http.StatusInternalServerError)
 		return
 	}
 	// Parse the emails from the request
@@ -105,7 +108,7 @@ func (s *server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Update the database
-	account, err := s.db.UpdateAccountEmails(*accountId, emails.Emails)
+	account, err := s.db.UpdateAccountEmails(*accountID, emails.Emails)
 	if err != nil {
 		setError(w, err, http.StatusInternalServerError)
 		return

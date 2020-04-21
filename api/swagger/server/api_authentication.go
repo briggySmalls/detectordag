@@ -38,7 +38,7 @@ func (s *server) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Create a token for the authenticated user
-	token, err := s.createToken(account.AccountId)
+	token, err := s.tokens.Create(account.AccountId)
 	if err != nil {
 		setError(w, err, http.StatusInternalServerError)
 	}

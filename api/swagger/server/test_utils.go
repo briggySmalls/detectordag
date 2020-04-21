@@ -5,7 +5,6 @@ package server
 
 import (
 	"bytes"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/golang/mock/gomock"
 	"net/http"
 	"net/http/httptest"
