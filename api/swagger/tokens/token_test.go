@@ -74,6 +74,7 @@ func TestCheckValid(t *testing.T) {
 		error     error
 	}{
 		{
+			// Valid token
 			secret:    "mysecret",
 			accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B",
 			token:     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiIzNTU4MUJGNC0zMkM4LTQ5MDgtODM3Ny0yRTZBMDIxRDNEMkIiLCJleHAiOjE1ODQ3OTk0NzQsImlzcyI6ImRldGVjdG9yZGFnIn0.qqMDypPk5BT1dz_8KT6S9eNLABWcYIfnaRr_BroisKo",
@@ -81,18 +82,28 @@ func TestCheckValid(t *testing.T) {
 			error:     nil,
 		},
 		{
+			// Expired token
 			secret:    "mysecret",
 			accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B",
 			token:     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiIzNTU4MUJGNC0zMkM4LTQ5MDgtODM3Ny0yRTZBMDIxRDNEMkIiLCJleHAiOjE1ODQ3OTk0NzQsImlzcyI6ImRldGVjdG9yZGFnIn0.qqMDypPk5BT1dz_8KT6S9eNLABWcYIfnaRr_BroisKo",
 			now:       createTime(t, "2020/03/22 12:06:00"),
-			error:     ErrUnauthorized,
+			error:     ErrBadToken,
 		},
 		{
+			// Missing token
 			secret:    "mysecret",
 			accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B",
 			token:     "",
 			now:       createTime(t, "2020/03/22 12:06:00"),
-			error:     ErrUnauthorized,
+			error:     ErrBadToken,
+		},
+		{
+			// Token with RS256 signing algorithm
+			secret:    "mysecret",
+			accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B",
+			token:     "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.POstGetfAytaZS82wHcjoTyoqhMyxXiWdR7Nn7A29DNSl0EiXLdwJ6xC6AfgZWF1bOsS_TuYI3OG85AmiExREkrS6tDfTQ2B3WXlrr-wp5AokiRbz3_oB4OxG-W9KcEEbDRcZc0nH3L7LzYptiy1PtAylQGxHTWZXtGz4ht0bAecBgmpdgXMguEIcoqPJ1n3pIWk_dUZegpqx0Lka21H6XxUTxiy8OcaarA8zdnPUnV6AmNP3ecFawIFYdvJB_cm-GvpCSbr8G8y_Mllj8f4x9nBH8pQux89_6gUY618iYv7tuPWBFfEbLxtF2pZS6YC1aSfLQxeNe8djT9YjpvRZA",
+			now:       createTime(t, "2020/03/22 12:06:00"),
+			error:     ErrBadToken,
 		},
 	}
 	for _, params := range testParams {

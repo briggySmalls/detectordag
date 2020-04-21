@@ -14,7 +14,7 @@ const (
 var (
 	ErrInternalError           = errors.New("Package failed to behave correctly")
 	ErrUnexpectedSigningMethod = errors.New("Unexpected signing method")
-	ErrUnauthorized            = errors.New("The token was found to fail validation")
+	ErrBadToken                = errors.New("The token was badly formatted or failed validation")
 )
 
 type Tokens interface {
@@ -79,12 +79,17 @@ func (t *tokens) Validate(tokenString string) (string, error) {
 	// Parse the JWS library error
 	vErr, ok := err.(*jwt.ValidationError)
 	if !ok {
+		// A ParseWithClaims error should always be a jwt.ValidationError
 		return "", ErrInternalError
+	}
+	// If we have a signing error due to an incorrect algorithm, it's _their_ fault
+	if vErr.Errors&jwt.ValidationErrorSignatureInvalid == 0 && vErr.Inner == ErrUnexpectedSigningMethod {
+		return "", ErrBadToken
 	}
 	// Remap errors to ones we care about
 	if vErr.Errors&jwt.ValidationErrorUnverifiable != 0 || vErr.Errors&jwt.ValidationErrorSignatureInvalid != 0 {
 		return "", ErrInternalError
 	}
 	// The token was parsed fine, but failed some claim
-	return "", ErrUnauthorized
+	return "", ErrBadToken
 }
