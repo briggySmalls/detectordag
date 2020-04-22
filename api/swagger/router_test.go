@@ -5,6 +5,8 @@ package swagger
 //go:generate mockgen -destination mock_tokens.go -package swagger -mock_names Client=MockTokens github.com/briggysmalls/detectordag/api/swagger/tokens Tokens
 
 import (
+	"fmt"
+	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
@@ -14,6 +16,8 @@ import (
 	"strings"
 	"testing"
 )
+
+const testToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiIzNTU4MUJGNC0zMkM4LTQ5MDgtODM3Ny0yRTZBMDIxRDNEMkIiLCJleHAiOjkyMjMzNzIwMzY4NTQ3NzU4MDcsImlzcyI6ImRldGVjdG9yZGFnIn0.CzyaCEIXlq1E0F89HR2Z9wbUn5gBDyQKTOCxTsX6iiQ"
 
 type expectFunc func(*MockServer, *MockDBClient, *MockTokens)
 
@@ -25,18 +29,34 @@ func TestValidRoutes(t *testing.T) {
 		expectFunc expectFunc
 	}{
 		{method: http.MethodPost, route: "/v1/auth", expectFunc: func(s *MockServer, _ *MockDBClient, _ *MockTokens) {
+			// Expect the handler to be called
 			s.EXPECT().Auth(gomock.Any(), gomock.Any()).Do(setStatusOk)
 		}},
-		{method: http.MethodGet, route: "/v1/accounts/33b782d3-a2c8-40be-8aef-db5b44119bd5", expectFunc: func(s *MockServer, _ *MockDBClient, _ *MockTokens) {
+		{method: http.MethodGet, route: "/v1/accounts/33b782d3-a2c8-40be-8aef-db5b44119bd5", expectFunc: func(s *MockServer, _ *MockDBClient, tokens *MockTokens) {
+			// Expect the auth middleware to validate the token
+			expectAuth(tokens, "33b782d3-a2c8-40be-8aef-db5b44119bd5")
+			// Expect the handler to be called
 			s.EXPECT().GetAccount(gomock.Any(), gomock.Any()).Do(setStatusOk)
 		}},
-		{method: http.MethodPatch, route: "/v1/accounts/cfe7d5ed-826e-4e31-bb46-d62aa1cb58a7", expectFunc: func(s *MockServer, _ *MockDBClient, _ *MockTokens) {
+		{method: http.MethodPatch, route: "/v1/accounts/cfe7d5ed-826e-4e31-bb46-d62aa1cb58a7", expectFunc: func(s *MockServer, _ *MockDBClient, tokens *MockTokens) {
+			// Expect the auth middleware to validate the token
+			expectAuth(tokens, "cfe7d5ed-826e-4e31-bb46-d62aa1cb58a7")
+			// Expect the handler to be called
 			s.EXPECT().UpdateAccount(gomock.Any(), gomock.Any()).Do(setStatusOk)
 		}},
-		{method: http.MethodGet, route: "/v1/accounts/f88948e6-5f93-4f11-8d58-15d48075069d/devices", expectFunc: func(s *MockServer, _ *MockDBClient, _ *MockTokens) {
+		{method: http.MethodGet, route: "/v1/accounts/f88948e6-5f93-4f11-8d58-15d48075069d/devices", expectFunc: func(s *MockServer, _ *MockDBClient, tokens *MockTokens) {
+			// Expect the auth middleware to validate the token
+			expectAuth(tokens, "f88948e6-5f93-4f11-8d58-15d48075069d")
+			// Expect the handler to be called
 			s.EXPECT().GetDevices(gomock.Any(), gomock.Any()).Do(setStatusOk)
 		}},
-		{method: http.MethodPatch, route: "/v1/devices/c0e94a1b-a835-4cc2-9574-642bea13805a", expectFunc: func(s *MockServer, _ *MockDBClient, _ *MockTokens) {
+		{method: http.MethodPatch, route: "/v1/devices/c0e94a1b-a835-4cc2-9574-642bea13805a", expectFunc: func(s *MockServer, db *MockDBClient, tokens *MockTokens) {
+			// Expect the auth middleware to get the device from database
+			accountID := "f88948e6-5f93-4f11-8d58-15d48075069d"
+			db.EXPECT().GetDeviceById(gomock.Eq("c0e94a1b-a835-4cc2-9574-642bea13805a")).Return(&database.Device{AccountId: accountID}, nil)
+			// Expect the auth middleware to validate the token
+			expectAuth(tokens, accountID)
+			// Expect the handler to be called
 			s.EXPECT().UpdateDevice(gomock.Any(), gomock.Any()).Do(setStatusOk)
 		}},
 	}
@@ -46,6 +66,7 @@ func TestValidRoutes(t *testing.T) {
 		// Create a request
 		r, err := http.NewRequest(params.method, params.route, nil)
 		assert.NoError(t, err)
+		r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", testToken))
 		// Run the request
 		w := runTest(t, r, params.expectFunc)
 		// Ensure we get a 200
@@ -109,6 +130,11 @@ func runTest(t *testing.T, r *http.Request, expect expectFunc) *http.Response {
 
 func setStatusOk(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
+}
+
+func expectAuth(tokens *MockTokens, accountID string) {
+	// Expect the auth middleware to validate the token
+	tokens.EXPECT().Validate(gomock.Eq(testToken)).Return(accountID, nil)
 }
 
 func createMocks(t *testing.T) (*MockServer, *MockDBClient, *MockTokens, *mux.Router) {
