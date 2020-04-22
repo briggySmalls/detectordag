@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	models "github.com/briggysmalls/detectordag/api/swagger/go"
@@ -59,8 +60,10 @@ func TestGetDevicesSuccess(t *testing.T) {
 	req := createRequest(t, "GET", fmt.Sprintf("/v1/accounts/%s/devices", accountID), nil)
 	req = mux.SetURLVars(req, map[string]string{"accountId": accountID})
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	// Record the account ID in the context, as-per the auth middleware
+	ctx := context.WithValue(req.Context(), AccountIdKey{}, accountID)
 	// Execute the handler
-	rr := runHandler(s.GetDevices, req)
+	rr := runHandler(s.GetDevices, req.WithContext(ctx))
 	// Assert status ok
 	assertStatus(t, rr, http.StatusOK)
 	// Inspect the body of the response
