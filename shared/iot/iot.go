@@ -1,6 +1,7 @@
 package iot
 
 import (
+	"errors"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iot"
@@ -15,7 +16,8 @@ type client struct {
 }
 
 type Client interface {
-	GetThing(id string)
+	GetThing(id string) (*iot.DescribeThingOutput, error)
+	GetThingsByAccount(id string) ([]*iot.ThingAttribute, error)
 }
 
 // New gets a new Client
@@ -38,12 +40,13 @@ func (c *client) GetThing(id string) (*iot.DescribeThingOutput, error) {
 }
 
 // GetThingsByAccount returns all things which are associated with the specified accountg
-func (c *client) GetThingsByAccount(id account) ([]*iot.ThingAttribute, error) {
+func (c *client) GetThingsByAccount(id string) ([]*iot.ThingAttribute, error) {
 	// Search for things
-	return getPaginatedThings(&iot.ListThingsInput{
+	things := []*iot.ThingAttribute{}
+	return c.getPaginatedThings(&iot.ListThingsInput{
 		AttributeName:  aws.String(accountIdAttributeName),
 		AttributeValue: aws.String(id),
-	}, nil)
+	}, nil, things)
 }
 
 func (c *client) getPaginatedThings(input *iot.ListThingsInput, output *iot.ListThingsOutput, things []*iot.ThingAttribute) ([]*iot.ThingAttribute, error) {
@@ -54,18 +57,18 @@ func (c *client) getPaginatedThings(input *iot.ListThingsInput, output *iot.List
 		output, err = c.iot.ListThings(input)
 	} else {
 		// We are making a paginated request, so use the 'next token'
-		output, err = c.iot.ListThings(input.SetNextToken(output.NextToken))
+		output, err = c.iot.ListThings(input.SetNextToken(*output.NextToken))
 	}
 	// Return if there is an error
 	if err != nil {
 		return nil, err
 	}
 	// Add the things
-	things = append(things, output.Things)
+	things = append(things, output.Things...)
 	// Short circuit if there are no more requests to make
 	if output.NextToken == nil {
 		return things, nil
 	}
 	// Recursively request more things
-	return getPaginatedThings(input, output, things)
+	return c.getPaginatedThings(input, output, things)
 }
