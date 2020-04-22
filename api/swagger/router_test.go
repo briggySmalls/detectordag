@@ -15,7 +15,7 @@ import (
 	"testing"
 )
 
-type expectFunc func(*MockServer)
+type expectFunc func(*MockServer, *MockDBClient, *MockTokens)
 
 func TestValidRoutes(t *testing.T) {
 	// Create requests to check
@@ -24,19 +24,19 @@ func TestValidRoutes(t *testing.T) {
 		route      string
 		expectFunc expectFunc
 	}{
-		{method: http.MethodPost, route: "/v1/auth", expectFunc: func(s *MockServer) {
+		{method: http.MethodPost, route: "/v1/auth", expectFunc: func(s *MockServer, _ *MockDBClient, _ *MockTokens) {
 			s.EXPECT().Auth(gomock.Any(), gomock.Any()).Do(setStatusOk)
 		}},
-		{method: http.MethodGet, route: "/v1/accounts/33b782d3-a2c8-40be-8aef-db5b44119bd5", expectFunc: func(s *MockServer) {
+		{method: http.MethodGet, route: "/v1/accounts/33b782d3-a2c8-40be-8aef-db5b44119bd5", expectFunc: func(s *MockServer, _ *MockDBClient, _ *MockTokens) {
 			s.EXPECT().GetAccount(gomock.Any(), gomock.Any()).Do(setStatusOk)
 		}},
-		{method: http.MethodPatch, route: "/v1/accounts/cfe7d5ed-826e-4e31-bb46-d62aa1cb58a7", expectFunc: func(s *MockServer) {
+		{method: http.MethodPatch, route: "/v1/accounts/cfe7d5ed-826e-4e31-bb46-d62aa1cb58a7", expectFunc: func(s *MockServer, _ *MockDBClient, _ *MockTokens) {
 			s.EXPECT().UpdateAccount(gomock.Any(), gomock.Any()).Do(setStatusOk)
 		}},
-		{method: http.MethodGet, route: "/v1/accounts/f88948e6-5f93-4f11-8d58-15d48075069d/devices", expectFunc: func(s *MockServer) {
+		{method: http.MethodGet, route: "/v1/accounts/f88948e6-5f93-4f11-8d58-15d48075069d/devices", expectFunc: func(s *MockServer, _ *MockDBClient, _ *MockTokens) {
 			s.EXPECT().GetDevices(gomock.Any(), gomock.Any()).Do(setStatusOk)
 		}},
-		{method: http.MethodPatch, route: "/v1/devices/c0e94a1b-a835-4cc2-9574-642bea13805a", expectFunc: func(s *MockServer) {
+		{method: http.MethodPatch, route: "/v1/devices/c0e94a1b-a835-4cc2-9574-642bea13805a", expectFunc: func(s *MockServer, _ *MockDBClient, _ *MockTokens) {
 			s.EXPECT().UpdateDevice(gomock.Any(), gomock.Any()).Do(setStatusOk)
 		}},
 	}
@@ -94,12 +94,12 @@ func TestOptionsRoutes(t *testing.T) {
 
 func runTest(t *testing.T, r *http.Request, expect expectFunc) *http.Response {
 	// Create router
-	server, _, _, router := createMocks(t)
+	server, db, tokens, router := createMocks(t)
 	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
 	w := httptest.NewRecorder()
 	// Configure the expectations
 	if expect != nil {
-		expect(server)
+		expect(server, db, tokens)
 	}
 	// Get the router to handle the request
 	router.ServeHTTP(w, r)
