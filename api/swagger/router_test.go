@@ -1,6 +1,8 @@
 package swagger
 
 //go:generate mockgen -destination mock_server.go -package swagger -mock_names Client=MockServer github.com/briggysmalls/detectordag/api/swagger/server Server
+//go:generate mockgen -destination mock_db.go -package swagger -mock_names Client=MockDBClient github.com/briggysmalls/detectordag/shared/database Client
+//go:generate mockgen -destination mock_tokens.go -package swagger -mock_names Client=MockTokens github.com/briggysmalls/detectordag/api/swagger/tokens Tokens
 
 import (
 	"github.com/golang/mock/gomock"
@@ -92,7 +94,7 @@ func TestOptionsRoutes(t *testing.T) {
 
 func runTest(t *testing.T, r *http.Request, expect expectFunc) *http.Response {
 	// Create router
-	server, router := createTestRouter(t)
+	server, _, _, router := createMocks(t)
 	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
 	w := httptest.NewRecorder()
 	// Configure the expectations
@@ -109,12 +111,17 @@ func setStatusOk(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func createTestRouter(t *testing.T) (*MockServer, *mux.Router) {
+func createMocks(t *testing.T) (*MockServer, *MockDBClient, *MockTokens, *mux.Router) {
 	// Create mock controller
 	ctrl := gomock.NewController(t)
 	// Create mock server
 	s := NewMockServer(ctrl)
-	return s, NewRouter(s)
+	// Create mock database
+	db := NewMockDBClient(ctrl)
+	// Create mock server
+	tokens := NewMockTokens(ctrl)
+	// Create the new router
+	return s, db, tokens, NewRouter(db, s, tokens)
 }
 
 func getHeaderValue(t *testing.T, header http.Header, key string) string {
