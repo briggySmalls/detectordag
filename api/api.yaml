@@ -57,12 +57,7 @@ paths:
       operationId: updateDevice
       parameters:
       - $ref: '#/components/parameters/Token'
-      - name: deviceId
-        in: path
-        description: ID of device that is to be updated
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/Device'
       requestBody:
         description: Properties to update about the device
         required: true
@@ -80,11 +75,7 @@ paths:
           description: successful operation
           content: {}
         400:
-          description: Invalid ID supplied
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/InvalidId'
         401:
           $ref: '#/components/responses/Unauthenticated'
         403:
@@ -97,12 +88,7 @@ paths:
       operationId: getAccount
       parameters:
       - $ref: '#/components/parameters/Token'
-      - name: accountId
-        in: path
-        description: ID of account that is to be queried
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/Account'
       responses:
         200:
           description: successful operation
@@ -125,12 +111,7 @@ paths:
       operationId: updateAccount
       parameters:
       - $ref: '#/components/parameters/Token'
-      - name: accountId
-        in: path
-        description: ID of account that is to be queried
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/Account'
       requestBody:
         description: Properties to update about the account
         required: true
@@ -162,12 +143,7 @@ paths:
       operationId: getDevices
       parameters:
       - $ref: '#/components/parameters/Token'
-      - name: accountId
-        in: path
-        description: ID of account that is to be queried
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/Account'
       responses:
         200:
           description: successful operation
@@ -183,7 +159,62 @@ paths:
           $ref: '#/components/responses/Unauthenticated'
         403:
           $ref: '#/components/responses/Unauthorised'
-      x-codegen-request-body-name: body
+  /accounts/{accountId}/devices/{deviceId}:
+    put:
+      tags:
+      - accounts
+      summary: Register a device to the account
+      description: Register a new device
+      parameters:
+        - $ref: '#/components/parameters/Token'
+        - $ref: '#/components/parameters/Device'
+        - $ref: '#/components/parameters/Account'
+      requestBody:
+        description: Registration parameters
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - certificateId
+                - certificatePem
+                - keyPair
+              properties:
+                certificateId:
+                  type: string
+                certificatePem:
+                  type: string
+                keyPair:
+                  type: object
+                  required:
+                    - privateKey
+                    - publickey
+                  properties:
+                    privateKey:
+                      type: string
+                    publicKey:
+                      type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  -
+                properties:
+                  accountId:
+                    type: string
+                  name:
+                    type: string
+        400:
+          $ref: '#/components/responses/InvalidId'
+        401:
+          $ref: '#/components/responses/Unauthenticated'
+        403:
+          $ref: '#/components/responses/Unauthorised'
 components:
   parameters:
     Token:
@@ -194,7 +225,30 @@ components:
       schema:
         type: string
         format: base64
+    Device:
+      name: deviceId
+      in: path
+      description: ID of device that is to be updated
+      required: true
+      schema:
+        type: string
+    Account:
+      name: accountId
+      in: path
+      description: ID of account that is to be queried
+      required: true
+      schema:
+        type: string
   responses:
+    Success:
+      description: Successful operation
+      content: {}
+    InvalidId:
+      description: Invalid ID supplied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
     Unauthenticated:
       description: Authorization token missing or invalid
       content:
