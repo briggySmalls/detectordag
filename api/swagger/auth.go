@@ -53,6 +53,8 @@ func (a *auth) middleware(next http.Handler) http.Handler {
 		accountID, err := a.getAccount(r)
 		// Ensure we were able to get the account
 		switch err {
+		case nil:
+			break
 		case errPathParameterMissing:
 			// We shouldn't ever get this, gorilla should handle it
 			server.SetError(w, err, http.StatusInternalServerError)
