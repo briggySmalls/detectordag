@@ -69,6 +69,12 @@ func NewRouter(iot iot.Client, server server.Server, tokens tokens.Tokens) *mux.
 			fmt.Sprintf("/{accountId:%s}", uuidRegex),
 			server.UpdateAccount,
 		},
+		Route{
+			"RegisterDevice",
+			http.MethodPut,
+			fmt.Sprintf("/{accountId:%s}/devices/{deviceId:%s}", uuidRegex),
+			server.RegisterDevice,
+		},
 	})
 
 	// Create subrouter for devices
