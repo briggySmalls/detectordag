@@ -16,36 +16,31 @@ import (
 	"net/http"
 )
 
-const (
-	expiryDuration = 1500
-	issuer         = "detectordag"
-)
-
 func (s *server) Auth(w http.ResponseWriter, r *http.Request) {
 	// Try to parse the body
 	var creds models.Credentials
 	var err error
 	err = json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
-		setError(w, err, http.StatusBadRequest)
+		SetError(w, err, http.StatusBadRequest)
 		return
 	}
 	// Query for an account with the given username
 	account, err := s.db.GetAccountByUsername(creds.Username)
 	if err != nil {
-		setError(w, err, http.StatusForbidden)
+		SetError(w, err, http.StatusForbidden)
 		return
 	}
 	// Check that the password is correct
 	err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(creds.Password))
 	if err != nil {
-		setError(w, err, http.StatusForbidden)
+		SetError(w, err, http.StatusForbidden)
 		return
 	}
 	// Create a token for the authenticated user
-	token, err := s.createToken(account.AccountId)
+	token, err := s.tokens.Create(account.AccountId)
 	if err != nil {
-		setError(w, err, http.StatusInternalServerError)
+		SetError(w, err, http.StatusInternalServerError)
 	}
 	// Build response content
 	content := models.Token{
@@ -54,7 +49,7 @@ func (s *server) Auth(w http.ResponseWriter, r *http.Request) {
 	}
 	body, err := json.Marshal(content)
 	if err != nil {
-		setError(w, err, http.StatusInternalServerError)
+		SetError(w, err, http.StatusInternalServerError)
 	}
 	// Write the response
 	w.WriteHeader(http.StatusOK)

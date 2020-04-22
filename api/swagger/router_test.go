@@ -1,18 +1,24 @@
 package swagger
 
 //go:generate mockgen -destination mock_server.go -package swagger -mock_names Client=MockServer github.com/briggysmalls/detectordag/api/swagger/server Server
+//go:generate mockgen -destination mock_db.go -package swagger -mock_names Client=MockDBClient github.com/briggysmalls/detectordag/shared/database Client
 
 import (
+	"fmt"
+	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 )
 
-type expectFunc func(*MockServer)
+const testToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiIzNTU4MUJGNC0zMkM4LTQ5MDgtODM3Ny0yRTZBMDIxRDNEMkIiLCJleHAiOjkyMjMzNzIwMzY4NTQ3NzU4MDcsImlzcyI6ImRldGVjdG9yZGFnIn0.CzyaCEIXlq1E0F89HR2Z9wbUn5gBDyQKTOCxTsX6iiQ"
+
+type expectFunc func(*MockServer, *MockDBClient, *MockTokens)
 
 func TestValidRoutes(t *testing.T) {
 	// Create requests to check
@@ -21,31 +27,53 @@ func TestValidRoutes(t *testing.T) {
 		route      string
 		expectFunc expectFunc
 	}{
-		{method: http.MethodPost, route: "/v1/auth", expectFunc: func(s *MockServer) {
+		{method: http.MethodPost, route: "/v1/auth", expectFunc: func(s *MockServer, _ *MockDBClient, _ *MockTokens) {
+			// Expect the handler to be called
 			s.EXPECT().Auth(gomock.Any(), gomock.Any()).Do(setStatusOk)
 		}},
-		{method: http.MethodGet, route: "/v1/accounts/33b782d3-a2c8-40be-8aef-db5b44119bd5", expectFunc: func(s *MockServer) {
+		{method: http.MethodGet, route: "/v1/accounts/33b782d3-a2c8-40be-8aef-db5b44119bd5", expectFunc: func(s *MockServer, _ *MockDBClient, tokens *MockTokens) {
+			// Expect the auth middleware to validate the token
+			expectAuth(tokens, "33b782d3-a2c8-40be-8aef-db5b44119bd5")
+			// Expect the handler to be called
 			s.EXPECT().GetAccount(gomock.Any(), gomock.Any()).Do(setStatusOk)
 		}},
-		{method: http.MethodPatch, route: "/v1/accounts/cfe7d5ed-826e-4e31-bb46-d62aa1cb58a7", expectFunc: func(s *MockServer) {
+		{method: http.MethodPatch, route: "/v1/accounts/cfe7d5ed-826e-4e31-bb46-d62aa1cb58a7", expectFunc: func(s *MockServer, _ *MockDBClient, tokens *MockTokens) {
+			// Expect the auth middleware to validate the token
+			expectAuth(tokens, "cfe7d5ed-826e-4e31-bb46-d62aa1cb58a7")
+			// Expect the handler to be called
 			s.EXPECT().UpdateAccount(gomock.Any(), gomock.Any()).Do(setStatusOk)
 		}},
-		{method: http.MethodGet, route: "/v1/accounts/f88948e6-5f93-4f11-8d58-15d48075069d/devices", expectFunc: func(s *MockServer) {
+		{method: http.MethodGet, route: "/v1/accounts/f88948e6-5f93-4f11-8d58-15d48075069d/devices", expectFunc: func(s *MockServer, _ *MockDBClient, tokens *MockTokens) {
+			// Expect the auth middleware to validate the token
+			expectAuth(tokens, "f88948e6-5f93-4f11-8d58-15d48075069d")
+			// Expect the handler to be called
 			s.EXPECT().GetDevices(gomock.Any(), gomock.Any()).Do(setStatusOk)
 		}},
-		{method: http.MethodPatch, route: "/v1/devices/c0e94a1b-a835-4cc2-9574-642bea13805a", expectFunc: func(s *MockServer) {
+		{method: http.MethodPatch, route: "/v1/devices/c0e94a1b-a835-4cc2-9574-642bea13805a", expectFunc: func(s *MockServer, db *MockDBClient, tokens *MockTokens) {
+			// Expect the auth middleware to get the device from database
+			accountID := "f88948e6-5f93-4f11-8d58-15d48075069d"
+			db.EXPECT().GetDeviceById(gomock.Eq("c0e94a1b-a835-4cc2-9574-642bea13805a")).Return(&database.Device{AccountId: accountID}, nil)
+			// Expect the auth middleware to validate the token
+			expectAuth(tokens, accountID)
+			// Expect the handler to be called
 			s.EXPECT().UpdateDevice(gomock.Any(), gomock.Any()).Do(setStatusOk)
 		}},
 	}
 	// Run the test iterations
 	for _, params := range tps {
+		log.Printf("Testing route (%s) '%s'", params.method, params.route)
 		// Create a request
 		r, err := http.NewRequest(params.method, params.route, nil)
 		assert.NoError(t, err)
+		r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", testToken))
 		// Run the request
 		w := runTest(t, r, params.expectFunc)
 		// Ensure we get a 200
 		assert.Equal(t, http.StatusOK, w.StatusCode)
+		// Assert Content-Type is set
+		assert.Equal(t, "application/json; charset=UTF-8", getHeaderValue(t, w.Header, "Content-Type"))
+		// Assert Access-Control-Allow-Origin is set
+		assert.Equal(t, "*", getHeaderValue(t, w.Header, "Access-Control-Allow-Origin"))
 	}
 }
 
@@ -62,6 +90,7 @@ func TestOptionsRoutes(t *testing.T) {
 	}
 	// Run the test iterations
 	for _, params := range tps {
+		log.Printf("Testing route '%s'", params.route)
 		// Create a request
 		r, err := http.NewRequest(http.MethodOptions, params.route, nil)
 		assert.NoError(t, err)
@@ -70,16 +99,12 @@ func TestOptionsRoutes(t *testing.T) {
 		// Ensure we get a 200
 		assert.Equal(t, http.StatusOK, w.StatusCode)
 		// Ensure we have the expected allowed headers
-		assert.Contains(t, w.Header, "Access-Control-Allow-Headers")
-		assert.Len(t, w.Header["Access-Control-Allow-Headers"], 1)
-		allowedHeaders := strings.Split(w.Header["Access-Control-Allow-Headers"][0], ",")
+		allowedHeaders := strings.Split(getHeaderValue(t, w.Header, "Access-Control-Allow-Headers"), ",")
 		assert.Contains(t, allowedHeaders, "Content-Type")
 		assert.Contains(t, allowedHeaders, "Authorization")
 		assert.Len(t, allowedHeaders, 2)
 		// Ensure we have the expected methods
-		assert.Contains(t, w.Header, "Access-Control-Allow-Methods")
-		assert.Len(t, w.Header["Access-Control-Allow-Methods"], 1)
-		allowedMethods := strings.Split(w.Header["Access-Control-Allow-Methods"][0], ",")
+		allowedMethods := strings.Split(getHeaderValue(t, w.Header, "Access-Control-Allow-Headers"), ",")
 		for _, method := range params.methods {
 			assert.Contains(t, allowedMethods, method)
 		}
@@ -89,12 +114,12 @@ func TestOptionsRoutes(t *testing.T) {
 
 func runTest(t *testing.T, r *http.Request, expect expectFunc) *http.Response {
 	// Create router
-	server, router := createTestRouter(t)
+	db, tokens, server, router := createStubbedRouter(t)
 	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
 	w := httptest.NewRecorder()
 	// Configure the expectations
 	if expect != nil {
-		expect(server)
+		expect(server, db, tokens)
 	}
 	// Get the router to handle the request
 	router.ServeHTTP(w, r)
@@ -106,10 +131,26 @@ func setStatusOk(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func createTestRouter(t *testing.T) (*MockServer, *mux.Router) {
+func expectAuth(tokens *MockTokens, accountID string) {
+	// Expect the auth middleware to validate the token
+	tokens.EXPECT().Validate(gomock.Eq(testToken)).Return(accountID, nil)
+}
+
+func createStubbedRouter(t *testing.T) (*MockDBClient, *MockTokens, *MockServer, *mux.Router) {
 	// Create mock controller
 	ctrl := gomock.NewController(t)
-	// Create mock server
+	// Create mock database
+	db := NewMockDBClient(ctrl)
+	// Create mock shadow
 	s := NewMockServer(ctrl)
-	return s, NewRouter(s)
+	// Create mock tokens
+	tokens := NewMockTokens(ctrl)
+	// Create the new router
+	return db, tokens, s, NewRouter(db, s, tokens)
+}
+
+func getHeaderValue(t *testing.T, header http.Header, key string) string {
+	assert.Contains(t, header, key)
+	assert.Len(t, header[key], 1)
+	return header[key][0]
 }

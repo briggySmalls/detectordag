@@ -11,28 +11,20 @@ import (
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	"github.com/briggysmalls/detectordag/api/swagger"
 	"github.com/briggysmalls/detectordag/api/swagger/server"
+	"github.com/briggysmalls/detectordag/api/swagger/tokens"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
 	"github.com/briggysmalls/detectordag/shared/shadow"
+	"github.com/gorilla/mux"
 	"log"
 )
 
 var adapter *gorillamux.GorillaMuxAdapter
 
 func init() {
-	// Get config from environment
-	c, err := server.LoadConfig()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
 	// Create an AWS session
 	// Good practice will share this session for all services
-	sesh, err := session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	})
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	sesh := createSession(aws.Config{})
 	// Create a new Db client
 	db, err := database.New(sesh)
 	if err != nil {
@@ -43,35 +35,21 @@ func init() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	// Create a new session just for emailing (we have to use a different region)
-	emailSesh, err := session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-		Config: aws.Config{
-			// There is no emailing service in eu-west-2
-			Region: aws.String("eu-west-1"),
-		},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
+	// Create a new session just for emailing (there is no emailing service in eu-west-2)
+	emailSesh := createSession(aws.Config{Region: aws.String("eu-west-1")})
 	// Create a new email client
 	email, err := email.New(emailSesh)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	// Create the tokens
+	tokens := createTokens()
 	// Create the server
-	serverParams := server.Params{
-		Db:     db,
-		Shadow: shadow,
-		Email:  email,
-		Config: *c,
-	}
-	s := server.New(serverParams)
+	s := createServer(db, shadow, email, tokens)
 	// Create the router
-	router := swagger.NewRouter(s)
-	// Create a router
+	r := createRouter(db, s)
 	// Create an adapter for aws lambda
-	adapter = gorillamux.New(router)
+	adapter = gorillamux.New(r)
 }
 
 // HandleRequest handles a lambda call
@@ -88,4 +66,43 @@ func handleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 // main is the entrypoint to the lambda function
 func main() {
 	lambda.Start(handleRequest)
+}
+
+func createSession(config aws.Config) *session.Session {
+	// Create a new session just for emailing (we have to use a different region)
+	sesh, err := session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+		Config:            config,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	return sesh
+}
+
+func createTokens() tokens.Tokens {
+	// Load config from environment
+	c, err := loadConfig()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	// Get the token duration
+	tokenDuration, _ := c.ParseDuration()
+	// Create a tokens
+	return tokens.New(c.JwtSecret, tokenDuration)
+}
+
+func createServer(db database.Client, shadow shadow.Client, email email.Client, tokens tokens.Tokens) server.Server {
+	// Create the server
+	return server.New(server.Params{
+		Db:     db,
+		Shadow: shadow,
+		Email:  email,
+		Tokens: tokens,
+	})
+}
+
+func createRouter(db database.Client, server server.Server) *mux.Router {
+	// Create the router
+	return swagger.NewRouter(db, server, createTokens())
 }

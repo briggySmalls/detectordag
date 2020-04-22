@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"fmt"
@@ -6,14 +6,14 @@ import (
 	"time"
 )
 
-type Config struct {
+type config struct {
 	JwtSecret   string `split_words:"true"`
 	JwtDuration string `split_words:"true"`
 }
 
-func LoadConfig() (*Config, error) {
+func loadConfig() (*config, error) {
 	// Load config
-	var c Config
+	var c config
 	var err error
 	err = envconfig.Process("detectordag", &c)
 	if err != nil {
@@ -30,6 +30,6 @@ func LoadConfig() (*Config, error) {
 	return &c, nil
 }
 
-func (c *Config) ParseDuration() (time.Duration, error) {
+func (c *config) ParseDuration() (time.Duration, error) {
 	return time.ParseDuration(c.JwtDuration)
 }

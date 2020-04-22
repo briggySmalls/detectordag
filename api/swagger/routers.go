@@ -12,12 +12,10 @@ package swagger
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/briggysmalls/detectordag/api/swagger/server"
+	"github.com/briggysmalls/detectordag/api/swagger/tokens"
 	"github.com/briggysmalls/detectordag/shared/database"
-	"github.com/briggysmalls/detectordag/shared/email"
-	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/gorilla/mux"
 )
 
@@ -32,99 +30,82 @@ type Route struct {
 	HandlerFunc http.HandlerFunc
 }
 
-type RouterConfig struct {
-	db     database.Client
-	shadow shadow.Client
-	email  email.Client
-}
-
 type Routes []Route
 
-func NewRouter(s server.Server) *mux.Router {
+func NewRouter(db database.Client, server server.Server, tokens tokens.Tokens) *mux.Router {
 	// Create the router
 	router := mux.NewRouter().StrictSlash(true)
-	// Prepare the routes
-	var routes = Routes{
-		Route{
-			"GetAccount",
-			strings.ToUpper("Get"),
-			fmt.Sprintf("/v1/accounts/{accountId:%s}", uuidRegex),
-			s.GetAccount,
-		},
-
-		Route{
-			"GetDevices",
-			strings.ToUpper("Get"),
-			fmt.Sprintf("/v1/accounts/{accountId:%s}/devices", uuidRegex),
-			s.GetDevices,
-		},
-
-		Route{
-			"UpdateAccount",
-			strings.ToUpper("Patch"),
-			fmt.Sprintf("/v1/accounts/{accountId:%s}", uuidRegex),
-			s.UpdateAccount,
-		},
-
+	// Create subrouter for 'v1'
+	api := router.PathPrefix("/v1").Subrouter()
+	// Add the non-auth routes
+	nonAuthRoutes := Routes{
 		Route{
 			"Auth",
-			strings.ToUpper("Post"),
-			"/v1/auth",
-			s.Auth,
-		},
-
-		Route{
-			"UpdateDevice",
-			strings.ToUpper("Patch"),
-			"/v1/devices/{deviceId}",
-			s.UpdateDevice,
+			http.MethodPost,
+			"/auth",
+			server.Auth,
 		},
 	}
+	addRoutes(api, nonAuthRoutes)
 
-	// Build the router
+	// Create subrouter for accounts
+	accounts := api.PathPrefix("/accounts").Subrouter()
+	addRoutes(accounts, Routes{
+		Route{
+			"GetAccount",
+			http.MethodGet,
+			fmt.Sprintf("/{accountId:%s}", uuidRegex),
+			server.GetAccount,
+		},
+		Route{
+			"GetDevices",
+			http.MethodGet,
+			fmt.Sprintf("/{accountId:%s}/devices", uuidRegex),
+			server.GetDevices,
+		},
+		Route{
+			"UpdateAccount",
+			http.MethodPatch,
+			fmt.Sprintf("/{accountId:%s}", uuidRegex),
+			server.UpdateAccount,
+		},
+	})
+
+	// Create subrouter for devices
+	devices := api.PathPrefix("/devices").Subrouter()
+	addRoutes(devices, Routes{
+		Route{
+			"UpdateDevice",
+			http.MethodPatch,
+			"/{deviceId}",
+			server.UpdateDevice,
+		},
+	})
+
+	// Add CORS header on all responses
+	api.Use(mux.CORSMethodMiddleware(api))
+	api.Use(corsMiddleware)
+
+	// Add authentication middleware
+	a := auth{
+		tokens: tokens,
+		db:     db,
+	}
+	accounts.Use(a.middleware)
+	devices.Use(a.middleware)
+
+	// Return the router
+	return router
+}
+
+func addRoutes(router *mux.Router, routes []Route) {
 	for _, route := range routes {
 		var handler http.Handler
 		handler = route.HandlerFunc
-
 		router.
-			Methods(route.Method).
+			Methods(route.Method, http.MethodOptions).
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(handler)
 	}
-
-	// Add routes to allow CORS
-	addOptionsRoutes(router, routes)
-
-	// Add CORS header on all responses
-	router.Use(corsMiddleware)
-
-	return router
-}
-
-func addOptionsRoutes(router *mux.Router, routes []Route) {
-	// Determine unique routes, and collect the methods on each
-	methods := make(map[string][]string)
-	for _, route := range routes {
-		// Append the method to the pattern
-		methods[route.Pattern] = append(methods[route.Pattern], route.Method)
-	}
-
-	// Add routes for the options method
-	for pattern, methods := range methods {
-		router.
-			Methods("OPTIONS").
-			Path(pattern).
-			Handler(OptionsHandlerFactory(methods))
-	}
-}
-
-//OptionsHandlerFactory creates a handler for a route
-func OptionsHandlerFactory(methods []string) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Add header to permit methods
-		w.Header().Set("Access-Control-Allow-Methods", strings.Join(methods, ","))
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,Authorization")
-		w.WriteHeader(http.StatusOK)
-	})
 }

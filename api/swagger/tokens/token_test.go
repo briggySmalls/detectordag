@@ -1,19 +1,17 @@
-package server
+package tokens
 
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/stretchr/testify/assert"
 	"math"
-	"net/http"
 	"testing"
 	"time"
 )
 
 func TestCreateToken(t *testing.T) {
 	timeLeeway, err := time.ParseDuration("10ns")
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
+	assert.NoError(t, err)
 	// Create some test inputs
 	testParams := []struct {
 		secret    string
@@ -25,16 +23,14 @@ func TestCreateToken(t *testing.T) {
 		{secret: "anothersecret", duration: "1m", accountID: "22222222-32C8-4908-8377-2E6A021D3D2B"},
 	}
 	for _, params := range testParams {
-		// Create a server
-		srv := server{
-			config: Config{JwtSecret: params.secret, JwtDuration: params.duration},
-		}
+		// Create a tokens
+		duration, err := time.ParseDuration("10s")
+		assert.NoError(t, err)
+		tokens := New(params.secret, duration)
 		// Create a token
-		ss, err := srv.createToken(params.accountID)
+		ss, err := tokens.Create(params.accountID)
 		// Check the error
-		if err != params.error {
-			t.Fatalf(err.Error())
-		}
+		assert.Equal(t, params.error, err)
 		// Parse the token contents
 		token, err := jwt.ParseWithClaims(ss, &CustomAuthClaims{}, func(token *jwt.Token) (interface{}, error) {
 			// Validate the alg is what we expect
@@ -65,81 +61,78 @@ func TestCreateToken(t *testing.T) {
 	}
 }
 
-func TestCheckAuthorized(t *testing.T) {
+func TestCheckValid(t *testing.T) {
+	// Create a dummy expiry duration
+	duration, err := time.ParseDuration("10s")
+	assert.NoError(t, err)
 	// Create some test inputs
 	testParams := []struct {
 		secret    string
 		token     string
 		now       time.Time
 		accountID string
-		errors    uint32
+		error     error
 	}{
 		{
+			// Valid token
 			secret:    "mysecret",
 			accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B",
 			token:     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiIzNTU4MUJGNC0zMkM4LTQ5MDgtODM3Ny0yRTZBMDIxRDNEMkIiLCJleHAiOjE1ODQ3OTk0NzQsImlzcyI6ImRldGVjdG9yZGFnIn0.qqMDypPk5BT1dz_8KT6S9eNLABWcYIfnaRr_BroisKo",
 			now:       createTime(t, "2020/03/21 12:06:00"),
-			errors:    0,
+			error:     nil,
 		},
 		{
+			// Expired token
 			secret:    "mysecret",
 			accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B",
 			token:     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiIzNTU4MUJGNC0zMkM4LTQ5MDgtODM3Ny0yRTZBMDIxRDNEMkIiLCJleHAiOjE1ODQ3OTk0NzQsImlzcyI6ImRldGVjdG9yZGFnIn0.qqMDypPk5BT1dz_8KT6S9eNLABWcYIfnaRr_BroisKo",
 			now:       createTime(t, "2020/03/22 12:06:00"),
-			errors:    jwt.ValidationErrorExpired,
+			error:     ErrBadToken,
 		},
 		{
+			// Missing token
 			secret:    "mysecret",
 			accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B",
 			token:     "",
 			now:       createTime(t, "2020/03/22 12:06:00"),
-			errors:    jwt.ValidationErrorMalformed,
+			error:     ErrBadToken,
+		},
+		{
+			// Token with RS256 signing algorithm
+			secret:    "mysecret",
+			accountID: "35581BF4-32C8-4908-8377-2E6A021D3D2B",
+			token:     "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.POstGetfAytaZS82wHcjoTyoqhMyxXiWdR7Nn7A29DNSl0EiXLdwJ6xC6AfgZWF1bOsS_TuYI3OG85AmiExREkrS6tDfTQ2B3WXlrr-wp5AokiRbz3_oB4OxG-W9KcEEbDRcZc0nH3L7LzYptiy1PtAylQGxHTWZXtGz4ht0bAecBgmpdgXMguEIcoqPJ1n3pIWk_dUZegpqx0Lka21H6XxUTxiy8OcaarA8zdnPUnV6AmNP3ecFawIFYdvJB_cm-GvpCSbr8G8y_Mllj8f4x9nBH8pQux89_6gUY618iYv7tuPWBFfEbLxtF2pZS6YC1aSfLQxeNe8djT9YjpvRZA",
+			now:       createTime(t, "2020/03/22 12:06:00"),
+			error:     ErrBadToken,
 		},
 	}
 	for _, params := range testParams {
-		// Create a server
-		srv := server{
-			config: Config{JwtSecret: params.secret},
-		}
+		// Create a tokens
+		tokens := New(params.secret, duration)
 		// Check if the token authorises the supplied account
 		at(params.now, func() {
-			err := srv.checkAuthorized(params.token, params.accountID)
-			if err == nil && params.errors == 0 {
+			accountID, err := tokens.Validate(params.token)
+			assert.Equal(t, params.error, err)
+			if err == nil {
 				// We weren't expecting an error
+				assert.Equal(t, params.accountID, accountID)
 				return
-			}
-			vErr, ok := err.(*jwt.ValidationError)
-			if !ok {
-				t.Errorf("Unexpected error format: %v", err)
-			} else if vErr.Errors&params.errors == 0 {
-				t.Errorf("Unexpected error: %v", err)
 			}
 		})
 	}
 }
 
-func TestGetToken(t *testing.T) {
-	// Create some test inputs
-	testParams := []struct {
-		authHeader http.Header
-		token      string
-		error      error
-	}{
-		{authHeader: http.Header{"Authorization": {"Bearer mytoken"}}, token: "mytoken", error: nil},
-		{authHeader: http.Header{"Authorization": {"badHeader"}}, token: "", error: ErrMalformattedAuthHeader},
-		{authHeader: http.Header{}, token: "", error: ErrNoAuthHeader},
+// Override time value for tests.  Restore default value after.
+func at(t time.Time, f func()) {
+	jwt.TimeFunc = func() time.Time {
+		return t
 	}
-	// Run the test
-	for _, params := range testParams {
-		// Create a server
-		srv := server{}
-		// Get the token
-		token, err := srv.getToken(&params.authHeader)
-		// Assert results
-		if err != params.error {
-			t.Errorf("Unexpected error: %v", err)
-		} else if token != params.token {
-			t.Errorf("Unexpected token: %s", token)
-		}
-	}
+	f()
+	jwt.TimeFunc = time.Now
+}
+
+func createTime(t *testing.T, timeString string) time.Time {
+	tme, err := time.Parse("2006/01/02 15:04:05", timeString)
+	assert.NoError(t, err)
+	return tme
 }
