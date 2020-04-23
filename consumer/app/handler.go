@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/briggysmalls/detectordag/shared/database"
-	"github.com/briggysmalls/detectordag/shared/iot"
+	iotm "github.com/briggysmalls/detectordag/shared/iot"
 	"log"
 	"time"
 )
@@ -29,7 +29,7 @@ type StatusUpdatedEvent struct {
 }
 
 var db database.Client
-var iot iot.Client
+var iot iotm.Client
 
 func init() {
 	// Create an AWS session
@@ -46,7 +46,7 @@ func init() {
 		log.Fatal(err.Error())
 	}
 	// Create an IOT client
-	iot, err := iot.New(sesh)
+	iot, err = iotm.New(sesh)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -64,15 +64,19 @@ func HandleRequest(ctx context.Context, event StatusUpdatedEvent) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("Device '%s' associated with account '%d'", event.DeviceID, accountID)
+	log.Printf("Device '%s' associated with account '%d'", event.DeviceId, accountID)
 	// Get the account
-	account, err := db.GetAccountById(device.AccountId)
+	account, err := db.GetAccountById(accountID)
 	if err != nil {
 		log.Fatal(err)
 	}
 	// Construct an event to pass to the emailer
+	name, err := device.Name()
+	if err != nil {
+		log.Fatal(err)
+	}
 	update := PowerStatusChangedEmailConfig{
-		DeviceName: device.Name,
+		DeviceName: name,
 		Timestamp:  time.Unix(event.Updated.Status.Timestamp, 0),
 		Status:     event.State.Status,
 	}
