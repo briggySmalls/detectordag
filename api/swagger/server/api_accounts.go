@@ -48,7 +48,7 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Fetch the devices associated with the account
-	devices, err := s.db.GetDevicesByAccount(string(accountID))
+	devices, err := s.iot.GetThingsByAccount(string(accountID))
 	if err != nil {
 		SetError(w, err, http.StatusInternalServerError)
 		return

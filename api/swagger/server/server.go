@@ -8,6 +8,7 @@ import (
 	"github.com/briggysmalls/detectordag/api/swagger/tokens"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
+	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"net/http"
 )
@@ -23,6 +24,7 @@ type server struct {
 	db     database.Client
 	shadow shadow.Client
 	email  email.Client
+	iot    iot.Client
 	tokens tokens.Tokens
 }
 
@@ -39,6 +41,7 @@ func New(params Params) Server {
 		db:     params.Db,
 		shadow: params.Shadow,
 		email:  params.Email,
+		iot:    params.IoT,
 		tokens: params.Tokens,
 	}
 }
