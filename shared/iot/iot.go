@@ -100,15 +100,25 @@ func (c *client) getPaginatedThings(input *iot.ListThingsInput, output *iot.List
 	return c.getPaginatedThings(input, output, things)
 }
 
+// AccountID gets the account ID for the thing
 func (t *thingAttribute) AccountID() (string, error) {
-	if accountID, ok := t.ThingAttribute.Attributes[accountIDAttributeName]; ok {
+	return t.getAttribute(accountIDAttributeName)
+}
+
+func (t *thingAttribute) getAttribute(key string) (string, error) {
+	if accountID, ok := t.ThingAttribute.Attributes[key]; ok {
 		return *accountID, nil
 	}
 	return "", ErrAccountIDMissing
 }
 
+// AccountID gets the account ID for the thing
 func (t *describeThingOutput) AccountID() (string, error) {
-	if accountID, ok := t.DescribeThingOutput.Attributes[accountIDAttributeName]; ok {
+	return t.getAttribute(accountIDAttributeName)
+}
+
+func (t *describeThingOutput) getAttribute(key string) (string, error) {
+	if accountID, ok := t.DescribeThingOutput.Attributes[key]; ok {
 		return *accountID, nil
 	}
 	return "", ErrAccountIDMissing
