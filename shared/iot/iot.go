@@ -21,8 +21,15 @@ type client struct {
 }
 
 type Client interface {
-	GetThing(id string) (Device, error)
-	GetThingsByAccount(id string) ([]Device, error)
+	GetThing(id string) (*Device, error)
+	GetThingsByAccount(id string) ([]*Device, error)
+}
+
+// Device holds the non-state properties of a device
+type Device struct {
+	Name      string
+	DeviceId  string
+	AccountId string
 }
 
 type thingAttribute struct {
@@ -33,9 +40,8 @@ type describeThingOutput struct {
 	*iot.DescribeThingOutput
 }
 
-type Device interface {
-	AccountID() (string, error)
-	Name() (string, error)
+type deviceSource interface {
+	ToDevice() (*Device, error)
 }
 
 // New gets a new Client
@@ -53,13 +59,19 @@ func New(sesh *session.Session) (Client, error) {
 }
 
 // GetThing gets a thing with the given name from the AWS IoT registry
-func (c *client) GetThing(id string) (Device, error) {
+func (c *client) GetThing(id string) (*Device, error) {
+	// Fetch the specified thing
 	thing, err := c.iot.DescribeThing(&iot.DescribeThingInput{ThingName: aws.String(id)})
-	return &describeThingOutput{thing}, err
+	if err != nil {
+		return nil, err
+	}
+	// Convert the response to a 'Device'
+	d := describeThingOutput{thing}
+	return d.ToDevice()
 }
 
 // GetThingsByAccount returns all things which are associated with the specified accountg
-func (c *client) GetThingsByAccount(id string) ([]Device, error) {
+func (c *client) GetThingsByAccount(id string) ([]*Device, error) {
 	// Search for things
 	things := []*iot.ThingAttribute{}
 	var err error
@@ -71,9 +83,14 @@ func (c *client) GetThingsByAccount(id string) ([]Device, error) {
 		return nil, err
 	}
 	// Wrap up each thing
-	wrappedThings := make([]Device, len(things))
+	wrappedThings := make([]*Device, len(things))
 	for i, thing := range things {
-		wrappedThings[i] = &thingAttribute{thing}
+		t := thingAttribute{thing}
+		device, err := t.ToDevice()
+		if err != nil {
+			return nil, err
+		}
+		wrappedThings[i] = device
 	}
 	return wrappedThings, nil
 }
@@ -102,14 +119,24 @@ func (c *client) getPaginatedThings(input *iot.ListThingsInput, output *iot.List
 	return c.getPaginatedThings(input, output, things)
 }
 
-// AccountID gets the account ID for the thing
-func (t *thingAttribute) AccountID() (string, error) {
-	return t.getAttribute(accountIDAttributeName)
-}
-
-// Name gets the name for the thing
-func (t *thingAttribute) Name() (string, error) {
-	return t.getAttribute(nameAttributeName)
+func (t *thingAttribute) ToDevice() (*Device, error) {
+	// Get the name
+	name, err := t.getAttribute(nameAttributeName)
+	if err != nil {
+		return nil, err
+	}
+	// Get the account ID
+	accountID, err := t.getAttribute(accountIDAttributeName)
+	if err != nil {
+		return nil, err
+	}
+	// Get the device ID
+	deviceID := t.ThingName
+	return &Device{
+		Name:      name,
+		DeviceId:  *deviceID,
+		AccountId: accountID,
+	}, nil
 }
 
 func (t *thingAttribute) getAttribute(key string) (string, error) {
@@ -119,14 +146,24 @@ func (t *thingAttribute) getAttribute(key string) (string, error) {
 	return "", ErrAccountIDMissing
 }
 
-// AccountID gets the account ID for the thing
-func (t *describeThingOutput) AccountID() (string, error) {
-	return t.getAttribute(accountIDAttributeName)
-}
-
-// Name gets the name for the thing
-func (t *describeThingOutput) Name() (string, error) {
-	return t.getAttribute(nameAttributeName)
+func (t *describeThingOutput) ToDevice() (*Device, error) {
+	// Get the name
+	name, err := t.getAttribute(nameAttributeName)
+	if err != nil {
+		return nil, err
+	}
+	// Get the account ID
+	accountID, err := t.getAttribute(accountIDAttributeName)
+	if err != nil {
+		return nil, err
+	}
+	// Get the device ID
+	deviceID := t.ThingName
+	return &Device{
+		Name:      name,
+		DeviceId:  *deviceID,
+		AccountId: accountID,
+	}, nil
 }
 
 func (t *describeThingOutput) getAttribute(key string) (string, error) {
