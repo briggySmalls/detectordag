@@ -8,7 +8,11 @@ import (
 )
 
 const (
-	accountIdAttributeName = "account-id"
+	accountIDAttributeName = "account-id"
+)
+
+var (
+	ErrAccountIDMissing = errors.New("The account-id attribute was missing")
 )
 
 type client struct {
@@ -16,8 +20,20 @@ type client struct {
 }
 
 type Client interface {
-	GetThing(id string) (*iot.DescribeThingOutput, error)
-	GetThingsByAccount(id string) ([]*iot.ThingAttribute, error)
+	GetThing(id string) (Device, error)
+	GetThingsByAccount(id string) ([]Device, error)
+}
+
+type thingAttribute struct {
+	*iot.ThingAttribute
+}
+
+type describeThingOutput struct {
+	*iot.DescribeThingOutput
+}
+
+type Device interface {
+	AccountID() (string, error)
 }
 
 // New gets a new Client
@@ -35,18 +51,29 @@ func New(sesh *session.Session) (Client, error) {
 }
 
 // GetThing gets a thing with the given name from the AWS IoT registry
-func (c *client) GetThing(id string) (*iot.DescribeThingOutput, error) {
-	return c.iot.DescribeThing(&iot.DescribeThingInput{ThingName: aws.String(id)})
+func (c *client) GetThing(id string) (Device, error) {
+	thing, err := c.iot.DescribeThing(&iot.DescribeThingInput{ThingName: aws.String(id)})
+	return &describeThingOutput{thing}, err
 }
 
 // GetThingsByAccount returns all things which are associated with the specified accountg
-func (c *client) GetThingsByAccount(id string) ([]*iot.ThingAttribute, error) {
+func (c *client) GetThingsByAccount(id string) ([]Device, error) {
 	// Search for things
 	things := []*iot.ThingAttribute{}
-	return c.getPaginatedThings(&iot.ListThingsInput{
-		AttributeName:  aws.String(accountIdAttributeName),
+	var err error
+	things, err = c.getPaginatedThings(&iot.ListThingsInput{
+		AttributeName:  aws.String(accountIDAttributeName),
 		AttributeValue: aws.String(id),
 	}, nil, things)
+	if err != nil {
+		return nil, err
+	}
+	// Wrap up each thing
+	wrappedThings := make([]Device, len(things))
+	for i, thing := range things {
+		wrappedThings[i] = &thingAttribute{thing}
+	}
+	return wrappedThings, nil
 }
 
 func (c *client) getPaginatedThings(input *iot.ListThingsInput, output *iot.ListThingsOutput, things []*iot.ThingAttribute) ([]*iot.ThingAttribute, error) {
@@ -71,4 +98,18 @@ func (c *client) getPaginatedThings(input *iot.ListThingsInput, output *iot.List
 	}
 	// Recursively request more things
 	return c.getPaginatedThings(input, output, things)
+}
+
+func (t *thingAttribute) AccountID() (string, error) {
+	if accountID, ok := t.ThingAttribute.Attributes[accountIDAttributeName]; ok {
+		return *accountID, nil
+	}
+	return "", ErrAccountIDMissing
+}
+
+func (t *describeThingOutput) AccountID() (string, error) {
+	if accountID, ok := t.DescribeThingOutput.Attributes[accountIDAttributeName]; ok {
+		return *accountID, nil
+	}
+	return "", ErrAccountIDMissing
 }

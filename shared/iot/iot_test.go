@@ -16,7 +16,9 @@ func TestGetThing(t *testing.T) {
 	device, err := c.GetThing("92f59eeb298c4f8c8773e4704d9afe65")
 	assert.NoError(t, err)
 	// Assert it has expected fields
-	assert.Equal(t, "92f59eeb298c4f8c8773e4704d9afe65", *device.ThingName)
+	accountID, err := device.AccountID()
+	assert.NoError(t, err)
+	assert.Equal(t, "aac45d02-c97d-442c-8431-336d578fdcf7", accountID)
 }
 
 func TestGetThingsByAccount(t *testing.T) {
@@ -30,7 +32,9 @@ func TestGetThingsByAccount(t *testing.T) {
 	assert.NoError(t, err)
 	// Assert it has expected fields
 	assert.Len(t, devices, 1)
-	assert.Equal(t, "92f59eeb298c4f8c8773e4704d9afe65", *devices[0].ThingName)
+	accountID, err := devices[0].AccountID()
+	assert.NoError(t, err)
+	assert.Equal(t, "aac45d02-c97d-442c-8431-336d578fdcf7", accountID)
 }
 
 func createSession(t *testing.T) *session.Session {
