@@ -9,6 +9,7 @@ import (
 
 const (
 	accountIDAttributeName = "account-id"
+	nameAttributeName      = "name"
 )
 
 var (
@@ -34,6 +35,7 @@ type describeThingOutput struct {
 
 type Device interface {
 	AccountID() (string, error)
+	Name() (string, error)
 }
 
 // New gets a new Client
@@ -105,6 +107,11 @@ func (t *thingAttribute) AccountID() (string, error) {
 	return t.getAttribute(accountIDAttributeName)
 }
 
+// Name gets the name for the thing
+func (t *thingAttribute) Name() (string, error) {
+	return t.getAttribute(nameAttributeName)
+}
+
 func (t *thingAttribute) getAttribute(key string) (string, error) {
 	if accountID, ok := t.ThingAttribute.Attributes[key]; ok {
 		return *accountID, nil
@@ -115,6 +122,11 @@ func (t *thingAttribute) getAttribute(key string) (string, error) {
 // AccountID gets the account ID for the thing
 func (t *describeThingOutput) AccountID() (string, error) {
 	return t.getAttribute(accountIDAttributeName)
+}
+
+// Name gets the name for the thing
+func (t *describeThingOutput) Name() (string, error) {
+	return t.getAttribute(nameAttributeName)
 }
 
 func (t *describeThingOutput) getAttribute(key string) (string, error) {
