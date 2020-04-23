@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/briggysmalls/detectordag/shared/database"
+	"github.com/briggysmalls/detectordag/shared/iot"
 	"log"
 	"time"
 )
@@ -28,6 +29,7 @@ type StatusUpdatedEvent struct {
 }
 
 var db database.Client
+var iot iot.Client
 
 func init() {
 	// Create an AWS session
@@ -43,16 +45,26 @@ func init() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	// Create an IOT client
+	iot, err := iot.New(sesh)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }
 
 // HandleRequest handles a lambda call
 func HandleRequest(ctx context.Context, event StatusUpdatedEvent) {
-	// Update the device status in the database
-	device, err := db.GetDeviceById(event.DeviceId)
+	// Get the device
+	device, err := iot.GetThing(event.DeviceId)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("Account ID: %d", device.AccountId)
+	// Get the account ID from the attributes
+	accountID, err := device.AccountID()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("Device '%s' associated with account '%d'", event.DeviceID, accountID)
 	// Get the account
 	account, err := db.GetAccountById(device.AccountId)
 	if err != nil {
