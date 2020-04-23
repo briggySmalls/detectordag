@@ -59,11 +59,7 @@ func HandleRequest(ctx context.Context, event StatusUpdatedEvent) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// Get the account ID from the attributes
-	accountID, err := device.AccountID()
-	if err != nil {
-		log.Fatal(err)
-	}
+	accountID := device.AccountId
 	log.Printf("Device '%s' associated with account '%d'", event.DeviceId, accountID)
 	// Get the account
 	account, err := db.GetAccountById(accountID)
@@ -71,12 +67,8 @@ func HandleRequest(ctx context.Context, event StatusUpdatedEvent) {
 		log.Fatal(err)
 	}
 	// Construct an event to pass to the emailer
-	name, err := device.Name()
-	if err != nil {
-		log.Fatal(err)
-	}
 	update := PowerStatusChangedEmailConfig{
-		DeviceName: name,
+		DeviceName: device.Name,
 		Timestamp:  time.Unix(event.Updated.Status.Timestamp, 0),
 		Status:     event.State.Status,
 	}
