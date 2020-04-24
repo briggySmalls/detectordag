@@ -86,22 +86,16 @@ func TestRegisterDevice(t *testing.T) {
 	certs := iot.Certificates{Public: publicCert, Private: privateCert}
 	iotClient.EXPECT().RegisterThing(accountID, desiredName).Return(&device, &certs, nil)
 	// Create a request for devices
-	req := createRequest(t, "PUT", fmt.Sprintf("/v1/accounts/%s/devices/%s", accountID, deviceID), nil)
+	req := createRequest(t, "PUT",
+		fmt.Sprintf("/v1/accounts/%s/devices/%s", accountID, deviceID),
+		[]byte(fmt.Sprintf(`{"name": "%s"}`, desiredName)),
+	)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	// Execute the handler
 	rr := runHandler(router, req)
 	// Assert status ok
 	assert.Equal(t, http.StatusOK, rr.Code)
 	// Inspect the body of the response
-	const expectedBody = `
-{
-	"name": "%s",
-	"deviceId", "%s",
-	"certificate": {
-		"publicKey": "%s",
-		"privateKey": "%s"
-	}
-}
-`
+	const expectedBody = `{"name":"%s","deviceId":"%s","certificate":{"publicKey":"%s","privateKey":"%s"}}`
 	assert.Equal(t, fmt.Sprintf(expectedBody, desiredName, deviceID, publicCert, privateCert), string(rr.Body.Bytes()))
 }
