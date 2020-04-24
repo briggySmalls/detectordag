@@ -45,7 +45,7 @@ func createRealRouter(t *testing.T) (*MockDBClient, *MockShadowClient, *MockEmai
 	// Create real server
 	s := server.New(db, shadow, email, iot, tokens)
 	// Create the new router
-	return db, shadow, email, iot, tokens, NewRouter(db, s, tokens)
+	return db, shadow, email, iot, tokens, NewRouter(iot, s, tokens)
 }
 
 func runHandler(router *mux.Router, req *http.Request) *httptest.ResponseRecorder {

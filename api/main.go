@@ -52,7 +52,7 @@ func init() {
 	// Create the server
 	s := server.New(db, shadow, email, iot, tokens)
 	// Create the router
-	r := swagger.NewRouter(db, s, createTokens())
+	r := swagger.NewRouter(iot, s, createTokens())
 	// Create an adapter for aws lambda
 	adapter = gorillamux.New(r)
 }

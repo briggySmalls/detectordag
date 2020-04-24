@@ -15,7 +15,7 @@ import (
 
 	"github.com/briggysmalls/detectordag/api/swagger/server"
 	"github.com/briggysmalls/detectordag/api/swagger/tokens"
-	"github.com/briggysmalls/detectordag/shared/database"
+	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/gorilla/mux"
 )
 
@@ -32,7 +32,7 @@ type Route struct {
 
 type Routes []Route
 
-func NewRouter(db database.Client, server server.Server, tokens tokens.Tokens) *mux.Router {
+func NewRouter(iot iot.Client, server server.Server, tokens tokens.Tokens) *mux.Router {
 	// Create the router
 	router := mux.NewRouter().StrictSlash(true)
 	// Create subrouter for 'v1'
@@ -89,7 +89,7 @@ func NewRouter(db database.Client, server server.Server, tokens tokens.Tokens) *
 	// Add authentication middleware
 	a := auth{
 		tokens: tokens,
-		db:     db,
+		iot:    iot,
 	}
 	accounts.Use(a.middleware)
 	devices.Use(a.middleware)
