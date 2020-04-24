@@ -4,11 +4,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/iot"
 )
 
-const (
-	accountIDAttributeName = "account-id"
-	nameAttributeName      = "name"
-)
-
 type thingAttribute struct {
 	*iot.ThingAttribute
 }
