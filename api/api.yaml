@@ -176,25 +176,9 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - certificateId
-                - certificatePem
-                - keyPair
               properties:
-                certificateId:
+                name:
                   type: string
-                certificatePem:
-                  type: string
-                keyPair:
-                  type: object
-                  required:
-                    - privateKey
-                    - publickey
-                  properties:
-                    privateKey:
-                      type: string
-                    publicKey:
-                      type: string
       responses:
         200:
           description: successful operation
@@ -203,12 +187,16 @@ paths:
               schema:
                 type: object
                 required:
-                  -
+                  - name
+                  - deviceId
+                  - certificate
                 properties:
-                  accountId:
-                    type: string
                   name:
                     type: string
+                  deviceId:
+                    type: string
+                  certificates:
+                    $ref: '#/components/schemas/Certificate'
         400:
           $ref: '#/components/responses/InvalidId'
         401:
@@ -349,4 +337,14 @@ components:
         type:
           type: string
         message:
+          type: string
+    Certificate:
+      type: object
+      required:
+        - publicKey
+        - privateKey
+      properties:
+        publicKey:
+          type: string
+        privateKey:
           type: string
