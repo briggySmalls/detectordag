@@ -16,15 +16,8 @@ import (
 
 const (
 	policyName        = "dd-edge-policy"
-	belanaAppName     = "detectordag-edge"
 	accountsTableName = "accounts"
 )
-
-type createThingResponse struct {
-	ThingName string `json:""`
-	ThingArn  string `json:""`
-	ThingId   string `json:""`
-}
 
 // CreatePolicy creates a policy for the edge devices
 func CreatePolicy() error {
