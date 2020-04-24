@@ -36,13 +36,13 @@ type Server interface {
 	UpdateDevice(w http.ResponseWriter, r *http.Request)
 }
 
-func New(params Params) Server {
+func New(db database.Client, shadow shadow.Client, email email.Client, iot iot.Client, tokens tokens.Tokens) Server {
 	return &server{
-		db:     params.Db,
-		shadow: params.Shadow,
-		email:  params.Email,
-		iot:    params.IoT,
-		tokens: params.Tokens,
+		db:     db,
+		shadow: shadow,
+		email:  email,
+		iot:    iot,
+		tokens: tokens,
 	}
 }
 
