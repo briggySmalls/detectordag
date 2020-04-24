@@ -40,6 +40,7 @@ func CreateRule() error {
 		"--topic-rule-payload", "file://config/topicRule.json")
 }
 
+// CreateTables creates dynamoDB tables for the application
 func CreateTables() error {
 	// Create accounts table
 	return sh.Run("aws", "dynamodb", "create-table", "--table-name", accountsTableName, "--cli-json-input", "file://db/accounts.json")
