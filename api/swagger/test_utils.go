@@ -29,7 +29,7 @@ func init() {
 	}
 }
 
-func createRealRouter(t *testing.T) (*MockDBClient, *MockShadowClient, *MockEmailClient, *MockTokens, *mux.Router) {
+func createRealRouter(t *testing.T) (*MockDBClient, *MockShadowClient, *MockEmailClient, *MockIoTClient, *MockTokens, *mux.Router) {
 	// Create mock controller
 	ctrl := gomock.NewController(t)
 	// Create mock database
@@ -45,7 +45,7 @@ func createRealRouter(t *testing.T) (*MockDBClient, *MockShadowClient, *MockEmai
 	// Create real server
 	s := server.New(db, shadow, email, iot, tokens)
 	// Create the new router
-	return db, shadow, email, tokens, NewRouter(db, s, tokens)
+	return db, shadow, email, iot, tokens, NewRouter(db, s, tokens)
 }
 
 func runHandler(router *mux.Router, req *http.Request) *httptest.ResponseRecorder {

@@ -19,7 +19,7 @@ func TestGetDevicesSuccess(t *testing.T) {
 		token     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiIzNTU4MUJGNC0zMkM4LTQ5MDgtODM3Ny0yRTZBMDIxRDNEMkIiLCJleHAiOjkyMjMzNzIwMzY4NTQ3NzU4MDcsImlzcyI6ImRldGVjdG9yZGFnIn0.CzyaCEIXlq1E0F89HR2Z9wbUn5gBDyQKTOCxTsX6iiQ"
 	)
 	// Create a client
-	db, shdw, _, tokens, router := createRealRouter(t)
+	db, shdw, _, _, tokens, router := createRealRouter(t)
 	// Configure the mock db client to expect a call to query for devices in an account
 	devices := []database.Device{
 		{AccountId: "35581BF4-32C8-4908-8377-2E6A021D3D2B", DeviceId: "63eda5eb-7f56-417f-88ed-44a9eb9e5f67"},
