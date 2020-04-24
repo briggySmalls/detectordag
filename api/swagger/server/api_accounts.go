@@ -122,6 +122,9 @@ func (s *server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 	w.Write(payload)
 }
 
+func (s *server) RegisterDevice(w http.ResponseWriter, r *http.Request) {
+}
+
 // Create account payload from database response
 func (s *server) createAccountPayload(account *database.Account) ([]byte, error) {
 	// Build the response

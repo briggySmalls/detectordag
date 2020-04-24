@@ -34,6 +34,7 @@ type Server interface {
 	GetDevices(w http.ResponseWriter, r *http.Request)
 	UpdateAccount(w http.ResponseWriter, r *http.Request)
 	UpdateDevice(w http.ResponseWriter, r *http.Request)
+	RegisterDevice(w http.ResponseWriter, r *http.Request)
 }
 
 func New(db database.Client, shadow shadow.Client, email email.Client, iot iot.Client, tokens tokens.Tokens) Server {
