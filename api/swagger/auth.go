@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/briggysmalls/detectordag/api/swagger/server"
 	"github.com/briggysmalls/detectordag/api/swagger/tokens"
-	"github.com/briggysmalls/detectordag/shared/database"
+	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/gorilla/mux"
 	"net/http"
 	"strings"
@@ -24,7 +24,7 @@ var (
 
 type auth struct {
 	tokens tokens.Tokens
-	db     database.Client
+	iot    iot.Client
 }
 
 type accountFetcher func(r *http.Request) (string, error)
@@ -110,7 +110,7 @@ func (a *auth) getAccountFromDevice(r *http.Request) (string, error) {
 		return "", errPathParameterMissing
 	}
 	// Lookup the device in the database
-	d, err := a.db.GetDeviceById(deviceID)
+	d, err := a.iot.GetThing(deviceID)
 	if err != nil {
 		return "", err
 	}

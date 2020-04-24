@@ -8,6 +8,7 @@ import (
 	"github.com/briggysmalls/detectordag/api/swagger/tokens"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
+	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"net/http"
 )
@@ -23,6 +24,7 @@ type server struct {
 	db     database.Client
 	shadow shadow.Client
 	email  email.Client
+	iot    iot.Client
 	tokens tokens.Tokens
 }
 
@@ -34,12 +36,13 @@ type Server interface {
 	UpdateDevice(w http.ResponseWriter, r *http.Request)
 }
 
-func New(params Params) Server {
+func New(db database.Client, shadow shadow.Client, email email.Client, iot iot.Client, tokens tokens.Tokens) Server {
 	return &server{
-		db:     params.Db,
-		shadow: params.Shadow,
-		email:  params.Email,
-		tokens: params.Tokens,
+		db:     db,
+		shadow: shadow,
+		email:  email,
+		iot:    iot,
+		tokens: tokens,
 	}
 }
 

@@ -25,7 +25,7 @@ func TestAuthSuccess(t *testing.T) {
 		hashedPassword = "$2y$12$Nt3ajpggM4ViynWVGLOpW.JSbnVVVKRjNuw/ZYI71cj1WNG3Fty0K"
 	)
 	// Create a mock client
-	db, _, _, tokens, router := createRealRouter(t)
+	db, _, _, _, tokens, router := createRealRouter(t)
 	// Configure the mock db client to expect a call to fetch the account
 	account := database.Account{AccountId: accountID, Username: username, Password: hashedPassword}
 	db.EXPECT().GetAccountByUsername(gomock.Eq(username)).Return(&account, nil)

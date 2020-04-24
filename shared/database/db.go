@@ -23,10 +23,8 @@ type client struct {
 
 // Client is a client for interfacing with a detectordag database
 type Client interface {
-	GetDeviceById(id string) (*Device, error)
 	GetAccountById(id string) (*Account, error)
 	GetAccountByUsername(username string) (*Account, error)
-	GetDevicesByAccount(id string) ([]Device, error)
 	UpdateAccountEmails(accountId string, emails []string) (*Account, error)
 }
 
@@ -36,13 +34,6 @@ type Account struct {
 	Emails    []string `dynamodbav:"emails"`
 	Username  string   `dynamodbav:"username"`
 	Password  string   `dynamodbav:"password"`
-}
-
-// device is a 'device' table row
-type Device struct {
-	Name      string `dynamodbav:"name"`
-	DeviceId  string `dynamodbav:"device-id"`
-	AccountId string `dynamodbav:"account-id"`
 }
 
 // New gets a new Client
@@ -57,60 +48,6 @@ func New(sesh *session.Session) (Client, error) {
 		db: db,
 	}
 	return &client, nil
-}
-
-func (d *client) GetDeviceById(id string) (*Device, error) {
-	// Request for the device associated with the ID
-	result, err := d.db.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String(DEVICES_TABLE),
-		Key: map[string]*dynamodb.AttributeValue{
-			"device-id": {
-				S: aws.String(id),
-			},
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
-	// Check we got exactly one device
-	if result.Item == nil {
-		return nil, fmt.Errorf("Unknown device: %s", id)
-	}
-	// Unmarshal the device
-	device := Device{}
-	err = dynamodbattribute.UnmarshalMap(result.Item, &device)
-	if err != nil {
-		return nil, err
-	}
-	return &device, nil
-}
-
-func (d *client) GetDevicesByAccount(id string) ([]Device, error) {
-	// Build an expression
-	kc := expression.Key("account-id").Equal(expression.Value(id))
-	expr, err := expression.NewBuilder().WithKeyCondition(kc).Build()
-	if err != nil {
-		return nil, err
-	}
-	// Request for the devices associated with the account
-	result, err := d.db.Query(&dynamodb.QueryInput{
-		TableName:                 aws.String(DEVICES_TABLE),
-		IndexName:                 aws.String(DEVICES_GSI_NAME),
-		ExpressionAttributeNames:  expr.Names(),
-		ExpressionAttributeValues: expr.Values(),
-		KeyConditionExpression:    expr.KeyCondition(),
-		Select:                    aws.String("ALL_PROJECTED_ATTRIBUTES"),
-	})
-	if err != nil {
-		return nil, err
-	}
-	// Unmarshal the devices
-	var devices []Device
-	err = dynamodbattribute.UnmarshalListOfMaps(result.Items, &devices)
-	if err != nil {
-		return nil, err
-	}
-	return devices, nil
 }
 
 func (d *client) GetAccountById(id string) (*Account, error) {

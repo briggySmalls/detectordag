@@ -48,7 +48,7 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Fetch the devices associated with the account
-	devices, err := s.db.GetDevicesByAccount(string(accountID))
+	devices, err := s.iot.GetThingsByAccount(accountID)
 	if err != nil {
 		SetError(w, err, http.StatusInternalServerError)
 		return
@@ -106,7 +106,7 @@ func (s *server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Update the database
-	account, err := s.db.UpdateAccountEmails(string(accountID), emails.Emails)
+	account, err := s.db.UpdateAccountEmails(accountID, emails.Emails)
 	if err != nil {
 		SetError(w, err, http.StatusInternalServerError)
 		return

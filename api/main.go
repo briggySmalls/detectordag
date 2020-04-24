@@ -14,8 +14,8 @@ import (
 	"github.com/briggysmalls/detectordag/api/swagger/tokens"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
+	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
-	"github.com/gorilla/mux"
 	"log"
 )
 
@@ -35,6 +35,11 @@ func init() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	// Create a new iot client
+	iot, err := iot.New(sesh)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	// Create a new session just for emailing (there is no emailing service in eu-west-2)
 	emailSesh := createSession(aws.Config{Region: aws.String("eu-west-1")})
 	// Create a new email client
@@ -45,9 +50,9 @@ func init() {
 	// Create the tokens
 	tokens := createTokens()
 	// Create the server
-	s := createServer(db, shadow, email, tokens)
+	s := server.New(db, shadow, email, iot, tokens)
 	// Create the router
-	r := createRouter(db, s)
+	r := swagger.NewRouter(iot, s, createTokens())
 	// Create an adapter for aws lambda
 	adapter = gorillamux.New(r)
 }
@@ -90,19 +95,4 @@ func createTokens() tokens.Tokens {
 	tokenDuration, _ := c.ParseDuration()
 	// Create a tokens
 	return tokens.New(c.JwtSecret, tokenDuration)
-}
-
-func createServer(db database.Client, shadow shadow.Client, email email.Client, tokens tokens.Tokens) server.Server {
-	// Create the server
-	return server.New(server.Params{
-		Db:     db,
-		Shadow: shadow,
-		Email:  email,
-		Tokens: tokens,
-	})
-}
-
-func createRouter(db database.Client, server server.Server) *mux.Router {
-	// Create the router
-	return swagger.NewRouter(db, server, createTokens())
 }
