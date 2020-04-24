@@ -14,8 +14,11 @@ import (
 	"strings"
 )
 
-const policyName = "dd-edge-policy"
-const belanaAppName = "detectordag-edge"
+const (
+	policyName        = "dd-edge-policy"
+	belanaAppName     = "detectordag-edge"
+	accountsTableName = "accounts"
+)
 
 type createThingResponse struct {
 	ThingName string `json:""`
@@ -83,12 +86,7 @@ func CreateRule() error {
 
 func CreateTables() error {
 	// Create accounts table
-	err := sh.Run("aws", "dynamodb", "create-table", "--table-name", "accounts", "--cli-json-input", "file://db/accounts.json")
-	if err != nil {
-		return err
-	}
-	// Create devices table
-	return sh.Run("aws", "dynamodb", "create-table", "--table-name", "devices", "--cli-json-input", "file://db/devices.json")
+	return sh.Run("aws", "dynamodb", "create-table", "--table-name", accountsTableName, "--cli-json-input", "file://db/accounts.json")
 }
 
 // CreateThing creates a new certificate
