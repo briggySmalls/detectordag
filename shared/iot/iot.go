@@ -7,11 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/iot"
 )
 
-const (
-	accountIDAttributeName = "account-id"
-	nameAttributeName      = "name"
-)
-
 var (
 	ErrAccountIDMissing = errors.New("The account-id attribute was missing")
 )
@@ -32,16 +27,9 @@ type Device struct {
 	AccountId string
 }
 
-type thingAttribute struct {
-	*iot.ThingAttribute
-}
-
-type describeThingOutput struct {
-	*iot.DescribeThingOutput
-}
-
-type deviceSource interface {
-	ToDevice() (*Device, error)
+type Certificates struct {
+	Public  string
+	Private string
 }
 
 // New gets a new Client
@@ -117,58 +105,4 @@ func (c *client) getPaginatedThings(input *iot.ListThingsInput, output *iot.List
 	}
 	// Recursively request more things
 	return c.getPaginatedThings(input, output, things)
-}
-
-func (t *thingAttribute) ToDevice() (*Device, error) {
-	// Get the name
-	name, err := t.getAttribute(nameAttributeName)
-	if err != nil {
-		return nil, err
-	}
-	// Get the account ID
-	accountID, err := t.getAttribute(accountIDAttributeName)
-	if err != nil {
-		return nil, err
-	}
-	// Get the device ID
-	deviceID := t.ThingName
-	return &Device{
-		Name:      name,
-		DeviceId:  *deviceID,
-		AccountId: accountID,
-	}, nil
-}
-
-func (t *thingAttribute) getAttribute(key string) (string, error) {
-	if accountID, ok := t.ThingAttribute.Attributes[key]; ok {
-		return *accountID, nil
-	}
-	return "", ErrAccountIDMissing
-}
-
-func (t *describeThingOutput) ToDevice() (*Device, error) {
-	// Get the name
-	name, err := t.getAttribute(nameAttributeName)
-	if err != nil {
-		return nil, err
-	}
-	// Get the account ID
-	accountID, err := t.getAttribute(accountIDAttributeName)
-	if err != nil {
-		return nil, err
-	}
-	// Get the device ID
-	deviceID := t.ThingName
-	return &Device{
-		Name:      name,
-		DeviceId:  *deviceID,
-		AccountId: accountID,
-	}, nil
-}
-
-func (t *describeThingOutput) getAttribute(key string) (string, error) {
-	if accountID, ok := t.DescribeThingOutput.Attributes[key]; ok {
-		return *accountID, nil
-	}
-	return "", ErrAccountIDMissing
 }
