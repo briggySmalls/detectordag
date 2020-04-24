@@ -12,7 +12,7 @@ externalDocs:
   description: Find out more about detectordag
   url: https://github.com/briggySmalls/detectordag
 servers:
-- url: https://petstore.swagger.io/v1
+- url: https://detectordag.tk/v1
 tags:
 - name: authentication
   description: Login to the app
@@ -64,12 +64,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - name
-              properties:
-                name:
-                  type: string
+              $ref: '#/components/schemas/MutableDevice'
       responses:
         200:
           description: successful operation
@@ -175,28 +170,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
+              $ref: '#/components/schemas/MutableDevice'
       responses:
         200:
-          description: successful operation
+          description: Device has been successfully registered
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - name
-                  - deviceId
-                  - certificate
-                properties:
-                  name:
-                    type: string
-                  deviceId:
-                    type: string
-                  certificates:
-                    $ref: '#/components/schemas/Certificate'
+                $ref : '#/components/schemas/DeviceRegistered'
         400:
           $ref: '#/components/responses/InvalidId'
         401:
@@ -256,6 +237,13 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
   schemas:
+    MutableDevice:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
     Device:
       type: object
       required:
@@ -338,13 +326,24 @@ components:
           type: string
         message:
           type: string
-    Certificate:
+    DeviceRegistered:
       type: object
       required:
-        - publicKey
-        - privateKey
+        - name
+        - deviceId
+        - certificate
       properties:
-        publicKey:
+        name:
           type: string
-        privateKey:
+        deviceId:
           type: string
+        certificates:
+          type: object
+          required:
+            - publicKey
+            - privateKey
+          properties:
+            publicKey:
+              type: string
+            privateKey:
+              type: string
