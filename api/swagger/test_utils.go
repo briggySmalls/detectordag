@@ -3,6 +3,7 @@ package swagger
 //go:generate mockgen -destination mock_db.go -package swagger -mock_names Client=MockDBClient github.com/briggysmalls/detectordag/shared/database Client
 //go:generate mockgen -destination mock_shadow.go -package swagger -mock_names Client=MockShadowClient github.com/briggysmalls/detectordag/shared/shadow Client
 //go:generate mockgen -destination mock_email.go -package swagger -mock_names Client=MockEmailClient github.com/briggysmalls/detectordag/shared/email Client
+//go:generate mockgen -destination mock_iot.go -package swagger -mock_names Client=MockIoTClient github.com/briggysmalls/detectordag/shared/iot Client
 //go:generate mockgen -destination mock_tokens.go -package swagger -mock_names Client=MockTokens github.com/briggysmalls/detectordag/api/swagger/tokens Tokens
 
 import (
@@ -37,15 +38,12 @@ func createRealRouter(t *testing.T) (*MockDBClient, *MockShadowClient, *MockEmai
 	shadow := NewMockShadowClient(ctrl)
 	// Create mock email
 	email := NewMockEmailClient(ctrl)
+	// Create mock iot
+	iot := NewMockIoTClient(ctrl)
 	// Create mock tokens
 	tokens := NewMockTokens(ctrl)
 	// Create real server
-	s := server.New(server.Params{
-		Db:     db,
-		Shadow: shadow,
-		Email:  email,
-		Tokens: tokens,
-	})
+	s := server.New(db, shadow, email, iot, tokens)
 	// Create the new router
 	return db, shadow, email, tokens, NewRouter(db, s, tokens)
 }
