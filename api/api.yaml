@@ -337,7 +337,7 @@ components:
           type: string
         deviceId:
           type: string
-        certificates:
+        certificate:
           type: object
           required:
             - publicKey
