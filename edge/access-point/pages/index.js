@@ -27,20 +27,15 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 // Create our form (we will wrap this)
-function Form() {
+const Form = ({ onSubmit }) => {
   // Create styles for use
   const classes = useStyles();
-  // Callback for submit event
-  const handleSubmit = (event) => {
-    alert("hello world");
-    // Don't actually submit
-    event.preventDefault();
-  }
   // Render the form
   return (
-    <form className={classes.form} onSubmit={handleSubmit}>
+    <form className={classes.form} onSubmit={onSubmit}>
       <TextField
         id="username-input"
+        name="username"
         label="Username"
         type="email"
         autoComplete="current-password"
@@ -49,6 +44,7 @@ function Form() {
       />
       <TextField
         id="password-input"
+        name="password"
         label="Password"
         type="password"
         autoComplete="current-password"
@@ -57,6 +53,7 @@ function Form() {
       />
       <TextField
         id="device-name-input"
+        name="device-name"
         label="Desired device name"
         type="text"
         className={classes.formItem}
@@ -82,6 +79,24 @@ function Home() {
   const classes = useStyles();
   // Declare isLoading state
   const [isLoading, setIsLoading] = useState(false);
+  // Callback for submit event
+  const handleSubmit = (event) => {
+    // Don't actually submit
+    event.preventDefault();
+    // Get the form data
+    const formData = new FormData(event.target);
+    let data = {};
+    formData.forEach((value, key) => {data[key] = value});
+    // Submit the form data
+    console.log(data);
+    // axios({
+    //   method: 'post',
+    //   url: '/api/register',
+    //   data: data,
+    // });
+    // Update the state
+    setIsLoading(false);
+  }
   // Render the component
   return (
     <Container>
@@ -99,7 +114,7 @@ function Home() {
           Register your device to get started
         </p>
 
-        <FormWithLoading isLoading={isLoading} />
+        <FormWithLoading isLoading={isLoading} onSubmit={handleSubmit} />
       </main>
     </Container>
   )
