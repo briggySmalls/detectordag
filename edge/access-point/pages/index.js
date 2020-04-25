@@ -1,5 +1,6 @@
 import { Component, useState } from 'react';
-import Head from 'next/head'
+import Head from 'next/head';
+import axios from 'axios';
 import WithLoading from '../components/WithLoading';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
@@ -88,12 +89,11 @@ function Home() {
     let data = {};
     formData.forEach((value, key) => {data[key] = value});
     // Submit the form data
-    console.log(data);
-    // axios({
-    //   method: 'post',
-    //   url: '/api/register',
-    //   data: data,
-    // });
+    axios({
+      method: 'post',
+      url: '/api/register',
+      data: data,
+    });
     // Update the state
     setIsLoading(true);
   }
