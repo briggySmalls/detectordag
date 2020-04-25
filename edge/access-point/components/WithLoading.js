@@ -1,9 +1,13 @@
-import React from 'react';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 function WithLoading(Component) {
   return function WihLoadingComponent({ isLoading, ...props }) {
-    if (!isLoading) return (<Component {...props} />);
-        return (<p>Be Hold, fetching data may take some time :)</p>);
+    // Short-circuit with the provided component
+    if (!isLoading) {
+        return (<Component {...props} />);
+    }
+    // Indicate that the component is loading
+    return (<CircularProgress />);
   }
 }
 
