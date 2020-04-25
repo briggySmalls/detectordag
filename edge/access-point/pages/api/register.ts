@@ -22,37 +22,47 @@ client.basePath = `${process.env.API_BASEPATH}/v1`;
 // Create an instance of our wrapper
 const wrapper = new ClientWrapper(client);
 
+function handleError(res: NextApiResponse, err: Error) {
+  console.log(err);
+  res.setHeader('Content-Type', 'application/json');
+  res.status(500).json({error: err.message});
+}
+
 // Handle form submission
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   // Pull out the results
   const formData = req.body;
   // Authenticate
+  let token: Token = null;
   try {
-    let result = await util.promisify(wrapper.authentication.auth.bind(wrapper.authentication))(new Credentials(formData.username, formData.password));
-    const token = JSON.parse(result.text);
-    res.setHeader('Content-Type', 'application/json');
-    res.status(200).json(result);
+    let result = await util.promisify((callback) => {
+      wrapper.authentication.auth(
+        new Credentials(formData.username, formData.password),
+        (err, ...results) => callback(err, results));
+    })()
+    console.log(result.text)
+    token = JSON.parse(result.text);
   } catch (err) {
-    console.log(err);
-    res.setHeader('Content-Type', 'application/json');
-    res.status(500).json({error: err});
+    handleError(res, err);
+    return
   }
-  // let result = await client.accounts.registerDevice(new , `Bearer ${auth.token}`, , auth.accountId);
-  // const registered = JSON.parse(result.text);
-
-  // // Create an async executor
-  // const run = async () => {
-  //   // First authorise
-  //   // Now save the credentials to file
-  //   console.log(token);
-  // };
-
-  // Run the executor
-  // const promise = new Promise(run).then((result) => {
-  //   res.setHeader('Content-Type', 'application/json');
-  //   res.status(200).json(result);
-  // }).catch((error) => {
-  //   res.setHeader('Content-Type', 'application/json');
-  //   res.status(500).json(error);
-  // });
+  // Register new device
+  let registered: DeviceRegistered = null;
+  try {
+    let result = await util.promisify((callback) => {
+      wrapper.accounts.registerDevice(
+        `Bearer ${token.token}`,
+        process.env.BALENA_DEVICE_UUID,
+        token.accountId,
+        callback);
+    })();
+    console.log(result.text);
+    registered = JSON.parse(result.text);
+  } catch (err) {
+    handleError(res, err);
+    return
+  }
+  // Return our success
+  res.setHeader('Content-Type', 'application/json');
+  res.status(200).json(registered);
 }
