@@ -13,5 +13,9 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "typeface-roboto": "^0.0.75"
+  },
+  "devDependencies": {
+    "@types/node": "^13.13.2",
+    "typescript": "^3.8.3"
   }
 }
