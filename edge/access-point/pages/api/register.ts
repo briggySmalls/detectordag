@@ -1,6 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { ApiClient, AccountsApi, AuthenticationApi, Credentials, Token, DeviceRegistered, MutableDevice } from '../../lib/client';
 import pify from 'pify';
+import fs from 'fs';
+import path from 'path';
 
 
 // Define a wrapper for the different clients
@@ -26,6 +28,13 @@ function handleError(res: NextApiResponse, err: Error) {
   console.log(err);
   res.setHeader('Content-Type', 'application/json');
   res.status(500).json({error: err.message});
+}
+
+function writeFile(filepath: string, content: string): Promise<void> {
+  // Ensure the directory is present
+  return fs.promises
+    .mkdir(path.dirname(filepath), { recursive: true })
+    .then(() => fs.writeFile(filepath));
 }
 
 // Handle form submission
@@ -57,6 +66,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     handleError(res, err);
     return
   }
+  // Save certificates to files
+  const certsPath = process.env.CERTS_DIR
+  const publicPromise = writeFile(path.join(certsPath, 'thing.public.pem'), registered.certificate.publicKey);
+  const privatePromise = writeFile(path.join(certsPath, 'thing.private.key'), registered.certificate.privateKey);
+  await Promise.all([publicPromise, privatePromise]);
   // Return our success
   res.setHeader('Content-Type', 'application/json');
   res.status(200).json(registered);
