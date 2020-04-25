@@ -3,164 +3,129 @@
 package main
 
 import (
-	"encoding/base64"
-	"encoding/json"
-	"fmt"
-	"github.com/google/uuid"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/iot"
+	"github.com/aws/aws-sdk-go/service/lambda"
+	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 	"io/ioutil"
 	"log"
-	"net/http"
-	"strings"
 )
 
-const policyName = "dd-edge-policy"
-const belanaAppName = "detectordag-edge"
+const (
+	policyName           = "dd-edge-policy"
+	accountsTableName    = "accounts"
+	thingTypeDescription = "detectordag device"
+	thingTypeName        = "detectordag"
+	thingGroupName       = "detectordag"
+	topicRuleName        = "PowerStatusChanged"
+	functionName         = "detectordag-consumer-AFE6GRIVNL4R"
+)
 
-type createThingResponse struct {
-	ThingName string `json:""`
-	ThingArn  string `json:""`
-	ThingId   string `json:""`
-}
+var thingTypeProperties = []*string{aws.String("name"), aws.String("account-id")}
 
-type keyPair struct {
-	Public  string `json:"PublicKey"`
-	Private string `json:"PrivateKey"`
-}
+var iotClient *iot.IoT
+var lambdaClient *lambda.Lambda
 
-type createCertificateResponse struct {
-	Arn     string  `json:"certificateArn"`
-	Id      string  `json:"certificateId"`
-	Pem     string  `json:"certificatePem"`
-	KeyPair keyPair `json:""`
-}
-
-type endpointDescriptionResponse struct {
-	Address string `json:"endpointAddress"`
-}
-
-func CreateThing() error {
-	// Create a new cert/key
-	createCertificateResponse, err := createCertificate()
+func init() {
+	// Create an AWS session
+	sesh, err := session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	// Decide on a new device ID
-	id := strings.ReplaceAll(uuid.New().String(), "-", "")
-	// Create a new thing
-	err = createThing(id, createCertificateResponse.Id)
-	if err != nil {
-		return err
-	}
-	// Add the thing to the database
-	err = createDbEntry(id)
-	// Create balena device
-	err = createDevice(id)
-	if err != nil {
-		return err
-	}
-	// Set certificates
-	err = setCertificates(id, createCertificateResponse.Pem, createCertificateResponse.KeyPair.Private)
-	if err != nil {
-		return err
-	}
-	return nil
+	// Create an IoT client
+	iotClient = iot.New(sesh)
+	// Create a lambda client
+	lambdaClient = lambda.New(sesh)
 }
 
 // CreatePolicy creates a policy for the edge devices
 func CreatePolicy() error {
-	return sh.Run("aws", "iot", "create-policy",
-		"--policy-name", policyName,
-		"--policy-document", "file://config/policy.json")
+	// Read in the policy
+	doc, err := ioutil.ReadFile("config/policy.json")
+	if err != nil {
+		return err
+	}
+	// Create the policy
+	_, err = iotClient.CreatePolicy(&iot.CreatePolicyInput{
+		PolicyName:     aws.String(policyName),
+		PolicyDocument: aws.String(string(doc)),
+	})
+	if err != nil {
+		if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == iot.ErrCodeResourceAlreadyExistsException {
+			// The policy already exists, happy days
+			return nil
+		}
+	}
+	return err
 }
 
 // CreateRule creates a rule to fire a lambda function
 func CreateRule() error {
-	return sh.Run("aws", "iot", "create-topic-rule",
-		"--rule-name", "power_status_changed",
-		"--topic-rule-payload", "file://config/topicRule.json")
+	// Get the lambda in question
+	lambda, err := lambdaClient.GetFunction(&lambda.GetFunctionInput{
+		FunctionName: aws.String(functionName),
+	})
+	if err != nil {
+		return err
+	}
+	// Create a rule for device shadow changes
+	_, err = iotClient.CreateTopicRule(&iot.CreateTopicRuleInput{
+		RuleName: aws.String(topicRuleName),
+		TopicRulePayload: &iot.TopicRulePayload{
+			Description:      aws.String("Run a lambda function to handle power status updates"),
+			AwsIotSqlVersion: aws.String("2016-03-23"),
+			RuleDisabled:     aws.Bool(false),
+			Sql:              aws.String("SELECT topic(3) as deviceId, timestamp, current.state.reported as state, current.metadata.reported as updated FROM '$aws/things/+/shadow/update/documents' WHERE current.state.reported.status <> previous.state.reported.status"),
+			Actions: []*iot.Action{{
+				Lambda: &iot.LambdaAction{
+					FunctionArn: lambda.Configuration.FunctionArn,
+				},
+			}},
+		},
+	})
+	return err
 }
 
+// CreateTables creates dynamoDB tables for the application
 func CreateTables() error {
 	// Create accounts table
-	err := sh.Run("aws", "dynamodb", "create-table", "--table-name", "accounts", "--cli-json-input", "file://db/accounts.json")
+	return sh.Run("aws", "dynamodb", "create-table", "--table-name", accountsTableName, "--cli-json-input", "file://db/accounts.json")
+}
+
+// CreateThingType creates the 'detectordag' thing type
+// We use the thing type to predefine the attributes we want a thing to have
+func CreateThingType() error {
+	_, err := iotClient.CreateThingType(&iot.CreateThingTypeInput{
+		ThingTypeName: aws.String(thingTypeName),
+		ThingTypeProperties: &iot.ThingTypeProperties{
+			SearchableAttributes: thingTypeProperties,
+			ThingTypeDescription: aws.String(thingTypeDescription),
+		},
+	})
+	return err
+}
+
+// CreateThingGroup creates the 'detectordag' thing group
+// We use the thing group to apply a policy to all dags
+func CreateThingGroup() error {
+	// Ensure we've created the policy
+	mg.Deps(CreatePolicy)
+	// Create the thing group
+	group, err := iotClient.CreateThingGroup(&iot.CreateThingGroupInput{
+		ThingGroupName: aws.String(thingGroupName),
+	})
 	if err != nil {
 		return err
 	}
-	// Create devices table
-	return sh.Run("aws", "dynamodb", "create-table", "--table-name", "devices", "--cli-json-input", "file://db/devices.json")
-}
-
-// CreateThing creates a new certificate
-func createCertificate() (*createCertificateResponse, error) {
-	// Create a new certificate
-	output, err := sh.Output("aws", "iot", "create-keys-and-certificate")
-	if err != nil {
-		return nil, err
-	}
-	// Parse the JSON
-	var response createCertificateResponse
-	err = json.Unmarshal([]byte(output), &response)
-	if err != nil {
-		return nil, err
-	}
-	log.Printf("Certificate created: %s", response.Id)
-	return &response, nil
-}
-
-func createDevice(id string) error {
-	err := sh.Run("balena", "device", "register", belanaAppName, "--uuid", id)
-	if err != nil {
-		return err
-	}
-	log.Printf("Created device %s", id)
-	return nil
-}
-
-// Encode a string in base64
-func encode(input string) string {
-	return base64.StdEncoding.EncodeToString([]byte(input))
-}
-
-func setCertificates(id, cert, key string) error {
-	// Convert the certificates to base64
-	envs := map[string]string{
-		"AWS_THING_CERT": encode(cert),
-		"AWS_THING_KEY":  encode(key),
-	}
-	// Set the variables
-	for key, value := range envs {
-		err := sh.Run("balena", "env", "add", "--device", id, key, value)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func createDbEntry(id string) error {
-	return sh.Run("aws", "dynamodb", "put-item",
-		"--table-name", "devices",
-		"--item", fmt.Sprintf("{\"device-id\": {\"S\": \"%s\"}}", id))
-}
-
-// createThing makes a new thing in AWS
-func createThing(thingName, certificateId string) error {
-	// Create a new thing
-	output, err := sh.Output("aws", "iot", "register-thing",
-		"--template-body", "file://config/thing.json",
-		"--parameters", fmt.Sprintf(
-			"ThingName=%s,CertificateId=%s,PolicyName=%s",
-			thingName, certificateId, policyName))
-	if err != nil {
-		return err
-	}
-	// Parse the JSON
-	var response createThingResponse
-	err = json.Unmarshal([]byte(output), &response)
-	if err != nil {
-		return err
-	}
-	log.Printf("Thing created: %s", response.ThingName)
-	return nil
+	// Attach the policy
+	_, err = iotClient.AttachPolicy(&iot.AttachPolicyInput{
+		PolicyName: aws.String(policyName),
+		Target:     group.ThingGroupArn,
+	})
+	return err
 }

@@ -122,6 +122,45 @@ func (s *server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 	w.Write(payload)
 }
 
+func (s *server) RegisterDevice(w http.ResponseWriter, r *http.Request) {
+	// Ensure the auth middleware provided us with the account ID
+	accountID, err := getAccountId(r.Context())
+	if err != nil {
+		SetError(w, ErrAccountIDMissing, http.StatusInternalServerError)
+		return
+	}
+	// Parse the device name from the request
+	var params models.MutableDevice
+	err = json.NewDecoder(r.Body).Decode(&params)
+	if err != nil {
+		SetError(w, err, http.StatusBadRequest)
+		return
+	}
+	// Make a request to register a device
+	device, certs, err := s.iot.RegisterThing(accountID, params.Name)
+	if err != nil {
+		SetError(w, err, http.StatusInternalServerError)
+		return
+	}
+	// Construct the response
+	payload := models.DeviceRegistered{
+		Name:     device.Name,
+		DeviceId: device.DeviceId,
+		Certificate: &models.DeviceRegisteredCertificate{
+			PublicKey:  certs.Public,
+			PrivateKey: certs.Private,
+		},
+	}
+	body, err := json.Marshal(payload)
+	if err != nil {
+		SetError(w, err, http.StatusInternalServerError)
+		return
+	}
+	// Send response
+	w.WriteHeader(http.StatusOK)
+	w.Write(body)
+}
+
 // Create account payload from database response
 func (s *server) createAccountPayload(account *database.Account) ([]byte, error) {
 	// Build the response
