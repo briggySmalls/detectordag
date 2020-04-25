@@ -6,9 +6,21 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 
 const useStyles = makeStyles((theme) => ({
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
   formItem: {
     margin: theme.spacing(1),
   },
+  root: {
+    padding: '5rem 0',
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 }));
 
 export default function Home() {
@@ -20,16 +32,16 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
+      <main className={classes.root}>
         <Typography variant="h2" component="h1" gutterBottom>
           Your dag is here to serve!
         </Typography>
 
-        <p className="description">
+        <p>
           Register your device to get started
         </p>
 
-        <form>
+        <form className={classes.form}>
           <TextField
             id="username-input"
             label="Username"
@@ -62,39 +74,6 @@ export default function Home() {
           </Button>
         </form>
       </main>
-
-      <style jsx>{`
-        main {
-          padding: 5rem 0;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
-        form {
-          display: flex;
-          flex-direction: column;
-        }
-        form > div {
-          margin: 0 5em;
-        }
-      `}</style>
-
-      <style jsx global>{`
-        html,
-        body {
-          padding: 0;
-          margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
-            Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
-            sans-serif;
-        }
-
-        * {
-          box-sizing: border-box;
-        }
-      `}</style>
     </Container>
   )
 }
