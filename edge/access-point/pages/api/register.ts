@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { ApiClient, AccountsApi, AuthenticationApi, Credentials, Token, DeviceRegistered } from '../../lib/client';
+import { ApiClient, AccountsApi, AuthenticationApi, Credentials, Token, DeviceRegistered, MutableDevice } from '../../lib/client';
 import pify from 'pify';
 
 
@@ -30,7 +30,7 @@ function handleError(res: NextApiResponse, err: Error) {
 
 // Handle form submission
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  // Pull out the results
+  // // Pull out the results
   const formData = req.body;
   // Authenticate
   let token: Token = null;
@@ -47,9 +47,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   let registered: DeviceRegistered = null;
   try {
     const [data, result] = await pify(wrapper.accounts.registerDevice.bind(wrapper.accounts), {multiArgs: true})(
-        `Bearer ${token.token}`,
-        process.env.BALENA_DEVICE_UUID,
-        token.accountId);
+      new MutableDevice(formData.deviceName),
+      `Bearer ${token.token}`,
+      process.env.BALENA_DEVICE_UUID,
+      token.accountId);
     console.log(result.text);
     registered = data;
   } catch (err) {

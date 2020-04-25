@@ -54,7 +54,7 @@ const Form = ({ onSubmit }) => {
       />
       <TextField
         id="device-name-input"
-        name="device-name"
+        name="deviceName"
         label="Desired device name"
         type="text"
         className={classes.formItem}
