@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { ApiClient, AccountsApi, AuthenticationApi, Credentials, Token, DeviceRegistered } from '../../lib/client';
-import util from 'util';
+import pify from 'pify';
 
 
 // Define a wrapper for the different clients
@@ -35,13 +35,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   // Authenticate
   let token: Token = null;
   try {
-    let result = await util.promisify((callback) => {
-      wrapper.authentication.auth(
-        new Credentials(formData.username, formData.password),
-        (err, ...results) => callback(err, results));
-    })()
+    const [data, result] = await pify(wrapper.authentication.auth.bind(wrapper.authentication), {multiArgs: true})(
+        new Credentials(formData.username, formData.password));
     console.log(result.text)
-    token = JSON.parse(result.text);
+    token = data;
   } catch (err) {
     handleError(res, err);
     return
@@ -49,15 +46,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   // Register new device
   let registered: DeviceRegistered = null;
   try {
-    let result = await util.promisify((callback) => {
-      wrapper.accounts.registerDevice(
+    const [data, result] = await pify(wrapper.accounts.registerDevice.bind(wrapper.accounts), {multiArgs: true})(
         `Bearer ${token.token}`,
         process.env.BALENA_DEVICE_UUID,
-        token.accountId,
-        callback);
-    })();
+        token.accountId);
     console.log(result.text);
-    registered = JSON.parse(result.text);
+    registered = data;
   } catch (err) {
     handleError(res, err);
     return
