@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import Head from 'next/head'
+import WithLoading from '../components/WithLoading';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
@@ -24,8 +26,57 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function Home() {
+// Create our form (we will wrap this)
+function Form() {
+  // Create styles for use
   const classes = useStyles();
+  // Render the form
+  return (
+    <form className={classes.form} action="/api/register">
+      <TextField
+        id="username-input"
+        label="Username"
+        type="email"
+        autoComplete="current-password"
+        className={classes.formItem}
+        required
+      />
+      <TextField
+        id="password-input"
+        label="Password"
+        type="password"
+        autoComplete="current-password"
+        className={classes.formItem}
+        required
+      />
+      <TextField
+        id="device-name-input"
+        label="Desired device name"
+        type="text"
+        className={classes.formItem}
+        required
+      />
+      <Button
+        variant="contained"
+        type="submit"
+        className={classes.formItem}
+      >
+        Submit
+      </Button>
+    </form>
+  )
+}
+
+// Wrap the form in a loader
+const FormWithLoading = WithLoading(Form);
+
+// Create the actual homepage
+function Home() {
+  // Create styles for use
+  const classes = useStyles();
+  // Declare isLoading state
+  const [isLoading, setIsLoading] = useState(false);
+  // Render the component
   return (
     <Container>
       <Head>
@@ -42,39 +93,10 @@ export default function Home() {
           Register your device to get started
         </p>
 
-        <form className={classes.form}>
-          <TextField
-            id="username-input"
-            label="Username"
-            type="email"
-            autoComplete="current-password"
-            className={classes.formItem}
-            required
-          />
-          <TextField
-            id="password-input"
-            label="Password"
-            type="password"
-            autoComplete="current-password"
-            className={classes.formItem}
-            required
-          />
-          <TextField
-            id="device-name-input"
-            label="Desired device name"
-            type="text"
-            className={classes.formItem}
-            required
-          />
-          <Button
-            variant="contained"
-            type="submit"
-            className={classes.formItem}
-          >
-            Submit
-          </Button>
-        </form>
+        <FormWithLoading isLoading={isLoading} />
       </main>
     </Container>
   )
 }
+
+export default Home;
