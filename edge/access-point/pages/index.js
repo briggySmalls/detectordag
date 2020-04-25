@@ -1,14 +1,14 @@
 import { Component, useState } from 'react';
 import Head from 'next/head'
 import WithLoading from '../components/WithLoading';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 
 // Create some CSS styles for the page
-const styles = (theme) => ({
+const useStyles = makeStyles((theme) => ({
   form: {
     display: 'flex',
     flexDirection: 'column',
@@ -24,54 +24,54 @@ const styles = (theme) => ({
     justifyContent: 'center',
     alignItems: 'center',
   }
-});
-const useStyles = makeStyles(styles);
+}));
 
 // Create our form (we will wrap this)
-class FormRaw extends React.Component {
-  render() {
-    // Pull the styles out
-    const { classes } = this.props;
-    // Render the form
-    return (
-      <form className={classes.form} action="/api/register">
-        <TextField
-          id="username-input"
-          label="Username"
-          type="email"
-          autoComplete="current-password"
-          className={classes.formItem}
-          required
-        />
-        <TextField
-          id="password-input"
-          label="Password"
-          type="password"
-          autoComplete="current-password"
-          className={classes.formItem}
-          required
-        />
-        <TextField
-          id="device-name-input"
-          label="Desired device name"
-          type="text"
-          className={classes.formItem}
-          required
-        />
-        <Button
-          variant="contained"
-          type="submit"
-          className={classes.formItem}
-        >
-          Submit
-        </Button>
-      </form>
-    )
+function Form() {
+  // Create styles for use
+  const classes = useStyles();
+  // Callback for submit event
+  const handleSubmit = (event) => {
+    alert("hello world");
+    // Don't actually submit
+    event.preventDefault();
   }
+  // Render the form
+  return (
+    <form className={classes.form} onSubmit={handleSubmit}>
+      <TextField
+        id="username-input"
+        label="Username"
+        type="email"
+        autoComplete="current-password"
+        className={classes.formItem}
+        required
+      />
+      <TextField
+        id="password-input"
+        label="Password"
+        type="password"
+        autoComplete="current-password"
+        className={classes.formItem}
+        required
+      />
+      <TextField
+        id="device-name-input"
+        label="Desired device name"
+        type="text"
+        className={classes.formItem}
+        required
+      />
+      <Button
+        variant="contained"
+        type="submit"
+        className={classes.formItem}
+      >
+        Submit
+      </Button>
+    </form>
+  )
 }
-
-// Wrap the form with our styles
-const Form = withStyles(styles)(FormRaw);
 
 // Wrap the form in a loader
 const FormWithLoading = WithLoading(Form);
