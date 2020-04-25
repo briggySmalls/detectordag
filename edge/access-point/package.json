@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "generate": "swagger-codegen generate -i ../../shared/api.yaml --lang javascript -o ./lib/client"
   },
   "dependencies": {
     "@material-ui/core": "^4.9.11",

@@ -1,6 +1,6 @@
 package main
 
-//go:generate swagger-codegen generate -i api.yaml --lang go-server -Dmodels --output swagger
+//go:generate swagger-codegen generate -i ../shared/api.yaml --lang go-server -Dmodels --output swagger
 
 import (
 	"context"

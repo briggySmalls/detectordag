@@ -7,7 +7,7 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "deploy": "vue-cli-service s3-deploy",
-    "generate": "swagger-codegen generate -i ../api/api.yaml --lang javascript -o ./lib/client",
+    "generate": "swagger-codegen generate -i ../shared/api.yaml --lang javascript -o ./lib/client",
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit"
   },
