@@ -95,7 +95,7 @@ function Home() {
     //   data: data,
     // });
     // Update the state
-    setIsLoading(false);
+    setIsLoading(true);
   }
   // Render the component
   return (
