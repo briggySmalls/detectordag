@@ -11,9 +11,11 @@
   "dependencies": {
     "@material-ui/core": "^4.9.11",
     "axios": "^0.19.2",
+    "dotenv-webpack": "^1.7.0",
     "next": "9.3.5",
     "react": "16.13.1",
     "react-dom": "16.13.1",
+    "superagent": "^5.2.2",
     "typeface-roboto": "^0.0.75"
   },
   "devDependencies": {
