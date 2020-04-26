@@ -6,7 +6,10 @@
     "dev": "next dev -p 8080",
     "build": "next build",
     "start": "next start",
-    "generate": "swagger-codegen generate -i ../../shared/api.yaml --lang javascript -o ./lib/client"
+    "generate": "swagger-codegen generate -i ../../shared/api.yaml --lang javascript -o ./lib/client",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@material-ui/core": "^4.9.11",
@@ -22,6 +25,12 @@
   },
   "devDependencies": {
     "@types/node": "^13.13.2",
+    "babel-jest": "^25.4.0",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.2",
+    "jest": "^25.4.0",
+    "react-addons-test-utils": "^15.6.2",
+    "react-test-renderer": "^16.13.1",
     "typescript": "^3.8.3"
   }
 }
