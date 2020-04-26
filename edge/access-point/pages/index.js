@@ -90,6 +90,12 @@ function Home() {
   // Render the component
   return (
     <Layout>
+      <p>
+        Register your device to get started
+      </p>
+      {error &&
+        <Alert severity="error">{error.message}</Alert>
+      }
       <FormWithLoading isLoading={isLoading} onSubmit={handleSubmit} />
     </Layout>
   )

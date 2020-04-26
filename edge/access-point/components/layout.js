@@ -29,9 +29,6 @@ export default function Layout({ children }) {
             <Typography variant="h2" component="h1" gutterBottom>
               Your dag is here to serve!
             </Typography>
-            <p>
-              Register your device to get started
-            </p>
             { children }
           </main>
         </Container>
