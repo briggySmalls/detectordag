@@ -1,10 +1,8 @@
 import { Component, useState } from 'react';
-import Head from 'next/head';
 import axios from 'axios';
 import WithLoading from '../components/WithLoading';
+import Layout from '../components/layout';
 import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
-import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 
@@ -17,14 +15,6 @@ const useStyles = makeStyles((theme) => ({
   formItem: {
     margin: theme.spacing(1),
   },
-  root: {
-    padding: '5rem 0',
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-  }
 }));
 
 // Create our form (we will wrap this)
@@ -93,30 +83,15 @@ function Home() {
       method: 'post',
       url: '/api/register',
       data: data,
-    });
+    })
     // Update the state
     setIsLoading(true);
   }
   // Render the component
   return (
-    <Container>
-      <Head>
-        <title>Detector Dag Device</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={classes.root}>
-        <Typography variant="h2" component="h1" gutterBottom>
-          Your dag is here to serve!
-        </Typography>
-
-        <p>
-          Register your device to get started
-        </p>
-
-        <FormWithLoading isLoading={isLoading} onSubmit={handleSubmit} />
-      </main>
-    </Container>
+    <Layout>
+      <FormWithLoading isLoading={isLoading} onSubmit={handleSubmit} />
+    </Layout>
   )
 }
 
