@@ -65,7 +65,7 @@ const Form = ({ onSubmit }) => {
 const FormWithLoading = WithLoading(Form);
 
 // Create the actual homepage
-function Home() {
+export default function Home() {
   // Create styles for use
   const classes = useStyles();
   // Declare isLoading state
@@ -100,5 +100,3 @@ function Home() {
     </Layout>
   )
 }
-
-export default Home;
