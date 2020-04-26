@@ -23,8 +23,6 @@ const useStyles = makeStyles((theme) => ({
 const Form = ({ onSubmit }) => {
   // Create styles for use
   const classes = useStyles();
-  // Get the nextjs router
-  const router = useRouter()
   // Render the form
   return (
     <form className={classes.form} onSubmit={onSubmit}>
@@ -74,8 +72,10 @@ export default function Home() {
   const classes = useStyles();
   // Declare isLoading state
   const [isLoading, setIsLoading] = useState(false);
-  // Declare isLoading state
+  // Declare error state
   const [error, setError] = useState(null);
+  // Get the nextjs router
+  const router = useRouter()
   // Callback for submit event
   const handleSubmit = (event) => {
     // Don't actually submit
