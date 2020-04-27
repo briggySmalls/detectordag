@@ -1,5 +1,5 @@
-import Layout from '../components/layout';
 import Alert from '@material-ui/lab/Alert';
+import Layout from '../components/layout';
 
 // Create the actual homepage
 export default function Success() {
@@ -8,5 +8,5 @@ export default function Success() {
     <Layout>
       <Alert severity="success">Your dag has been registered successfully!</Alert>
     </Layout>
-  )
+  );
 }
