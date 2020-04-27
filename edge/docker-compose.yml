@@ -1,0 +1,13 @@
+version: '2'
+volumes:
+    shared:
+services:
+    access-point:
+        network_mode: host
+        build: ./access-point
+        volumes:
+            - 'shared/data'
+    detector:
+        build: ./detector
+        volumes:
+            - 'shared:/data'
