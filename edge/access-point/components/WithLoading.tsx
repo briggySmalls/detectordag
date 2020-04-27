@@ -1,15 +1,15 @@
 import CircularProgress from '@material-ui/core/CircularProgress';
-import PropTypes from "prop-types";
+import PropTypes from 'prop-types';
 
 export default function WithLoading(Component) {
-  const WithLoadingComponent = ({ isLoading, ...props }) => {
+  const WithLoadingComponent = ({ isLoading, ...props }): JSX.Element => {
     // Short-circuit with the provided component
     if (!isLoading) {
-        return (<Component {...props} />);
+      return (<Component { ...props } />);
     }
     // Indicate that the component is loading
     return (<CircularProgress />);
-  }
+  };
   WithLoadingComponent.propTypes = {
     isLoading: PropTypes.bool.isRequired,
     props: PropTypes.any,
@@ -17,5 +17,5 @@ export default function WithLoading(Component) {
 }
 
 WithLoading.propTypes = {
-    Component: PropTypes.element.isRequired,
+  Component: PropTypes.element.isRequired,
 };

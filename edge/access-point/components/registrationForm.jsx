@@ -1,6 +1,7 @@
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import PropTypes from 'prop-types';
 
 // Create some CSS styles for the page
 const useStyles = makeStyles((theme) => ({
@@ -14,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 // Create our form (we will wrap this)
-export default function Form ({ onSubmit }) {
+export default function Form({ onSubmit }) {
   // Create styles for use
   const classes = useStyles();
   // Create a handler
@@ -23,13 +24,13 @@ export default function Form ({ onSubmit }) {
     event.preventDefault();
     // Now call outer handler
     const formData = new FormData(event.target);
-    let data = {};
-    formData.forEach((value, key) => {data[key] = value});
+    const data = {};
+    formData.forEach((value, key) => { data[key] = value; });
     onSubmit(data);
-  }
+  };
   // Render the form
   return (
-    <form className={classes.form} onSubmit={onSubmit}>
+    <form className={classes.form} onSubmit={innerSubmit}>
       <TextField
         id="username-input"
         name="username"
@@ -64,5 +65,9 @@ export default function Form ({ onSubmit }) {
         Submit
       </Button>
     </form>
-  )
+  );
 }
+
+Form.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+};

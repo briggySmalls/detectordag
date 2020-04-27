@@ -1,0 +1,10 @@
+# Don't lint the generated swagger output
+lib/
+# Don't ever lint installed modules
+node_modules/
+# Or next's build output
+.next/
+# Or coverage results
+coverage/
+# Config files
+*.config.js
