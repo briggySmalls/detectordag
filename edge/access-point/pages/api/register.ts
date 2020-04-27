@@ -1,9 +1,10 @@
-import { NextApiRequest, NextApiResponse } from 'next'
+import { NextApiRequest, NextApiResponse } from 'next';
 import pify from 'pify';
 import { promises as fs } from 'fs';
 import path from 'path';
 import {
-  ApiClient, AccountsApi, AuthenticationApi, Credentials, Token, DeviceRegistered, MutableDevice } from '../../lib/client';
+  ApiClient, AccountsApi, AuthenticationApi, Credentials, Token, DeviceRegistered, MutableDevice,
+} from '../../lib/client';
 
 
 // Define a wrapper for the different clients
