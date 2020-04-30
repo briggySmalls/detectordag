@@ -13,12 +13,6 @@ from edge.config import AppConfig, ConfigError
 _TEST_DATA_DIR = Path(__file__).parent.joinpath('test_data')
 
 
-@dataclass
-class EnvVarProps:
-    value: Any
-    optional: bool
-
-
 @pytest.fixture
 def variables(monkeypatch: Any, tmp_path: Path) -> Dict[str, Any]:
     # Establish the paths for the thing certificates
@@ -39,12 +33,12 @@ def variables(monkeypatch: Any, tmp_path: Path) -> Dict[str, Any]:
         "ALIVE_INTERVAL": 3600,
     }
     # Delete existing environment variables
-    for key in variables.keys():
+    for key in variables:
         monkeypatch.delenv(key, raising=False)
     return variables
 
 
-def test_present(monkeypatch: Any, variables: Dict[str, EnvVarProps]) -> None:
+def test_present(monkeypatch: Any, variables: Dict[str, Any]) -> None:
     """Test 'happy path' of all variables present
 
     Args:
@@ -73,7 +67,7 @@ def test_present(monkeypatch: Any, variables: Dict[str, EnvVarProps]) -> None:
     "AWS_THING_KEY_PATH",
     "BALENA_DEVICE_UUID",
 ])
-def test_missing_env(monkeypatch: Any, variables: Dict[str, EnvVarProps], to_drop: str) -> None:
+def test_missing_env(monkeypatch: Any, variables: Dict[str, Any], to_drop: str) -> None:
     """Run a test, dropping each of the mandatory variables in turn"""
     # Set all variables, dropping the variable under test
     for key, value in variables.items():
