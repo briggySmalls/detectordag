@@ -3,7 +3,7 @@
 from shutil import copyfile
 from pathlib import Path
 from typing import Any, Dict
-from dataclasses import dataclass
+from uuid import UUID
 
 import pytest
 
@@ -25,7 +25,7 @@ def variables(monkeypatch: Any, tmp_path: Path) -> Dict[str, Any]:
     # Create the variables
     variables = {
         "AWS_ENDPOINT": "www.test.com",
-        "BALENA_DEVICE_UUID": "03076b52-3a66-425b-ad2d-43e925486e60",
+        "BALENA_DEVICE_UUID": UUID("03076b52-3a66-425b-ad2d-43e925486e60"),
         "AWS_ROOT_CERT": "LS0tLS2CRUdJTiBDRVJUSUZJQ0FURS0tqS0tCk1JSURRVENDQWltZ0F3SUJBZ0lUQm15Zno1bS9qQW81NHZCNGlrUG1salpieWpBTkJna3Foa2lHOXcwQkFRc0YKQURBNU1Rc3dDUVlEVlFRR0V3SlZVekVQTUEwR0ExVUVDaE1HUVcxaGVtOXVNUmt3RndZRFZRUURFeEJCYldGNgpiMjRnVW05dmRDQkRRU0F4TUI0WERURTFNRFV5TmpBd01EQXdNRm9YRFRNNE1ERXhOekF3TURBd01Gb3dPVEVMCk1Ba0dBMVVFQmhNQ1ZWTXhEekFOQmdOVkJBb1RCa0Z0WVhwdmJqRVpNQmNHQTFVRUF4TVFRVzFoZW05dUlGSnYKYjNRZ1EwRWdNVENDQVNJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DZ2dFQkFMSjRnSEhLZU5YagpjYTlIZ0ZCMGZXN1kxNGgyOUpsbzkxZ2hZUGwwaEFFdnJBSXRodE9nUTNwT3NxVFFOcm9Cdm8zYlNNZ0hGelpNCjlPNklJOGMrNnpmMXRSbjRTV2l3M3RlNWRqZ2RZWjZrL29JMnBlVktWdVJGNGZuOXRCYjZkTnFjbXpVNUwvcXcKSUZBR2JIclFnTEttK2Evc1J4bVBVRGdIM0tLSE9WajR1dFdwK1Vobk1KYnVsSGhlYjRtalVjQXdobWFoUldhNgpWT3VqdzVINVNOei8wZWd3TFgwdGRIQTExNGdrOTU3RVdXNjdjNGNYOGpKR0tMaEQrcmNkcXNxMDhwOGtEaTFMCjkzRmNYbW4vNnBVQ3l6aUtybEE0Yjl2N0xXSWJ4Y2NlVk9GMzRHZklENXlISTlZL1FDQi9JSURFZ0V3K095UW0KamdTdWJKcklxZzBDQXdFQUFhTkNNRUF3RHdZRFZSMFRBUUgvQkFVd0F3RUIvekFPQmdOVkhROEJBZjhFQkFNQwpBWVl3SFFZRFZSME9CQllFRklRWXpJVTA3THdNbEpRdUNGbWN4N0lRVGdvSU1BMEdDU3FHU0liM0RRRUJDd1VBCkE0SUJBUUNZOGpkYVFaQ2hHc1YyVVNnZ05pTU9ydVlvdTZyNGxLNUlwREIvRy93a2pVdTB5S0dYOXJieGVuREkKVTVQTUNDamptQ1hQSTZUNTNpSFRmSVVKclU2YWRUckNDMnFKZUhaRVJ4aGxiSTFCamp0L21zdjB0YWRRMXdVcwpOK2dEUzYzcFlhQUNidlh5OE1XeTdWdTMzUHFVWEhlZUU2Vi9VcTJWOHZpVE85NkxYRnZLV2xKYllLOFU5MHZ2Cm8vdWZRSlZ0TVZUOFF0UEhSaDhqcmRrUFNIQ2EyWFY0Y2RGeVF6UjFibGRad2dKY0ptQXB6eU1aRm82SVE2WFUKNU1zSSt5TVJRK2hES1hKaW9hbGRYZ2pVa0s2NDJNNFV3dEJWOG9iMnhKTkRkMlpod0xub1FkZVhlR0FEYmtweQpycVhSZmJvUW5vWnNHNHE1V1RQNDY4U1F2dkc1Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K",  # noqa: E501 pylint: disable=line-too-long
         "AWS_THING_CERT_PATH": aws_thing_cert_path.resolve(),
         "AWS_THING_KEY_PATH": aws_thing_key_path.resolve(),
@@ -53,10 +53,10 @@ def test_present(monkeypatch: Any, variables: Dict[str, Any]) -> None:
     # Assert values
     assert config.aws_endpoint == variables["AWS_ENDPOINT"]
     assert config.aws_root_cert == variables["AWS_ROOT_CERT"]
-    assert config.aws_thing_cert == variables["AWS_THING_CERT_PATH"]
-    assert config.aws_thing_key == variables["AWS_THING_KEY_PATH"]
+    assert config.aws_thing_cert_path == variables["AWS_THING_CERT_PATH"]
+    assert config.aws_thing_key_path == variables["AWS_THING_KEY_PATH"]
     assert config.aws_port == variables["AWS_PORT"]
-    assert config.aws_thing_name == variables["AWS_THING_NAME"]
+    assert config.aws_thing_name == variables["BALENA_DEVICE_UUID"]
     assert config.alive_interval == variables["ALIVE_INTERVAL"]
 
 

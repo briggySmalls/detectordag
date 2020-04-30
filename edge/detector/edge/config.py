@@ -27,24 +27,19 @@ class AppConfig:
     _parsers = {
         'aws_thing_name': ConfigMapper('BALENA_DEVICE_UUID', 'uuid'),
         'aws_root_cert': ConfigMapper('AWS_ROOT_CERT', 'str'),
+        'aws_thing_cert_path': ConfigMapper('AWS_THING_CERT_PATH', 'path'),
+        'aws_thing_key_path': ConfigMapper('AWS_THING_KEY_PATH', 'path'),
         'aws_endpoint': ConfigMapper('AWS_ENDPOINT', 'str'),
         'aws_port': ConfigMapper('AWS_PORT', 'int', default=8883),
-        'certs_dir': ConfigMapper('CERT_DIR', 'path', '~/.detectordag/certs'),
         'alive_interval': ConfigMapper('ALIVE_INTERVAL', 'int', default=3600),
-    }
-    _certs = {
-        'aws_root_cert': 'root-CA.crt',
-        'aws_thing_key': 'thing.private.key',
-        'aws_thing_cert': 'thing.cert.pem',
     }
 
     aws_thing_name: UUID
-    aws_root_cert: Path
-    aws_thing_cert: Path
-    aws_thing_key: Path
+    aws_root_cert: str
+    aws_thing_cert_path: Path
+    aws_thing_key_path: Path
     aws_endpoint: str
     aws_port: int
-    certs_dir: Path
     alive_interval: int
 
     @classmethod
@@ -70,16 +65,6 @@ class AppConfig:
                         mapping.identifier, default=mapping.default)
             except EnvValidationError as exc:
                 raise ConfigError(exc)
-        # Convert root cert to a file
-        certs_dir = parsed['certs_dir']
-        cls._write_cert(parsed['aws_root_cert'], cls._to_cert(certs_dir, cls._certs['aws_root_cert']))
-        # Add paths for certs
-        for key, filename in cls._certs.items():
-            # Ensure the certificate is present
-            cert_path = cls._to_cert(certs_dir, filename)
-            if not cert_path.exists():
-                raise ConfigError(f"Certificate missing: {cert_path}")
-            parsed[key] = cert_path
         # Return a new config object
         return AppConfig(**parsed)
 
