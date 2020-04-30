@@ -5,6 +5,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from types import TracebackType
 from typing import Optional, Type
+from uuid import UUID
 
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 
@@ -15,7 +16,7 @@ logging.getLogger("AWSIoTPythonSDK").setLevel(logging.WARNING)
 @dataclass
 class ClientConfig:
     """Configuration for the CloudClient"""
-    device_id: str
+    device_id: UUID
     root_cert: Path
     thing_cert: Path
     thing_key: Path
@@ -49,7 +50,7 @@ class CloudClient:
         self.config = config
         # Unique ID. If another connection using the same key is opened the
         # previous one is auto closed by AWS IOT
-        self.client = AWSIoTMQTTShadowClient(config.device_id)
+        self.client = AWSIoTMQTTShadowClient(str(config.device_id))
         # Used to configure the host name and port number the underneath AWS
         # IoT MQTT Client tries to connect to.
         self.client.configureEndpoint(self.config.endpoint, self.config.port)

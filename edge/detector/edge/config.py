@@ -1,5 +1,4 @@
 """Logic for parsing configuration"""
-import base64
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -67,22 +66,3 @@ class AppConfig:
                 raise ConfigError(exc)
         # Return a new config object
         return AppConfig(**parsed)
-
-    @classmethod
-    def variables(cls) -> List[str]:
-        """Get the variables this config looks for
-
-        Returns:
-            List[str]: Identifiers of all variables searched for
-        """
-        return [mapper.identifier for mapper in cls._parsers.values()]
-
-    @staticmethod
-    def _write_cert(cert: str, file: Path) -> None:
-        # Turn base64 encoded string into a certificate file
-        with file.open('wb') as output_file:
-            output_file.write(base64.b64decode(cert))
-
-    @staticmethod
-    def _to_cert(cert_dir: Path, filename: str) -> Path:
-        return cert_dir.expanduser() / filename

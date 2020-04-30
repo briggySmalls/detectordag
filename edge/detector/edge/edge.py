@@ -3,6 +3,10 @@ import logging
 from threading import Timer
 from types import TracebackType
 from typing import Optional, Type
+import base64
+from pathlib import Path
+import tempfile
+from uuid import uuid4
 
 from edge.aws import ClientConfig, CloudClient
 from edge.config import AppConfig
@@ -19,13 +23,15 @@ class EdgeApp:
     """Wrapper for the entire application"""
     def __init__(self, device: DigitalInputDevice, config: AppConfig) -> None:
         self.config = config
+        # Write the root cert to a file
+        root_cert_path = self._write_cert(config.aws_root_cert)
         # Prepare configuration for the client
         client_config = ClientConfig(device_id=config.aws_thing_name,
                                      endpoint=config.aws_endpoint,
                                      port=config.aws_port,
-                                     root_cert=config.aws_root_cert,
-                                     thing_cert=config.aws_thing_cert,
-                                     thing_key=config.aws_thing_key)
+                                     root_cert=root_cert_path,
+                                     thing_cert=config.aws_thing_cert_path,
+                                     thing_key=config.aws_thing_key_path)
         self._device = device
         # Create the client
         self._client = CloudClient(client_config)
@@ -74,3 +80,13 @@ class EdgeApp:
         # Schedule another tick
         self._timer = Timer(self.config.alive_interval, self._tick)
         self._timer.start()
+
+    @staticmethod
+    def _write_cert(cert: str) -> Path:
+        # Get the temporary directory
+        tmp = Path(tempfile.gettempdir())
+        file = tmp / f"{uuid4()}.pem"
+        # Turn base64 encoded string into a certificate file
+        with file.open('wb') as output_file:
+            output_file.write(base64.b64decode(cert))
+        return file
