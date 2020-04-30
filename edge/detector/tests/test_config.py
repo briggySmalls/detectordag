@@ -58,8 +58,7 @@ def test_present(monkeypatch: Any, variables: Dict[str, EnvVarProps]) -> None:
     config = AppConfig.from_env()
     # Assert values
     assert config.aws_endpoint == variables["AWS_ENDPOINT"]
-    assert config.certs_dir == variables["CERTS_DIR"]
-    assert config.aws_root_cert == variables["AWS_ROOT_CERT_PATH"]
+    assert config.aws_root_cert == variables["AWS_ROOT_CERT"]
     assert config.aws_thing_cert == variables["AWS_THING_CERT_PATH"]
     assert config.aws_thing_key == variables["AWS_THING_KEY_PATH"]
     assert config.aws_port == variables["AWS_PORT"]
@@ -75,6 +74,8 @@ def test_present(monkeypatch: Any, variables: Dict[str, EnvVarProps]) -> None:
     "BALENA_DEVICE_UUID",
 ])
 def test_missing_env(monkeypatch: Any, variables: Dict[str, EnvVarProps], to_drop: str) -> None:
+    """Run a test, dropping each of the mandatory variables in turn"""
+    # Set all variables, dropping the variable under test
     for key, value in variables.items():
         if key != to_drop:
             # Set the variable in the environment
