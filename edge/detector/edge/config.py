@@ -3,6 +3,7 @@ import base64
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from uuid import UUID
 
 from environs import Env, EnvValidationError
 
@@ -24,10 +25,8 @@ class AppConfig:
     """Class that holds application configuration"""
     # pylint: disable=too-many-instance-attributes
     _parsers = {
-        'aws_thing_name': ConfigMapper('AWS_THING_NAME', 'str'),
+        'aws_thing_name': ConfigMapper('BALENA_DEVICE_UUID', 'uuid'),
         'aws_root_cert': ConfigMapper('AWS_ROOT_CERT', 'str'),
-        'aws_thing_cert': ConfigMapper('AWS_THING_CERT', 'str'),
-        'aws_thing_key': ConfigMapper('AWS_THING_KEY', 'str'),
         'aws_endpoint': ConfigMapper('AWS_ENDPOINT', 'str'),
         'aws_port': ConfigMapper('AWS_PORT', 'int', default=8883),
         'certs_dir': ConfigMapper('CERT_DIR', 'path', '~/.detectordag/certs'),
@@ -39,7 +38,7 @@ class AppConfig:
         'aws_thing_cert': 'thing.cert.pem',
     }
 
-    aws_thing_name: str
+    aws_thing_name: UUID
     aws_root_cert: Path
     aws_thing_cert: Path
     aws_thing_key: Path
@@ -71,9 +70,16 @@ class AppConfig:
                         mapping.identifier, default=mapping.default)
             except EnvValidationError as exc:
                 raise ConfigError(exc)
-
-        # Write to a file
-        cls._convert_certs(parsed)
+        # Convert root cert to a file
+        certs_dir = parsed['certs_dir']
+        cls._write_cert(parsed['aws_root_cert'], cls._to_cert(certs_dir, cls._certs['aws_root_cert']))
+        # Add paths for certs
+        for key, filename in cls._certs.items():
+            # Ensure the certificate is present
+            cert_path = cls._to_cert(certs_dir, filename)
+            if not cert_path.exists():
+                raise ConfigError(f"Certificate missing: {cert_path}")
+            parsed[key] = cert_path
         # Return a new config object
         return AppConfig(**parsed)
 
@@ -86,21 +92,12 @@ class AppConfig:
         """
         return [mapper.identifier for mapper in cls._parsers.values()]
 
-    @classmethod
-    def _convert_certs(cls, parsed: Dict[str, Any]) -> None:
-        # Save certs to files
-        certs_dir = parsed['certs_dir'].expanduser()
-        certs_dir.mkdir(exist_ok=True, parents=True)
-        for cert, filename in cls._certs.items():
-            # Establish the path of the new certificate file
-            cert_path = certs_dir / filename
-            # Create the file from the environment variable
-            cls._write_cert(parsed[cert], cert_path)
-            # Replace the env variable content with the path to the certificate
-            parsed[cert] = cert_path
-
     @staticmethod
     def _write_cert(cert: str, file: Path) -> None:
         # Turn base64 encoded string into a certificate file
         with file.open('wb') as output_file:
             output_file.write(base64.b64decode(cert))
+
+    @staticmethod
+    def _to_cert(cert_dir: Path, filename: str) -> Path:
+        return cert_dir.expanduser() / filename
