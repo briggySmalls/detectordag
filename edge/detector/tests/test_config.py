@@ -53,7 +53,7 @@ def test_present(monkeypatch: Any, variables: Dict[str, EnvVarProps]) -> None:
     """
     # Configure the environment variables
     for name, value in variables.items():
-        monkeypatch.setenv(name, value)
+        monkeypatch.setenv(name, str(value))
     # Create the config
     config = AppConfig.from_env()
     # Assert values
@@ -78,7 +78,7 @@ def test_missing_env(monkeypatch: Any, variables: Dict[str, EnvVarProps], to_dro
     for key, value in variables.items():
         if key != to_drop:
             # Set the variable in the environment
-            monkeypatch.setenv(key, value)
+            monkeypatch.setenv(key, str(value))
     # Expect an error
     with pytest.raises(ConfigError):
         AppConfig.from_env()
