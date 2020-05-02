@@ -2,6 +2,7 @@
 import logging
 import sys
 from typing import Any
+import os
 
 import click
 
@@ -42,6 +43,9 @@ def app(ctx: Any) -> None:
 @click.pass_context
 def mock(ctx: Any) -> None:
     """Run the mock edge software"""
+    # Convert environment variables to local certificate files
+    ctx.obj['config'].aws_thing_cert_path = EdgeApp._write_cert(os.getenv('MOCK_AWS_THING_CERT'))
+    ctx.obj['config'].aws_thing_key_path = EdgeApp._write_cert(os.getenv('MOCK_AWS_THING_KEY'))
     # Create a mock device
     from edge.mocks import MockDigitalInputDevice  # noqa: E501, pylint: disable=import-outside-toplevel
     power_status_device = MockDigitalInputDevice(_POWER_PIN)
