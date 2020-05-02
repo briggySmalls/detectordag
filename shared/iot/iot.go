@@ -38,8 +38,9 @@ type Device struct {
 }
 
 type Certificates struct {
-	Public  string
-	Private string
+	Certificate string
+	Public      string
+	Private     string
 }
 
 // New gets a new Client
@@ -123,8 +124,9 @@ func (c *client) RegisterThing(accountID, name string) (*Device, *Certificates, 
 		AccountId: accountID,
 	}
 	certs := Certificates{
-		Public:  *certsResponse.KeyPair.PublicKey,
-		Private: *certsResponse.KeyPair.PrivateKey,
+		Certificate: *certsResponse.certificatePem,
+		Public:      *certsResponse.KeyPair.PublicKey,
+		Private:     *certsResponse.KeyPair.PrivateKey,
 	}
 	// Activate certificate now we're happy all is well
 	_, err = c.iot.UpdateCertificate(&iot.UpdateCertificateInput{

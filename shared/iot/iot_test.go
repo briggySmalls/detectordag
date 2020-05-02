@@ -53,6 +53,7 @@ func TestRegisterDevice(t *testing.T) {
 	_, err = uuid.Parse(device.DeviceId)
 	assert.NoError(t, err)
 	// Assert certs has expected fields
+	assert.NotEmpty(t, certs.Certificate)
 	assert.NotEmpty(t, certs.Public)
 	assert.NotEmpty(t, certs.Private)
 }
