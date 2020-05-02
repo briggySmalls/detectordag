@@ -5,6 +5,7 @@ import axios from 'axios';
 
 import Home from "../pages/index.js";
 import Layout from "../components/layout.js";
+import Form from '../components/registrationForm';
 
 // Mock axios for us
 jest.mock('axios');
@@ -17,11 +18,11 @@ describe("With Enzyme", () => {
     expect(app.find("Layout p").text()).toEqual("Register your device to get started");
   });
 
-  if('Home calls API', () => {
+  it('Home calls API successfully', () => {
     const app = shallow(<Home />);
     // Simulate a submission
     const testData = {test: 'data'};
-    app.find("Layout FormWithLoading").props.onSubmit(testData);
+    app.find(Form).props().onSubmit(testData);
     // Expect axios to have been called
     const resp = {data: users};
     axios.post.mockResolvedValue(resp);
@@ -29,6 +30,24 @@ describe("With Enzyme", () => {
     expect(axios.post.mock.calls.length).toBe(1);
     expect(axios.post.mock.calls[0][0]).toBe('/api/register');
     expect(axios.post.mock.calls[0][1]).toBe(testData);
+  });
+
+  it('Home calls API which fails', () => {
+    const app = shallow(<Home />);
+    // Simulate a submission
+    const testData = {test: 'data'};
+    app.find(Form).props().onSubmit(testData);
+    // Expect axios to have been called
+    axios.post.mockRejectedValue(new Error("A failure"));
+    // Assert mock calls
+    expect(axios.post.mock.calls.length).toBe(1);
+    expect(axios.post.mock.calls[0][0]).toBe('/api/register');
+    expect(axios.post.mock.calls[0][1]).toBe(testData);
+    // Assert error
+    const error = app.find("Error");
+    expect(error).toHaveLength(1);
+    expect(error.text()).toBe("A failure");
+    expect(error).prop('severity').toEqual('error');
   });
 });
 
