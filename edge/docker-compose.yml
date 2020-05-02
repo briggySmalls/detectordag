@@ -6,7 +6,7 @@ services:
         network_mode: host
         build: ./access-point
         volumes:
-            - 'shared/data'
+            - 'shared:/data'
     detector:
         build: ./detector
         volumes:
