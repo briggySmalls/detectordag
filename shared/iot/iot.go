@@ -5,12 +5,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iot"
-	"github.com/google/uuid"
+	"github.com/aws/aws-sdk-go/service/iot/iotiface"
 	"log"
-)
-
-var (
-	ErrAccountIDMissing = errors.New("The account-id attribute was missing")
 )
 
 const (
@@ -21,13 +17,13 @@ const (
 )
 
 type client struct {
-	iot *iot.IoT
+	iot iotiface.IoTAPI
 }
 
 type Client interface {
 	GetThing(id string) (*Device, error)
 	GetThingsByAccount(id string) ([]*Device, error)
-	RegisterThing(accountID, name string) (*Device, *Certificates, error)
+	RegisterThing(accountID, deviceID, name string) (*Device, *Certificates, error)
 }
 
 // Device holds the non-state properties of a device
@@ -38,8 +34,9 @@ type Device struct {
 }
 
 type Certificates struct {
-	Public  string
-	Private string
+	Certificate string
+	Public      string
+	Private     string
 }
 
 // New gets a new Client
@@ -93,16 +90,14 @@ func (c *client) GetThingsByAccount(id string) ([]*Device, error) {
 }
 
 // RegisterThing creates a new thing and provides certificates for it to communicate
-func (c *client) RegisterThing(accountID, name string) (*Device, *Certificates, error) {
+func (c *client) RegisterThing(accountID, deviceID, name string) (*Device, *Certificates, error) {
 	// Create a new certificate
 	certsResponse, err := c.createCertificate()
 	if err != nil {
 		return nil, nil, err
 	}
-	// Generate a device name at random
-	deviceId := uuid.New().String()
 	// Create a new thing
-	_, err = c.registerThing(deviceId, *certsResponse.CertificateId, name, accountID)
+	_, err = c.registerThing(deviceID, *certsResponse.CertificateId, name, accountID)
 	// Check if we failed to create the thing
 	if err != nil {
 		log.Printf("Failed to RegisterThing: %v", err)
@@ -118,13 +113,14 @@ func (c *client) RegisterThing(accountID, name string) (*Device, *Certificates, 
 	}
 	// We're all done!
 	d := Device{
-		DeviceId:  deviceId,
+		DeviceId:  deviceID,
 		Name:      name,
 		AccountId: accountID,
 	}
 	certs := Certificates{
-		Public:  *certsResponse.KeyPair.PublicKey,
-		Private: *certsResponse.KeyPair.PrivateKey,
+		Certificate: *certsResponse.CertificatePem,
+		Public:      *certsResponse.KeyPair.PublicKey,
+		Private:     *certsResponse.KeyPair.PrivateKey,
 	}
 	// Activate certificate now we're happy all is well
 	_, err = c.iot.UpdateCertificate(&iot.UpdateCertificateInput{

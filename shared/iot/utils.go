@@ -1,6 +1,7 @@
 package iot
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/service/iot"
 )
 
@@ -40,7 +41,7 @@ func (t *thingAttribute) getAttribute(key string) (string, error) {
 	if accountID, ok := t.ThingAttribute.Attributes[key]; ok {
 		return *accountID, nil
 	}
-	return "", ErrAccountIDMissing
+	return "", fmt.Errorf("Attribute %s was missing", key)
 }
 
 func (t *describeThingOutput) ToDevice() (*Device, error) {
@@ -67,5 +68,5 @@ func (t *describeThingOutput) getAttribute(key string) (string, error) {
 	if accountID, ok := t.DescribeThingOutput.Attributes[key]; ok {
 		return *accountID, nil
 	}
-	return "", ErrAccountIDMissing
+	return "", fmt.Errorf("Attribute '%s' was missing", key)
 }

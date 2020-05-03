@@ -83,7 +83,7 @@ func NewRouter(iot iot.Client, server server.Server, tokens tokens.Tokens) *mux.
 		Route{
 			"UpdateDevice",
 			http.MethodPatch,
-			"/{deviceId}",
+			fmt.Sprintf("/{deviceId:%s}", uuidRegex),
 			server.UpdateDevice,
 		},
 	})
