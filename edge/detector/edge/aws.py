@@ -65,7 +65,7 @@ class CloudClient:
         self.client.configureMQTTOperationTimeout(self._OPERATION_TIMEOUT)
         # Create the shadow handler
         self.shadow = self.client.createShadowHandlerWithName(
-            config.device_id, False)
+            str(config.device_id), False)
 
     def __enter__(self) -> 'CloudClient':
         # Connect
