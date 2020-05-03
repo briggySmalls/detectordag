@@ -5,12 +5,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iot"
+	"github.com/aws/aws-sdk-go/service/iot/iotiface"
 	"github.com/google/uuid"
 	"log"
-)
-
-var (
-	ErrAccountIDMissing = errors.New("The account-id attribute was missing")
 )
 
 const (
@@ -21,7 +18,7 @@ const (
 )
 
 type client struct {
-	iot *iot.IoT
+	iot iotiface.IoTAPI
 }
 
 type Client interface {
@@ -124,7 +121,7 @@ func (c *client) RegisterThing(accountID, name string) (*Device, *Certificates, 
 		AccountId: accountID,
 	}
 	certs := Certificates{
-		Certificate: *certsResponse.certificatePem,
+		Certificate: *certsResponse.CertificatePem,
 		Public:      *certsResponse.KeyPair.PublicKey,
 		Private:     *certsResponse.KeyPair.PrivateKey,
 	}
