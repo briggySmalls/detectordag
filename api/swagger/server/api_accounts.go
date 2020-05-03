@@ -156,8 +156,9 @@ func (s *server) RegisterDevice(w http.ResponseWriter, r *http.Request) {
 		Name:     device.Name,
 		DeviceId: device.DeviceId,
 		Certificate: &models.DeviceRegisteredCertificate{
-			PublicKey:  certs.Public,
-			PrivateKey: certs.Private,
+			Certificate: certs.Certificate,
+			PublicKey:   certs.Public,
+			PrivateKey:  certs.Private,
 		},
 	}
 	body, err := json.Marshal(payload)
