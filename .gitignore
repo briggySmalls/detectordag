@@ -1,0 +1,2 @@
+# Ignore go mocks
+mock_*.go
