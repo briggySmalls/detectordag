@@ -84,7 +84,7 @@ func TestRegisterDevice(t *testing.T) {
 	// Configure the IoT client to expect a request to register a new device
 	device := iot.Device{Name: desiredName, AccountId: accountID, DeviceId: deviceID}
 	certs := iot.Certificates{Public: publicCert, Private: privateCert}
-	iotClient.EXPECT().RegisterThing(accountID, desiredName).Return(&device, &certs, nil)
+	iotClient.EXPECT().RegisterThing(accountID, deviceID, desiredName).Return(&device, &certs, nil)
 	// Create a request for devices
 	req := createRequest(t, "PUT",
 		fmt.Sprintf("/v1/accounts/%s/devices/%s", accountID, deviceID),

@@ -6,7 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iot"
 	"github.com/aws/aws-sdk-go/service/iot/iotiface"
-	"github.com/google/uuid"
 	"log"
 )
 
@@ -24,7 +23,7 @@ type client struct {
 type Client interface {
 	GetThing(id string) (*Device, error)
 	GetThingsByAccount(id string) ([]*Device, error)
-	RegisterThing(accountID, name string) (*Device, *Certificates, error)
+	RegisterThing(accountID, deviceID, name string) (*Device, *Certificates, error)
 }
 
 // Device holds the non-state properties of a device
@@ -91,16 +90,14 @@ func (c *client) GetThingsByAccount(id string) ([]*Device, error) {
 }
 
 // RegisterThing creates a new thing and provides certificates for it to communicate
-func (c *client) RegisterThing(accountID, name string) (*Device, *Certificates, error) {
+func (c *client) RegisterThing(accountID, deviceID, name string) (*Device, *Certificates, error) {
 	// Create a new certificate
 	certsResponse, err := c.createCertificate()
 	if err != nil {
 		return nil, nil, err
 	}
-	// Generate a device name at random
-	deviceId := uuid.New().String()
 	// Create a new thing
-	_, err = c.registerThing(deviceId, *certsResponse.CertificateId, name, accountID)
+	_, err = c.registerThing(deviceID, *certsResponse.CertificateId, name, accountID)
 	// Check if we failed to create the thing
 	if err != nil {
 		log.Printf("Failed to RegisterThing: %v", err)
@@ -116,7 +113,7 @@ func (c *client) RegisterThing(accountID, name string) (*Device, *Certificates, 
 	}
 	// We're all done!
 	d := Device{
-		DeviceId:  deviceId,
+		DeviceId:  deviceID,
 		Name:      name,
 		AccountId: accountID,
 	}

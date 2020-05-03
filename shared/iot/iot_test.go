@@ -6,7 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iot"
 	"github.com/golang/mock/gomock"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -101,6 +100,7 @@ func TestGetThingsByAccount(t *testing.T) {
 func TestRegisterDevice(t *testing.T) {
 	const (
 		accountID             = "aac45d02-c97d-442c-8431-336d578fdcf7"
+		deviceID              = "f80103e1-ba55-4b55-b80e-b24f5dd518bb"
 		deviceName            = "Annex"
 		certificateID         = "d5c29c58-5a69-4b46-908e-13d2ad5b21a6"
 		certificatePem        = "THIS IS A PEM"
@@ -121,7 +121,6 @@ func TestRegisterDevice(t *testing.T) {
 		},
 	}, nil)
 	// Configure mock to create a device successfully
-	var deviceID string
 	mock.EXPECT().RegisterThing(gomock.Not(gomock.Nil())).Do(func(input *iot.RegisterThingInput) {
 		assert.Equal(t, provisioningTemplate, *input.TemplateBody)
 		assert.Equal(t, thingGroup, *input.Parameters["ThingGroup"])
@@ -129,10 +128,7 @@ func TestRegisterDevice(t *testing.T) {
 		assert.Equal(t, deviceName, *input.Parameters["DeviceName"])
 		assert.Equal(t, certificateID, *input.Parameters["CertificateId"])
 		assert.Equal(t, accountID, *input.Parameters["AccountId"])
-		// Check the UUID was generated
-		deviceID = *input.Parameters["DeviceId"]
-		_, err := uuid.Parse(deviceID)
-		assert.NoError(t, err)
+		assert.Equal(t, deviceID, *input.Parameters["DeviceId"])
 	}).Return(nil, nil)
 	// Configure mock to expect activation of certificate
 	mock.EXPECT().UpdateCertificate(gomock.Not(gomock.Nil())).Do(func(input *iot.UpdateCertificateInput) {
@@ -140,13 +136,12 @@ func TestRegisterDevice(t *testing.T) {
 		assert.Equal(t, "ACTIVE", *input.NewStatus)
 	}).Return(nil, nil)
 	// Query for devices associated with an account
-	device, certs, err := c.RegisterThing(accountID, deviceName)
+	device, certs, err := c.RegisterThing(accountID, deviceID, deviceName)
 	assert.NoError(t, err)
 	// Assert device has expected fields
 	assert.Equal(t, deviceName, device.Name)
 	assert.Equal(t, accountID, device.AccountId)
-	_, err = uuid.Parse(device.DeviceId)
-	assert.NoError(t, err)
+	assert.Equal(t, deviceID, device.DeviceId)
 	// Assert certs has expected fields
 	assert.Equal(t, certificatePem, certs.Certificate)
 	assert.Equal(t, certificatePublicKey, certs.Public)
