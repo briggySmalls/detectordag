@@ -3,11 +3,18 @@ volumes:
     shared:
 services:
     access-point:
+        environment:
+            API_BASEPATH: "$API_BASEPATH"
+            CERTS_DIR: /data
         network_mode: host
         build: ./access-point
         volumes:
             - 'shared:/data'
     detector:
+        environment:
+            AWS_ENDPOINT: "$AWS_IOT_ENDPOINT"
+            AWS_THING_CERT_PATH: /data/thing.cert.pem
+            AWS_THING_KEY_PATH: /data/thing.private.key
         build: ./detector
         volumes:
             - 'shared:/data'
