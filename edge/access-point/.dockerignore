@@ -1,0 +1,2 @@
+# Don't load env vars from .envs in docker
+.env*

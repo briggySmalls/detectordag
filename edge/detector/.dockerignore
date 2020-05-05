@@ -1,0 +1,2 @@
+# Don't use .env files when building docker containers
+.env*
