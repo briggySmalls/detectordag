@@ -1,5 +1,5 @@
 # Next we begin the real image, first installing requirements
-FROM balenalib/%%BALENA_MACHINE_NAME%%-python:3.7-buster
+FROM balenalib/%%BALENA_MACHINE_NAME%%-python:3.7-buster-build
 # Install GPIO stuff
 RUN apt-get update && apt-get install python3-gpiozero python3-rpi.gpio
 # Copy the package source
