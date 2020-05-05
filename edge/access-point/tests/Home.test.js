@@ -31,7 +31,7 @@ describe("With Enzyme", () => {
     const app = shallow(<Home />);
     const loading = app.find("WithLoadingComponent");
     // Ensure the loading value is false
-    expect(loading.props().isLoading).toBe(false);
+    expect(loading.prop('isLoading')).toBe(false);
     // Configure axios mock success
     axios.post.mockImplementationOnce(() => {
         // Assert that the loading icon is shown
@@ -39,24 +39,24 @@ describe("With Enzyme", () => {
         // Return response
         return Promise.resolve({data: 'whatever really'});
     });
-    // Configure mock router submission
-    mockPush.mockImplementationOnce(() => {});
     // Simulate a submission
     const testData = {test: 'data'};
-    loading.props().onSubmit(testData);
+    loading.prop('onSubmit')(testData);
     // Assert
     await expect(axios.post).toHaveBeenCalledWith('/api/register', testData);
-    expect(loading.props().isLoading).toBe(false);
+    expect(loading.prop('isLoading')).toBe(false);
+    console.log(loading.debug());
     expect(mockPush).toHaveBeenCalledWith('/success');
   });
 
   it('Home calls API which fails', async () => {
     const app = shallow(<Home />);
+    const loading = app.find("WithLoadingComponent");
     // Configure axios mock failure
     axios.post.mockRejectedValueOnce(new Error("A failure"));
     // Simulate a submission
     const testData = {test: 'data'};
-    app.find("WithLoadingComponent").props().onSubmit(testData);
+    loading.prop('onSubmit')(testData);
     // Assert mock calls
     await expect(axios.post).toHaveBeenCalledWith('/api/register', testData);
     expect(mockPush).not.toHaveBeenCalled();
@@ -64,7 +64,7 @@ describe("With Enzyme", () => {
     const error = app.find("Alert");
     expect(error).toHaveLength(1);
     expect(error.text()).toBe("A failure");
-    expect(error).prop('severity').toEqual('error');
+    expect(error.prop('severity')).toEqual('error');
   });
 });
 
