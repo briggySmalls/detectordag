@@ -1,0 +1,15 @@
+# Next we begin the real image, first installing requirements
+FROM balenalib/%%BALENA_MACHINE_NAME%%-node:14-buster-build
+# Set the working directory
+WORKDIR /app
+# Copy the package data
+COPY package.json .
+COPY yarn.lock .
+# Install dependencies
+RUN yarn install
+# Copy the package source
+COPY . .
+# Build the app
+RUN yarn build
+# Run the server
+CMD ["yarn", "start"]
