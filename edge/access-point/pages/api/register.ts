@@ -25,7 +25,7 @@ class ClientWrapper {
 
 // Create the underlying client
 const client = new ApiClient();
-client.basePath = `${serverRuntimeConfig.apiBasepath}/v1`;
+client.basePath = `${serverRuntimeConfig.apiBasepath}`;
 
 // Create an instance of our wrapper
 const wrapper = new ClientWrapper(client);
