@@ -2,13 +2,10 @@
 FROM balenalib/%%BALENA_MACHINE_NAME%%-node:14-build
 # Set the working directory
 WORKDIR /app
-# Copy the package data
-COPY package.json .
-COPY yarn.lock .
-# Install dependencies
-RUN yarn install
 # Copy the package source
 COPY . .
+# Install dependencies
+RUN yarn install
 # Build the app
 RUN yarn build
 # Run the server
