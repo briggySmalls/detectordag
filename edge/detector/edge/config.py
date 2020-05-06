@@ -41,6 +41,14 @@ class AppConfig:
     aws_port: int
     alive_interval: int
 
+    def are_certs_present(self) -> bool:
+        """Indicates if the configuration is valid
+
+        Returns:
+            bool: The configuration is valid
+        """
+        return self.aws_thing_cert_path.exists() and self.aws_thing_key_path.exists()
+
     @classmethod
     def from_env(cls) -> 'AppConfig':
         """Parse configuration from environment variables

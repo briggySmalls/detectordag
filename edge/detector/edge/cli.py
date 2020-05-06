@@ -23,7 +23,11 @@ def main(ctx: Any) -> None:
     logging.basicConfig(level=logging.DEBUG)
     logging.info("Starting")
     # Parse config
-    ctx.obj['config'] = AppConfig.from_env()
+    config = AppConfig.from_env()
+    ctx.obj['config'] = config
+    # Ensure the files are present
+    while not config.are_certs_present():
+        pass
 
 
 @main.command()
