@@ -9,4 +9,4 @@ RUN yarn install
 # Build the app
 RUN yarn build
 # Run the server
-CMD ["yarn", "start"]
+CMD ["yarn", "start", "-p", "80"]
