@@ -4,7 +4,7 @@ const env = process.env.NODE_ENV;
 module.exports = {
   // Provide runtime configuration
   serverRuntimeConfig: {
-    apiBasepath: process.env.API_BASEPATH,
+    apiBasepath: process.env.DETECTORDAG_API_BASEPATH,
   },
   // Use .env to provide built-time variables
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
