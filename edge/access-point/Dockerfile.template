@@ -1,5 +1,5 @@
 # Next we begin the real image, first installing requirements
-FROM balenalib/%%BALENA_MACHINE_NAME%%-node:14-buster-build
+FROM balenalib/%%BALENA_MACHINE_NAME%%-node:14-build
 # Set the working directory
 WORKDIR /app
 # Copy the package data
