@@ -2,10 +2,14 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import pify from 'pify';
 import { promises as fs } from 'fs';
 import path from 'path';
+import getConfig from 'next/config'
 import {
   ApiClient, AccountsApi, AuthenticationApi, Credentials, Token, DeviceRegistered, MutableDevice,
 } from '../../lib/client';
 
+
+// Get runtime configuration (API route)
+const { serverRuntimeConfig } = getConfig();
 
 // Define a wrapper for the different clients
 class ClientWrapper {
@@ -21,7 +25,7 @@ class ClientWrapper {
 
 // Create the underlying client
 const client = new ApiClient();
-client.basePath = `${process.env.API_BASEPATH}/v1`;
+client.basePath = `${serverRuntimeConfig.apiBasepath}/v1`;
 
 // Create an instance of our wrapper
 const wrapper = new ClientWrapper(client);
