@@ -1,4 +1,4 @@
-const Dotenv = require('dotenv-webpack');
+require('dotenv').config()
 const env = process.env.NODE_ENV;
 
 module.exports = {
@@ -6,12 +6,9 @@ module.exports = {
   serverRuntimeConfig: {
     apiBasepath: process.env.DETECTORDAG_API_BASEPATH,
   },
-  // Use .env to provide built-time variables
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Add dotenv
-    config.plugins.push(new Dotenv({
-      path: `./.env.${env === "production" ? "production" : "dev"}`,
-    }));
-    return config
+  // Provide build-time configuration
+  env: {
+    BALENA_DEVICE_UUID: process.env.BALENA_DEVICE_UUID,
+    CERTS_DIR: process.env.CERTS_DIR,
   },
 }
