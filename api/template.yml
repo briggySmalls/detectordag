@@ -66,22 +66,24 @@ Resources:
                 - 'dynamodb:UpdateItem'
                 - 'dynamodb:Query'
               Resource:
-                - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/devices"
-                - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/devices/index/*"
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - 'dynamodb:GetItem'
-                - 'dynamodb:UpdateItem'
-                - 'dynamodb:Query'
-              Resource:
                 - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/accounts"
                 - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/accounts/index/*"
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
               Action:
+                - 'iot:ListThings'
+                - 'iot:CreateKeysAndCertificate'
+                - 'iot:UpdateCertificate'
+                - 'iot:DeleteCertificate'
+                - 'iot:RegisterThing'
+              Resource:
+                - '*'
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'iot:DescribeThing'
                 - 'iot:GetThingShadow'
               Resource:
                 - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
