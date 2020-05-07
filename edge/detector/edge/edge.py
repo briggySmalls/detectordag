@@ -49,6 +49,7 @@ class EdgeApp:
     def configure(self) -> None:
         """Configure the app
         """
+        _LOGGER.debug("Configuring application")
         # Send messages when power status changes
         self._device.when_activated = self._publish_update
         self._device.when_deactivated = self._publish_update
