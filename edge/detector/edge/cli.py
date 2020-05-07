@@ -27,9 +27,11 @@ def main(ctx: Any) -> None:
     # Ensure the files are present
     while True:
         # Parse config
+        logging.info("Checking for certificates...")
         config = AppConfig.from_env()
         # Bail if certificates are now present
         if config.are_certs_present():
+            logging.info("Certificates are present!")
             break
         # Wait some time before looping
         time.sleep(_SLEEP_TIME)
