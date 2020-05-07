@@ -3,6 +3,7 @@ import logging
 import sys
 from typing import Any
 import os
+import time
 
 import click
 
@@ -10,6 +11,7 @@ from edge.config import AppConfig
 from edge.edge import EdgeApp
 
 _POWER_PIN = 4
+_SLEEP_TIME = 5
 
 
 @click.group()
@@ -22,12 +24,17 @@ def main(ctx: Any) -> None:
     # Configure logging
     logging.basicConfig(level=logging.DEBUG)
     logging.info("Starting")
-    # Parse config
-    config = AppConfig.from_env()
-    ctx.obj['config'] = config
     # Ensure the files are present
-    while not config.are_certs_present():
-        pass
+    while True:
+        # Parse config
+        config = AppConfig.from_env()
+        # Bail if certificates are now present
+        if config.are_certs_present():
+            break
+        # Wait some time before looping
+        time.sleep(_SLEEP_TIME)
+    # Assign the config
+    ctx.obj['config'] = config
 
 
 @main.command()
