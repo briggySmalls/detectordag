@@ -86,7 +86,12 @@ Resources:
                 - 'iot:CreateKeysAndCertificate'
                 - 'iot:UpdateCertificate'
                 - 'iot:DeleteCertificate'
+                - 'iot:DescribeCertificate'
+                - 'iot:DescribeThingType'
+                - 'iot:DescribeThingGroup'
                 - 'iot:RegisterThing'
+                - 'iot:AddThingToThingGroup'
+                - 'iot:AttachThingPrincipal'
               Resource:
                 - '*'
         - Version: '2012-10-17'
@@ -94,7 +99,9 @@ Resources:
             - Effect: Allow
               Action:
                 - 'iot:DescribeThing'
+                - 'iot:ListThingGroupsForThing'
                 - 'iot:GetThingShadow'
+                - 'iot:CreateThing'
               Resource:
                 - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
         - Version: '2012-10-17'
