@@ -37,6 +37,15 @@ function handleError(res: NextApiResponse, err: Error) {
   res.status(500).json({ error: err.message });
 }
 
+// Helper fuction for converting UUIDs
+function addDashesToUUID(uuid: string) {
+  // Regex for converting UUIDs
+  const uuidRegex = /([a-f0-9]{8})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{12})/
+  // Replacement
+  const replacement = '$1-$2-$3-$4-$5';
+  return uuid.replace(uuidRegex, replacement);
+}
+
 // Handle form submission
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   // // Pull out the results
@@ -65,7 +74,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     )(
       new MutableDevice(formData.deviceName),
       `Bearer ${token.token}`,
-      process.env.BALENA_DEVICE_UUID,
+      addDashesToUUID(process.env.BALENA_DEVICE_UUID),
       token.accountId,
     );
     console.log(result.text);
