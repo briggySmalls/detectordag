@@ -1,0 +1,10 @@
+# Sadly balena only listens to .dockerignore in root directory
+# See: https://forums.balena.io/t/is-it-possible-to-filter-files-to-be-tared-during-balena-push/62167/31
+# Ignore apects of the access-point program
+access-point/.env
+access-point/.next/
+access-point/node_modules/
+# Ignore apects of the detector program
+detector/.mypy_cache/
+detector/.pytest_cache/
+detector/.pytest_cache/
