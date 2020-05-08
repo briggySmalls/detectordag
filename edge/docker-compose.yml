@@ -3,10 +3,11 @@ volumes:
     shared:
 services:
     access-point:
-        environment:
-            CERTS_DIR: /data
+        build:
+            context: ./access-point
+            args:
+                - "CERTS_DIR=/data"
         network_mode: host
-        build: ./access-point
         volumes:
             - 'shared:/data'
     detector:

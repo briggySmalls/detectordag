@@ -5,6 +5,8 @@ WORKDIR /app
 # Copy the dependencies first
 COPY package.json package.json
 COPY yarn.lock yarn.lock
+# Ensure build-time variables are present
+ARG CERTS_DIR
 # Install dependencies
 RUN yarn install
 # Copy the rest of the package source
