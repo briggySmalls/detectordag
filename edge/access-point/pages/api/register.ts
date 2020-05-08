@@ -74,7 +74,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     )(
       new MutableDevice(formData.deviceName),
       `Bearer ${token.token}`,
-      addDashesToUUID(process.env.BALENA_DEVICE_UUID),
+      addDashesToUUID(serverRuntimeConfig.deviceUUID),
       token.accountId,
     );
     console.log(result.text);
