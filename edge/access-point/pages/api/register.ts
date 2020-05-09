@@ -90,7 +90,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   await Promise.all([
     // Write the public key
     fs.writeFile(
-      path.join(certsPath, 'thing.public.pem'),
+      path.join(certsPath, 'thing.cert.pem'),
       registered.certificate.certificate,
     ),
     // Write the private key
