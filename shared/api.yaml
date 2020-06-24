@@ -160,6 +160,7 @@ paths:
       - accounts
       summary: Register a device to the account
       description: Register a new device
+      operationId: registerDevice
       parameters:
         - $ref: '#/components/parameters/Token'
         - $ref: '#/components/parameters/Device'
