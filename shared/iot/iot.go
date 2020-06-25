@@ -22,6 +22,7 @@ type client struct {
 
 type Client interface {
 	GetThing(id string) (*Device, error)
+	GetThings() ([]*Device, error)
 	GetThingsByAccount(id string) ([]*Device, error)
 	RegisterThing(accountID, deviceID, name string) (*Device, *Certificates, error)
 }
@@ -64,29 +65,20 @@ func (c *client) GetThing(id string) (*Device, error) {
 	return d.ToDevice()
 }
 
+// GetThings returns all things
+func (c *client) GetThings() ([]*Device, error) {
+	return c.getPaginatedDevices(&iot.ListThingsInput{
+		ThingTypeName: aws.String(thingType),
+	})
+}
+
 // GetThingsByAccount returns all things which are associated with the specified accountg
 func (c *client) GetThingsByAccount(id string) ([]*Device, error) {
 	// Search for things
-	things := []*iot.ThingAttribute{}
-	var err error
-	things, err = c.getPaginatedThings(&iot.ListThingsInput{
+	return c.getPaginatedDevices(&iot.ListThingsInput{
 		AttributeName:  aws.String(accountIDAttributeName),
 		AttributeValue: aws.String(id),
-	}, nil, things)
-	if err != nil {
-		return nil, err
-	}
-	// Wrap up each thing
-	wrappedThings := make([]*Device, len(things))
-	for i, thing := range things {
-		t := thingAttribute{thing}
-		device, err := t.ToDevice()
-		if err != nil {
-			return nil, err
-		}
-		wrappedThings[i] = device
-	}
-	return wrappedThings, nil
+	})
 }
 
 // RegisterThing creates a new thing and provides certificates for it to communicate
@@ -151,6 +143,27 @@ func (c *client) registerThing(deviceId, certificateID, name, accountID string) 
 			"CertificateId": aws.String(certificateID),
 		},
 	})
+}
+
+func (c *client) getPaginatedDevices(input *iot.ListThingsInput) ([]*Device, error) {
+	// Search for things
+	things := []*iot.ThingAttribute{}
+	var err error
+	things, err = c.getPaginatedThings(input, nil, things)
+	if err != nil {
+		return nil, err
+	}
+	// Wrap up each thing
+	wrappedThings := make([]*Device, len(things))
+	for i, thing := range things {
+		t := thingAttribute{thing}
+		device, err := t.ToDevice()
+		if err != nil {
+			return nil, err
+		}
+		wrappedThings[i] = device
+	}
+	return wrappedThings, nil
 }
 
 func (c *client) getPaginatedThings(input *iot.ListThingsInput, output *iot.ListThingsOutput, things []*iot.ThingAttribute) ([]*iot.ThingAttribute, error) {

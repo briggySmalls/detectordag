@@ -37,6 +37,68 @@ func TestGetThing(t *testing.T) {
 	assert.Equal(t, accountID, device.AccountId)
 }
 
+func TestGetThings(t *testing.T) {
+	const (
+		accountID     = "9962902c-f7e7-417d-bea0-dc2eb0bc67d7"
+		nextToken     = "1a13f6f2-13e5-408d-a184-1ce292320175"
+		deviceOne     = "4fa62730-dd7a-421b-91b9-ec1f20ad265b"
+		deviceOneName = "One"
+		deviceTwo     = "70c3e40a-fbc2-40d7-9cb3-7f7637f85cb4"
+		deviceTwoName = "Two"
+	)
+	// Create unit under test and mocks
+	mock, c := createUnitAndMocks(t)
+	// Expect a call to ListDevices
+	gomock.InOrder(
+		mock.EXPECT().ListThings(gomock.Not(gomock.Nil())).Do(func(input *iot.ListThingsInput) {
+			// Assert that the search is setting the correct parameters
+			assert.Equal(t, thingType, *input.ThingTypeName)
+			assert.Nil(t, input.AttributeName)
+			assert.Nil(t, input.AttributeValue)
+		}).Return(&iot.ListThingsOutput{
+			Things: []*iot.ThingAttribute{
+				{
+					ThingName: aws.String(deviceOne),
+					Attributes: map[string]*string{
+						accountIDAttributeName: aws.String(accountID),
+						nameAttributeName:      aws.String(deviceOneName),
+					},
+				},
+			},
+			NextToken: aws.String(nextToken), // Indicate there are more things to come
+		}, nil),
+		mock.EXPECT().ListThings(gomock.Not(gomock.Nil())).Do(func(input *iot.ListThingsInput) {
+			// Assert that the search is setting the correct parameters
+			assert.Equal(t, thingType, *input.ThingTypeName)
+			assert.Nil(t, input.AttributeName)
+			assert.Nil(t, input.AttributeValue)
+			assert.Equal(t, nextToken, *input.NextToken)
+		}).Return(&iot.ListThingsOutput{
+			Things: []*iot.ThingAttribute{
+				{
+					ThingName: aws.String(deviceTwo),
+					Attributes: map[string]*string{
+						accountIDAttributeName: aws.String(accountID),
+						nameAttributeName:      aws.String(deviceTwoName),
+					},
+				},
+			},
+		}, nil),
+	)
+	// Query for devices
+	devices, err := c.GetThings()
+	assert.NoError(t, err)
+	// Assert the returned devices
+	expectedDevices := []Device{
+		{DeviceId: deviceOne, Name: deviceOneName, AccountId: accountID},
+		{DeviceId: deviceTwo, Name: deviceTwoName, AccountId: accountID},
+	}
+	assert.Len(t, devices, len(expectedDevices))
+	for i, device := range devices {
+		assert.Equal(t, expectedDevices[i], *device)
+	}
+}
+
 func TestGetThingsByAccount(t *testing.T) {
 	const (
 		accountID     = "9962902c-f7e7-417d-bea0-dc2eb0bc67d7"
