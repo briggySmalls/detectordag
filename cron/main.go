@@ -61,8 +61,8 @@ func init() {
 func runJob(ctx context.Context) error {
 	// Print out handler parameters
 	log.Print("Context: ", ctx)
-	// Request all devices
-	devices, err := iotClient.GetThings()
+	// Request all devices that are considered 'visible'
+	devices, err := iotClient.GetThingsByVisibility(true)
 	if err != nil {
 		return err
 	}
@@ -84,8 +84,8 @@ func runJob(ctx context.Context) error {
 			continue
 		}
 		if !device.Visibility {
-			// This device has already been marked as lost
-			log.Printf("%s already marked lost (%s)", deviceString(device), lastSeen.Format(time.RFC3339))
+			// We searched for visible devices, something weird has happened
+			log.Printf("%s already marked lost despite searching for visible devices", deviceString(device))
 			continue
 		}
 		// Notify the account owner their device is missing
