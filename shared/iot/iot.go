@@ -24,7 +24,7 @@ type client struct {
 
 type Client interface {
 	GetThing(id string) (*Device, error)
-	GetThings() ([]*Device, error)
+	GetThingsByVisibility(status bool) ([]*Device, error)
 	GetThingsByAccount(id string) ([]*Device, error)
 	RegisterThing(accountID, deviceID, name string) (*Device, *Certificates, error)
 	SetVisibiltyState(device *Device, state bool) error
@@ -69,10 +69,12 @@ func (c *client) GetThing(id string) (*Device, error) {
 	return d.ToDevice()
 }
 
-// GetThings returns all things
-func (c *client) GetThings() ([]*Device, error) {
+// GetThings returns all things which have the specified visiblity status
+func (c *client) GetThingsByVisibility(status bool) ([]*Device, error) {
 	return c.getPaginatedDevices(&iot.ListThingsInput{
-		ThingTypeName: aws.String(thingType),
+		ThingTypeName:  aws.String(thingType),
+		AttributeName:  aws.String(visibilityAttributeName),
+		AttributeValue: aws.String(strconv.FormatBool(status)),
 	})
 }
 

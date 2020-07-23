@@ -41,7 +41,7 @@ func TestGetThing(t *testing.T) {
 	assert.Equal(t, true, device.Visibility)
 }
 
-func TestGetThings(t *testing.T) {
+func GetThingsByVisibility(t *testing.T) {
 	const (
 		accountID     = "9962902c-f7e7-417d-bea0-dc2eb0bc67d7"
 		nextToken     = "1a13f6f2-13e5-408d-a184-1ce292320175"
@@ -57,8 +57,8 @@ func TestGetThings(t *testing.T) {
 		mock.EXPECT().ListThings(gomock.Not(gomock.Nil())).Do(func(input *iot.ListThingsInput) {
 			// Assert that the search is setting the correct parameters
 			assert.Equal(t, thingType, *input.ThingTypeName)
-			assert.Nil(t, input.AttributeName)
-			assert.Nil(t, input.AttributeValue)
+			assert.Equal(t, visibilityAttributeName, *input.AttributeName)
+			assert.Nil(t, "true", *input.AttributeValue)
 		}).Return(&iot.ListThingsOutput{
 			Things: []*iot.ThingAttribute{
 				{
@@ -85,19 +85,19 @@ func TestGetThings(t *testing.T) {
 					Attributes: map[string]*string{
 						accountIDAttributeName:  aws.String(accountID),
 						nameAttributeName:       aws.String(deviceTwoName),
-						visibilityAttributeName: aws.String("false"),
+						visibilityAttributeName: aws.String("true"),
 					},
 				},
 			},
 		}, nil),
 	)
 	// Query for devices
-	devices, err := c.GetThings()
+	devices, err := c.GetThingsByVisibility(true)
 	assert.NoError(t, err)
 	// Assert the returned devices
 	expectedDevices := []Device{
 		{DeviceId: deviceOne, Name: deviceOneName, AccountId: accountID, Visibility: true},
-		{DeviceId: deviceTwo, Name: deviceTwoName, AccountId: accountID, Visibility: false},
+		{DeviceId: deviceTwo, Name: deviceTwoName, AccountId: accountID, Visibility: true},
 	}
 	assert.Len(t, devices, len(expectedDevices))
 	for i, device := range devices {
@@ -113,8 +113,6 @@ func TestGetThingsByAccount(t *testing.T) {
 		deviceOneName = "One"
 		deviceTwo     = "70c3e40a-fbc2-40d7-9cb3-7f7637f85cb4"
 		deviceTwoName = "Two"
-		visibilityStr = "true"
-		visibility    = true
 	)
 	// Create unit under test and mocks
 	mock, c := createUnitAndMocks(t)
@@ -122,6 +120,7 @@ func TestGetThingsByAccount(t *testing.T) {
 	gomock.InOrder(
 		mock.EXPECT().ListThings(gomock.Not(gomock.Nil())).Do(func(input *iot.ListThingsInput) {
 			// Assert that the search is setting the correct parameters
+			assert.Equal(t, thingType, *input.ThingTypeName)
 			assert.Equal(t, accountIDAttributeName, *input.AttributeName)
 			assert.Equal(t, accountID, *input.AttributeValue)
 		}).Return(&iot.ListThingsOutput{
@@ -131,7 +130,7 @@ func TestGetThingsByAccount(t *testing.T) {
 					Attributes: map[string]*string{
 						accountIDAttributeName:  aws.String(accountID),
 						nameAttributeName:       aws.String(deviceOneName),
-						visibilityAttributeName: aws.String(visibilityStr),
+						visibilityAttributeName: aws.String("true"),
 					},
 				},
 			},
@@ -149,7 +148,7 @@ func TestGetThingsByAccount(t *testing.T) {
 					Attributes: map[string]*string{
 						accountIDAttributeName:  aws.String(accountID),
 						nameAttributeName:       aws.String(deviceTwoName),
-						visibilityAttributeName: aws.String(visibilityStr),
+						visibilityAttributeName: aws.String("false"),
 					},
 				},
 			},
@@ -160,8 +159,8 @@ func TestGetThingsByAccount(t *testing.T) {
 	assert.NoError(t, err)
 	// Assert the returned devices
 	expectedDevices := []Device{
-		{DeviceId: deviceOne, Name: deviceOneName, AccountId: accountID, Visibility: visibility},
-		{DeviceId: deviceTwo, Name: deviceTwoName, AccountId: accountID, Visibility: visibility},
+		{DeviceId: deviceOne, Name: deviceOneName, AccountId: accountID, Visibility: true},
+		{DeviceId: deviceTwo, Name: deviceTwoName, AccountId: accountID, Visibility: false},
 	}
 	assert.Len(t, devices, len(expectedDevices))
 	for i, device := range devices {
