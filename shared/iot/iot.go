@@ -80,6 +80,7 @@ func (c *client) GetThings() ([]*Device, error) {
 func (c *client) GetThingsByAccount(id string) ([]*Device, error) {
 	// Search for things
 	return c.getPaginatedDevices(&iot.ListThingsInput{
+		ThingTypeName:  aws.String(thingType),
 		AttributeName:  aws.String(accountIDAttributeName),
 		AttributeValue: aws.String(id),
 	})
