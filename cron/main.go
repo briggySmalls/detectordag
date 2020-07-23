@@ -51,7 +51,7 @@ func init() {
 		log.Fatal(err.Error())
 	}
 	// Create the duration
-	lastSeenDuration, err = time.ParseDuration(fmt.Sprintf("%sh", lastSeenDurationHours))
+	lastSeenDuration, err = time.ParseDuration(fmt.Sprintf("%dh", lastSeenDurationHours))
 	if err != nil {
 		log.Fatal(err.Error())
 	}
