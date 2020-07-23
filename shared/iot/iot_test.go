@@ -234,6 +234,7 @@ func TestSetVisibiltyState(t *testing.T) {
 			assert.Equal(t, deviceID, *input.ThingName)
 			assert.Equal(t, thingType, *input.ThingTypeName)
 			assert.Equal(t, state, *input.AttributePayload.Attributes[visibilityAttributeName])
+			assert.Equal(t, true, *input.AttributePayload.Merge)
 		})
 	}
 	// Configure mock to set the state

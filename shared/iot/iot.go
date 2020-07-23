@@ -137,6 +137,7 @@ func (c *client) SetVisibiltyState(device *Device, state bool) error {
 			Attributes: map[string]*string{
 				visibilityAttributeName: aws.String(strconv.FormatBool(state)),
 			},
+			Merge: aws.Bool(true), // Don't nuke the other attributes
 		},
 	})
 	return err
