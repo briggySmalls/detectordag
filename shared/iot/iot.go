@@ -72,7 +72,6 @@ func (c *client) GetThing(id string) (*Device, error) {
 // GetThings returns all things which have the specified visiblity status
 func (c *client) GetThingsByVisibility(status bool) ([]*Device, error) {
 	return c.getPaginatedDevices(&iot.ListThingsInput{
-		ThingTypeName:  aws.String(thingType),
 		AttributeName:  aws.String(visibilityAttributeName),
 		AttributeValue: aws.String(strconv.FormatBool(status)),
 	})
@@ -82,7 +81,6 @@ func (c *client) GetThingsByVisibility(status bool) ([]*Device, error) {
 func (c *client) GetThingsByAccount(id string) ([]*Device, error) {
 	// Search for things
 	return c.getPaginatedDevices(&iot.ListThingsInput{
-		ThingTypeName:  aws.String(thingType),
 		AttributeName:  aws.String(accountIDAttributeName),
 		AttributeValue: aws.String(id),
 	})

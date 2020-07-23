@@ -56,9 +56,9 @@ func GetThingsByVisibility(t *testing.T) {
 	gomock.InOrder(
 		mock.EXPECT().ListThings(gomock.Not(gomock.Nil())).Do(func(input *iot.ListThingsInput) {
 			// Assert that the search is setting the correct parameters
-			assert.Equal(t, thingType, *input.ThingTypeName)
+			assert.Nil(t, input.ThingTypeName)
 			assert.Equal(t, visibilityAttributeName, *input.AttributeName)
-			assert.Nil(t, "true", *input.AttributeValue)
+			assert.Equal(t, "true", *input.AttributeValue)
 		}).Return(&iot.ListThingsOutput{
 			Things: []*iot.ThingAttribute{
 				{
@@ -74,9 +74,9 @@ func GetThingsByVisibility(t *testing.T) {
 		}, nil),
 		mock.EXPECT().ListThings(gomock.Not(gomock.Nil())).Do(func(input *iot.ListThingsInput) {
 			// Assert that the search is setting the correct parameters
-			assert.Equal(t, thingType, *input.ThingTypeName)
-			assert.Nil(t, input.AttributeName)
-			assert.Nil(t, input.AttributeValue)
+			assert.Nil(t, input.ThingTypeName)
+			assert.Equal(t, visibilityAttributeName, *input.AttributeName)
+			assert.Equal(t, "true", *input.AttributeValue)
 			assert.Equal(t, nextToken, *input.NextToken)
 		}).Return(&iot.ListThingsOutput{
 			Things: []*iot.ThingAttribute{
@@ -120,7 +120,7 @@ func TestGetThingsByAccount(t *testing.T) {
 	gomock.InOrder(
 		mock.EXPECT().ListThings(gomock.Not(gomock.Nil())).Do(func(input *iot.ListThingsInput) {
 			// Assert that the search is setting the correct parameters
-			assert.Equal(t, thingType, *input.ThingTypeName)
+			assert.Nil(t, input.ThingTypeName)
 			assert.Equal(t, accountIDAttributeName, *input.AttributeName)
 			assert.Equal(t, accountID, *input.AttributeValue)
 		}).Return(&iot.ListThingsOutput{
@@ -138,7 +138,7 @@ func TestGetThingsByAccount(t *testing.T) {
 		}, nil),
 		mock.EXPECT().ListThings(gomock.Not(gomock.Nil())).Do(func(input *iot.ListThingsInput) {
 			// Assert that the search is setting the correct parameters
-			assert.Equal(t, accountIDAttributeName, *input.AttributeName)
+			assert.Nil(t, input.ThingTypeName)
 			assert.Equal(t, accountID, *input.AttributeValue)
 			assert.Equal(t, nextToken, *input.NextToken)
 		}).Return(&iot.ListThingsOutput{
