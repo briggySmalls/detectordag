@@ -7,13 +7,15 @@ import (
 	"github.com/aws/aws-sdk-go/service/iot"
 	"github.com/aws/aws-sdk-go/service/iot/iotiface"
 	"log"
+	"strconv"
 )
 
 const (
-	accountIDAttributeName = "account-id"
-	nameAttributeName      = "name"
-	thingType              = "detectordag"
-	thingGroup             = "detectordag"
+	accountIDAttributeName  = "account-id"
+	nameAttributeName       = "name"
+	thingType               = "detectordag"
+	thingGroup              = "detectordag"
+	visibilityAttributeName = "visibility"
 )
 
 type client struct {
@@ -25,6 +27,7 @@ type Client interface {
 	GetThings() ([]*Device, error)
 	GetThingsByAccount(id string) ([]*Device, error)
 	RegisterThing(accountID, deviceID, name string) (*Device, *Certificates, error)
+	SetVisibiltyState(device *Device, state bool) error
 }
 
 // Device holds the non-state properties of a device
@@ -120,6 +123,21 @@ func (c *client) RegisterThing(accountID, deviceID, name string) (*Device, *Cert
 		NewStatus:     aws.String("ACTIVE"),
 	})
 	return &d, &certs, nil
+}
+
+// SetVisibilityState sets attribute indicating if the device is lost
+func (c *client) SetVisibiltyState(device *Device, state bool) error {
+	// Set the attribute
+	_, err := c.iot.UpdateThing(&iot.UpdateThingInput{
+		ThingName:     aws.String(device.DeviceId),
+		ThingTypeName: aws.String(thingType),
+		AttributePayload: &iot.AttributePayload{
+			Attributes: map[string]*string{
+				visibilityAttributeName: aws.String(strconv.FormatBool(state)),
+			},
+		},
+	})
+	return err
 }
 
 // createCertificate creates a new certificate

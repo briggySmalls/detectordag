@@ -210,6 +210,39 @@ func TestRegisterDevice(t *testing.T) {
 	assert.Equal(t, certificatePrivateKey, certs.Private)
 }
 
+func TestSetVisibiltyState(t *testing.T) {
+	// Define some test parameters
+	const (
+		deviceID   = "261f3f87-84bb-4c0e-91bc-ba41c3bc0668"
+		deviceName = "Testing"
+		accountID  = "9962902c-f7e7-417d-bea0-dc2eb0bc67d7"
+	)
+	// Create unit under test and mocks
+	mock, c := createUnitAndMocks(t)
+	// Create a helper for asserting the attribute update request
+	updateThingAssertion := func(state string) *gomock.Call {
+		return mock.EXPECT().UpdateThing(gomock.Not(gomock.Nil())).Do(func(input *iot.UpdateThingInput) {
+			assert.Equal(t, deviceID, *input.ThingName)
+			assert.Equal(t, thingType, *input.ThingTypeName)
+			assert.Equal(t, state, *input.AttributePayload.Attributes[visibilityAttributeName])
+		})
+	}
+	// Configure mock to set the state
+	gomock.InOrder(
+		updateThingAssertion("true"),
+		updateThingAssertion("false"),
+	)
+	// Create a device to pass in
+	device := Device{
+		DeviceId:  deviceID,
+		Name:      deviceName,
+		AccountId: accountID,
+	}
+	// Run the test
+	c.SetVisibiltyState(&device, true)
+	c.SetVisibiltyState(&device, false)
+}
+
 func createUnitAndMocks(t *testing.T) (*MockIoTAPI, Client) {
 	// Create mock controller
 	ctrl := gomock.NewController(t)
