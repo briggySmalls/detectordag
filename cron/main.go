@@ -89,7 +89,7 @@ func runJob(ctx context.Context) error {
 			continue
 		}
 		// Notify the account owner their device is missing
-		log.Printf("%s not seen since %s", deviceString(device), device.Name, lastSeen.Format(time.RFC3339))
+		log.Printf("%s not seen since %s", deviceString(device), lastSeen.Format(time.RFC3339))
 		// Mark as lost
 		iotClient.SetVisibiltyState(device, false)
 	}
