@@ -32,9 +32,10 @@ type Client interface {
 
 // Device holds the non-state properties of a device
 type Device struct {
-	Name      string
-	DeviceId  string
-	AccountId string
+	Name       string
+	DeviceId   string
+	AccountId  string
+	Visibility bool
 }
 
 type Certificates struct {

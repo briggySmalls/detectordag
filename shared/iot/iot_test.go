@@ -16,6 +16,7 @@ func TestGetThing(t *testing.T) {
 		deviceID   = "261f3f87-84bb-4c0e-91bc-ba41c3bc0668"
 		deviceName = "Testing"
 		accountID  = "9962902c-f7e7-417d-bea0-dc2eb0bc67d7"
+		visibility
 	)
 	// Create unit under test and mocks
 	mock, c := createUnitAndMocks(t)
@@ -26,8 +27,9 @@ func TestGetThing(t *testing.T) {
 	}).Return(&iot.DescribeThingOutput{
 		ThingName: aws.String(deviceID),
 		Attributes: map[string]*string{
-			accountIDAttributeName: aws.String(accountID),
-			nameAttributeName:      aws.String(deviceName),
+			accountIDAttributeName:  aws.String(accountID),
+			nameAttributeName:       aws.String(deviceName),
+			visibilityAttributeName: aws.String("true"),
 		},
 	}, nil)
 	// Query for a known device
@@ -35,6 +37,8 @@ func TestGetThing(t *testing.T) {
 	assert.NoError(t, err)
 	// Assert it has expected fields
 	assert.Equal(t, accountID, device.AccountId)
+	assert.Equal(t, deviceName, device.Name)
+	assert.Equal(t, true, device.Visibility)
 }
 
 func TestGetThings(t *testing.T) {
@@ -60,8 +64,9 @@ func TestGetThings(t *testing.T) {
 				{
 					ThingName: aws.String(deviceOne),
 					Attributes: map[string]*string{
-						accountIDAttributeName: aws.String(accountID),
-						nameAttributeName:      aws.String(deviceOneName),
+						accountIDAttributeName:  aws.String(accountID),
+						nameAttributeName:       aws.String(deviceOneName),
+						visibilityAttributeName: aws.String("true"),
 					},
 				},
 			},
@@ -78,8 +83,9 @@ func TestGetThings(t *testing.T) {
 				{
 					ThingName: aws.String(deviceTwo),
 					Attributes: map[string]*string{
-						accountIDAttributeName: aws.String(accountID),
-						nameAttributeName:      aws.String(deviceTwoName),
+						accountIDAttributeName:  aws.String(accountID),
+						nameAttributeName:       aws.String(deviceTwoName),
+						visibilityAttributeName: aws.String("false"),
 					},
 				},
 			},
@@ -90,8 +96,8 @@ func TestGetThings(t *testing.T) {
 	assert.NoError(t, err)
 	// Assert the returned devices
 	expectedDevices := []Device{
-		{DeviceId: deviceOne, Name: deviceOneName, AccountId: accountID},
-		{DeviceId: deviceTwo, Name: deviceTwoName, AccountId: accountID},
+		{DeviceId: deviceOne, Name: deviceOneName, AccountId: accountID, Visibility: true},
+		{DeviceId: deviceTwo, Name: deviceTwoName, AccountId: accountID, Visibility: false},
 	}
 	assert.Len(t, devices, len(expectedDevices))
 	for i, device := range devices {
@@ -107,6 +113,8 @@ func TestGetThingsByAccount(t *testing.T) {
 		deviceOneName = "One"
 		deviceTwo     = "70c3e40a-fbc2-40d7-9cb3-7f7637f85cb4"
 		deviceTwoName = "Two"
+		visibilityStr = "true"
+		visibility    = true
 	)
 	// Create unit under test and mocks
 	mock, c := createUnitAndMocks(t)
@@ -121,8 +129,9 @@ func TestGetThingsByAccount(t *testing.T) {
 				{
 					ThingName: aws.String(deviceOne),
 					Attributes: map[string]*string{
-						accountIDAttributeName: aws.String(accountID),
-						nameAttributeName:      aws.String(deviceOneName),
+						accountIDAttributeName:  aws.String(accountID),
+						nameAttributeName:       aws.String(deviceOneName),
+						visibilityAttributeName: aws.String(visibilityStr),
 					},
 				},
 			},
@@ -138,8 +147,9 @@ func TestGetThingsByAccount(t *testing.T) {
 				{
 					ThingName: aws.String(deviceTwo),
 					Attributes: map[string]*string{
-						accountIDAttributeName: aws.String(accountID),
-						nameAttributeName:      aws.String(deviceTwoName),
+						accountIDAttributeName:  aws.String(accountID),
+						nameAttributeName:       aws.String(deviceTwoName),
+						visibilityAttributeName: aws.String(visibilityStr),
 					},
 				},
 			},
@@ -150,8 +160,8 @@ func TestGetThingsByAccount(t *testing.T) {
 	assert.NoError(t, err)
 	// Assert the returned devices
 	expectedDevices := []Device{
-		{DeviceId: deviceOne, Name: deviceOneName, AccountId: accountID},
-		{DeviceId: deviceTwo, Name: deviceTwoName, AccountId: accountID},
+		{DeviceId: deviceOne, Name: deviceOneName, AccountId: accountID, Visibility: visibility},
+		{DeviceId: deviceTwo, Name: deviceTwoName, AccountId: accountID, Visibility: visibility},
 	}
 	assert.Len(t, devices, len(expectedDevices))
 	for i, device := range devices {
