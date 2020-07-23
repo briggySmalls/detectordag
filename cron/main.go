@@ -75,7 +75,7 @@ func runJob(ctx context.Context) error {
 		}
 		_, ok := shdw.State.Reported["status"].(bool)
 		if !ok {
-			return fmt.Errorf("Device '%s' doesn't have status", device.DeviceId)
+			return fmt.Errorf("%s doesn't have status", deviceString(device))
 		}
 		lastSeen := shdw.Metadata.Reported["status"].Timestamp.Time
 		// Device hasn't been seen for a while
@@ -83,8 +83,15 @@ func runJob(ctx context.Context) error {
 			// This device was seen recently enough
 			continue
 		}
+		if !device.Visibility {
+			// This device has already been marked as lost
+			log.Printf("%s already marked lost (%s)", deviceString(device), lastSeen.Format(time.RFC3339))
+			continue
+		}
 		// Notify the account owner their device is missing
-		log.Printf("Device '%s' ('%s') not seen since %s", device.DeviceId, device.Name, lastSeen.Format(time.RFC3339))
+		log.Printf("%s not seen since %s", deviceString(device), device.Name, lastSeen.Format(time.RFC3339))
+		// Mark as lost
+		iotClient.SetVisibiltyState(device, false)
 	}
 	// Return the response
 	return err
@@ -93,4 +100,8 @@ func runJob(ctx context.Context) error {
 // main is the entrypoint to the lambda function
 func main() {
 	lambda.Start(runJob)
+}
+
+func deviceString(device *iot.Device) string {
+	return fmt.Sprintf("Device '%s' ('%s')", device.DeviceId, device.Name)
 }
