@@ -11,6 +11,11 @@ import (
 	"time"
 )
 
+// Client represents a client to the device shadow service
+type Client interface {
+	Get(deviceId string) (*Shadow, error)
+}
+
 type Timestamp struct {
 	time.Time
 }
@@ -64,11 +69,6 @@ func New(sess *session.Session) (Client, error) {
 	return &client{
 		dp: svc,
 	}, nil
-}
-
-// Client represents a client to the device shadow service
-type Client interface {
-	Get(deviceId string) (*Shadow, error)
 }
 
 func (c *client) Get(deviceId string) (*Shadow, error) {
