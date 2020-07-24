@@ -118,5 +118,5 @@ func handleLostDevice(device *iot.Device, lastSeen time.Time) error {
 		return err
 	}
 	// Mark as lost
-	return iotClient.SetVisibiltyState(device, false)
+	return iotClient.SetVisibiltyState(device.DeviceId, false)
 }

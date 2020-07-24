@@ -242,15 +242,9 @@ func TestSetVisibiltyState(t *testing.T) {
 		updateThingAssertion("true"),
 		updateThingAssertion("false"),
 	)
-	// Create a device to pass in
-	device := Device{
-		DeviceId:  deviceID,
-		Name:      deviceName,
-		AccountId: accountID,
-	}
 	// Run the test
-	c.SetVisibiltyState(&device, true)
-	c.SetVisibiltyState(&device, false)
+	c.SetVisibiltyState(deviceID, true)
+	c.SetVisibiltyState(deviceID, false)
 }
 
 func createUnitAndMocks(t *testing.T) (*MockIoTAPI, Client) {

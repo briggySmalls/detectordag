@@ -27,7 +27,7 @@ type Client interface {
 	GetThingsByVisibility(status bool) ([]*Device, error)
 	GetThingsByAccount(id string) ([]*Device, error)
 	RegisterThing(accountID, deviceID, name string) (*Device, *Certificates, error)
-	SetVisibiltyState(device *Device, state bool) error
+	SetVisibiltyState(deviceID string, state bool) error
 }
 
 // Device holds the non-state properties of a device
@@ -128,10 +128,10 @@ func (c *client) RegisterThing(accountID, deviceID, name string) (*Device, *Cert
 }
 
 // SetVisibilityState sets attribute indicating if the device is lost
-func (c *client) SetVisibiltyState(device *Device, state bool) error {
+func (c *client) SetVisibiltyState(deviceID string, state bool) error {
 	// Set the attribute
 	_, err := c.iot.UpdateThing(&iot.UpdateThingInput{
-		ThingName:     aws.String(device.DeviceId),
+		ThingName:     aws.String(deviceID),
 		ThingTypeName: aws.String(thingType),
 		AttributePayload: &iot.AttributePayload{
 			Attributes: map[string]*string{
