@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/briggysmalls/detectordag/shared"
 	"github.com/briggysmalls/detectordag/shared/database"
-	"github.com/briggysmalls/detectordag/shared/email"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"log"
@@ -20,14 +19,13 @@ const lastSeenDurationHours = 24
 var dbClient database.Client
 var iotClient iot.Client
 var shadowClient shadow.Client
-var emailClient email.Client
 var lastSeenDuration time.Duration
 
 func init() {
+	var err error
 	// Create an AWS session
 	// Good practice will share this session for all services
 	sesh := shared.CreateSession(aws.Config{})
-	var err error
 	// Create a new Db client
 	dbClient, err = database.New(sesh)
 	if err != nil {
@@ -40,13 +38,6 @@ func init() {
 	}
 	// Create a new shadow client
 	shadowClient, err = shadow.New(sesh)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	// Create a new session just for emailing (there is no emailing service in eu-west-2)
-	emailSesh := shared.CreateSession(aws.Config{Region: aws.String("eu-west-1")})
-	// Create a new email client
-	emailClient, err = email.New(emailSesh)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -88,10 +79,11 @@ func runJob(ctx context.Context) error {
 			log.Printf("%s already marked lost despite searching for visible devices", deviceString(device))
 			continue
 		}
-		// Notify the account owner their device is missing
-		log.Printf("%s not seen since %s", deviceString(device), lastSeen.Format(time.RFC3339))
-		// Mark as lost
-		iotClient.SetVisibiltyState(device, false)
+		// The device is lost
+		err = handleLostDevice(device, lastSeen)
+		if err != nil {
+			return err
+		}
 	}
 	// Return the response
 	return err
@@ -104,4 +96,27 @@ func main() {
 
 func deviceString(device *iot.Device) string {
 	return fmt.Sprintf("Device '%s' ('%s')", device.DeviceId, device.Name)
+}
+
+func handleLostDevice(device *iot.Device, lastSeen time.Time) error {
+	log.Printf("%s not seen since %s", deviceString(device), lastSeen.Format(time.RFC3339))
+	// Get the account
+	account, err := dbClient.GetAccountById(device.AccountId)
+	if err != nil {
+		return err
+	}
+	// Notify the account owner their device is missing
+	err = SendEmail(
+		account.Emails,
+		VisibilityStatusChangedEmailConfig{
+			DeviceName: device.Name,
+			Timestamp:  lastSeen,
+			Status:     false,
+		},
+	)
+	if err != nil {
+		return err
+	}
+	// Mark as lost
+	return iotClient.SetVisibiltyState(device, false)
 }
