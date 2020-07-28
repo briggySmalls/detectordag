@@ -9,6 +9,7 @@ import (
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
+	"github.com/briggysmalls/detectordag/visibility"
 	"log"
 	"time"
 )
@@ -108,9 +109,9 @@ func handleLostDevice(device *iot.Device, lastSeen time.Time) error {
 		return err
 	}
 	// Notify the account owner their device is missing
-	err = SendEmail(
+	err = visibility.SendEmail(
 		account.Emails,
-		VisibilityStatusChangedEmailConfig{
+		visibility.VisibilityStatusChangedEmailConfig{
 			DeviceName: device.Name,
 			Timestamp:  lastSeen,
 			Status:     false,
