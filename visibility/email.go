@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/briggysmalls/detectordag/shared"
+	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
+	"github.com/briggysmalls/detectordag/shared/iot"
 	"html/template"
 	"log"
 	"time"
@@ -96,7 +98,25 @@ func init() {
 	}
 }
 
-func SendEmail(recipients []string, status VisibilityStatusChangedEmailConfig) error {
+func EmailVisiblityStatus(dbClient database.Client, device *iot.Device, timestamp time.Time, status bool) error {
+	log.Printf("Sending visibility email for device: %s with state %v", DeviceString(device), status)
+	// Get the account
+	account, err := dbClient.GetAccountById(device.AccountId)
+	if err != nil {
+		return err
+	}
+	// Notify the account owner their device is missing
+	return sendEmail(
+		account.Emails,
+		VisibilityStatusChangedEmailConfig{
+			DeviceName: device.Name,
+			Timestamp:  timestamp,
+			Status:     status,
+		},
+	)
+}
+
+func sendEmail(recipients []string, status VisibilityStatusChangedEmailConfig) error {
 	// Execute the templates
 	var err error
 	var htmlBody bytes.Buffer

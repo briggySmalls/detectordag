@@ -83,7 +83,12 @@ func runJob(ctx context.Context) error {
 			continue
 		}
 		// The device is lost
-		err = handleLostDevice(device, lastSeen)
+		err = iotClient.SetVisibiltyState(event.DeviceId, false)
+		if err != nil {
+			return err
+		}
+		// Email to say so
+		err = visibility.EmailVisiblityStatus(dbClient, device, lastSeen, false)
 		if err != nil {
 			return err
 		}
@@ -95,31 +100,4 @@ func runJob(ctx context.Context) error {
 // main is the entrypoint to the lambda function
 func main() {
 	lambda.Start(runJob)
-}
-
-func deviceString(device *iot.Device) string {
-	return fmt.Sprintf("Device '%s' ('%s')", device.DeviceId, device.Name)
-}
-
-func handleLostDevice(device *iot.Device, lastSeen time.Time) error {
-	log.Printf("%s not seen since %s", deviceString(device), lastSeen.Format(time.RFC3339))
-	// Get the account
-	account, err := dbClient.GetAccountById(device.AccountId)
-	if err != nil {
-		return err
-	}
-	// Notify the account owner their device is missing
-	err = visibility.SendEmail(
-		account.Emails,
-		visibility.VisibilityStatusChangedEmailConfig{
-			DeviceName: device.Name,
-			Timestamp:  lastSeen,
-			Status:     false,
-		},
-	)
-	if err != nil {
-		return err
-	}
-	// Mark as lost
-	return iotClient.SetVisibiltyState(device.DeviceId, false)
 }
