@@ -22,6 +22,8 @@ var shadowClient shadow.Client
 var lastSeenDuration time.Duration
 
 func init() {
+	// Add file/line number to the default logger
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	var err error
 	// Create an AWS session
 	// Good practice will share this session for all services
