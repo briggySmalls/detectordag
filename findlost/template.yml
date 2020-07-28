@@ -4,10 +4,6 @@ Resources:
   NotifyMissingDevices:
     Type: AWS::Serverless::Function
     Properties:
-      Environment:
-        Variables:
-          DETECTORDAG_JWT_DURATION: "2h"
-          DETECTORDAG_JWT_SECRET: "dummy-secret"
       Handler: api
       Runtime: go1.x
       Timeout: 5
@@ -16,3 +12,11 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: rate(1 day)
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'ses:SendEmail'
+                - 'ses:SendRawEmail'
+              Resource: '*'
