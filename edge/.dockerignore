@@ -1,0 +1,5 @@
+# Don't use .env files when building docker containers
+.env*
+# Ignore other unnecessary directories
+.mypy_cache/
+.pytest_cache/
