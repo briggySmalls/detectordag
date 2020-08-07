@@ -60,6 +60,7 @@ func runJob(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	log.Printf("Checking %d devices for updated visibility status", len(devices))
 	// Iterate through devices
 	for _, device := range devices {
 		// Fetch the shadow
