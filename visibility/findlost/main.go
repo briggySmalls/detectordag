@@ -69,7 +69,7 @@ func runJob(ctx context.Context) error {
 		}
 		_, ok := shdw.State.Reported["status"].(bool)
 		if !ok {
-			return fmt.Errorf("%s doesn't have status", deviceString(device))
+			return fmt.Errorf("%s doesn't have status", visibility.DeviceString(device))
 		}
 		lastSeen := shdw.Metadata.Reported["status"].Timestamp.Time
 		// Device hasn't been seen for a while
@@ -79,7 +79,7 @@ func runJob(ctx context.Context) error {
 		}
 		if !device.Visibility {
 			// We searched for visible devices, something weird has happened
-			log.Printf("%s already marked lost despite searching for visible devices", deviceString(device))
+			log.Printf("%s already marked lost despite searching for visible devices", visibility.DeviceString(device))
 			continue
 		}
 		// The device is lost
