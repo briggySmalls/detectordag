@@ -83,7 +83,7 @@ func runJob(ctx context.Context) error {
 			continue
 		}
 		// The device is lost
-		err = iotClient.SetVisibiltyState(event.DeviceId, false)
+		err = iotClient.SetVisibiltyState(device.DeviceId, false)
 		if err != nil {
 			return err
 		}
