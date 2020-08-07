@@ -22,6 +22,8 @@ import (
 var adapter *gorillamux.GorillaMuxAdapter
 
 func init() {
+	// Add file/line number to the default logger
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	// Create an AWS session
 	// Good practice will share this session for all services
 	sesh := shared.CreateSession(aws.Config{})
