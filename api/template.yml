@@ -92,8 +92,7 @@ Resources:
                 - 'iot:RegisterThing'
                 - 'iot:AddThingToThingGroup'
                 - 'iot:AttachThingPrincipal'
-              Resource:
-                - '*'
+              Resource: '*'
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
