@@ -3,8 +3,9 @@ package app
 import (
 	"context"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/briggysmalls/detectordag/shared"
 	"github.com/briggysmalls/detectordag/shared/database"
-	iotm "github.com/briggysmalls/detectordag/shared/iot"
+	iotp "github.com/briggysmalls/detectordag/shared/iot"
 	"log"
 	"time"
 )
@@ -29,7 +30,7 @@ type StatusUpdatedEvent struct {
 }
 
 var db database.Client
-var iot iotm.Client
+var iot iotp.Client
 
 func init() {
 	// Create an AWS session
@@ -38,17 +39,17 @@ func init() {
 		SharedConfigState: session.SharedConfigEnable,
 	})
 	if err != nil {
-		log.Fatal(err.Error())
+		shared.LogErrorAndExit(err)
 	}
 	// Create a database client
 	db, err = database.New(sesh)
 	if err != nil {
-		log.Fatal(err.Error())
+		shared.LogErrorAndExit(err)
 	}
 	// Create an IOT client
-	iot, err = iotm.New(sesh)
+	iot, err = iotp.New(sesh)
 	if err != nil {
-		log.Fatal(err.Error())
+		shared.LogErrorAndExit(err)
 	}
 }
 
@@ -57,14 +58,14 @@ func HandleRequest(ctx context.Context, event StatusUpdatedEvent) {
 	// Get the device
 	device, err := iot.GetThing(event.DeviceId)
 	if err != nil {
-		log.Fatal(err)
+		shared.LogErrorAndExit(err)
 	}
 	accountID := device.AccountId
 	log.Printf("Device '%s' associated with account '%d'", event.DeviceId, accountID)
 	// Get the account
 	account, err := db.GetAccountById(accountID)
 	if err != nil {
-		log.Fatal(err)
+		shared.LogErrorAndExit(err)
 	}
 	// Construct an event to pass to the emailer
 	update := PowerStatusChangedEmailConfig{
@@ -76,6 +77,6 @@ func HandleRequest(ctx context.Context, event StatusUpdatedEvent) {
 	log.Printf("Send emails to: %s", account.Emails)
 	err = SendEmail(account.Emails, update)
 	if err != nil {
-		log.Fatal(err)
+		shared.LogErrorAndExit(err)
 	}
 }

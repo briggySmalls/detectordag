@@ -1,9 +1,18 @@
 package shared
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
+	"log"
 )
 
-func WrapError(err error, msg string) error {
-	return fmt.Errorf("%s: %w", msg, err)
+func LogErrorAndReturn(err error) {
+	log.Printf("%+v\n", wrapError(err))
+}
+
+func LogErrorAndExit(err error) {
+	log.Fatalf("%+v\n", wrapError(err))
+}
+
+func wrapError(err error) error {
+	return errors.Wrap(err, "detectordag error:")
 }
