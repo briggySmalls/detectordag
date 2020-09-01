@@ -41,7 +41,7 @@ type Certificates struct {
 
 // New gets a new Client
 func New(sesh *session.Session) (Client, error) {
-	// Create Amazon DynamoDB client
+	// Create Amazon IoT client
 	iot := iot.New(sesh)
 	if iot == nil {
 		return nil, errors.New("Failed to create database client")
