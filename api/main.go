@@ -12,6 +12,7 @@ import (
 	"github.com/briggysmalls/detectordag/api/swagger"
 	"github.com/briggysmalls/detectordag/api/swagger/server"
 	"github.com/briggysmalls/detectordag/api/swagger/tokens"
+	"github.com/briggysmalls/detectordag/shared"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
 	"github.com/briggysmalls/detectordag/shared/iot"
@@ -28,24 +29,24 @@ func init() {
 	// Create a new Db client
 	db, err := database.New(sesh)
 	if err != nil {
-		log.Fatal(err.Error())
+		shared.LogErrorAndExit(err)
 	}
 	// Create a new shadow client
 	shadow, err := shadow.New(sesh)
 	if err != nil {
-		log.Fatal(err.Error())
+		shared.LogErrorAndExit(err)
 	}
 	// Create a new iot client
 	iot, err := iot.New(sesh)
 	if err != nil {
-		log.Fatal(err.Error())
+		shared.LogErrorAndExit(err)
 	}
 	// Create a new session just for emailing (there is no emailing service in eu-west-2)
 	emailSesh := createSession(aws.Config{Region: aws.String("eu-west-1")})
 	// Create a new email client
 	email, err := email.New(emailSesh)
 	if err != nil {
-		log.Fatal(err.Error())
+		shared.LogErrorAndExit(err)
 	}
 	// Create the tokens
 	tokens := createTokens()
@@ -80,7 +81,7 @@ func createSession(config aws.Config) *session.Session {
 		Config:            config,
 	})
 	if err != nil {
-		log.Fatal(err)
+		shared.LogErrorAndExit(err)
 	}
 	return sesh
 }
@@ -89,7 +90,7 @@ func createTokens() tokens.Tokens {
 	// Load config from environment
 	c, err := loadConfig()
 	if err != nil {
-		log.Fatal(err.Error())
+		shared.LogErrorAndExit(err)
 	}
 	// Get the token duration
 	tokenDuration, _ := c.ParseDuration()
