@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/briggysmalls/detectordag/shared"
 	"github.com/briggysmalls/detectordag/shared/email"
 	"html/template"
 	"log"
@@ -91,21 +92,21 @@ func init() {
 		},
 	})
 	if err != nil {
-		log.Fatal(err)
+		shared.LogErrorAndExit(err)
 	}
 	// Create SES client
 	mailer, err = email.New(sesh)
 	if err != nil {
-		log.Fatal(err)
+		shared.LogErrorAndExit(err)
 	}
 	// Create templates
 	htmlTemplate, err = template.New("htmlTemplate").Parse(htmlTemplateSource)
 	if err != nil {
-		log.Fatal(err)
+		shared.LogErrorAndExit(err)
 	}
 	textTemplate, err = template.New("textTemplate").Parse(textTemplateSource)
 	if err != nil {
-		log.Fatal(err)
+		shared.LogErrorAndExit(err)
 	}
 }
 
