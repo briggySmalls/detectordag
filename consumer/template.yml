@@ -17,3 +17,10 @@ Resources:
                 - 'ses:SendEmail'
                 - 'ses:SendRawEmail'
               Resource: '*'
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'iot:DescribeThing'
+              Resource:
+                - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
