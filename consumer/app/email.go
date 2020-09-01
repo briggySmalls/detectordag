@@ -3,11 +3,9 @@ package app
 import (
 	"bytes"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/briggysmalls/detectordag/shared"
 	"github.com/briggysmalls/detectordag/shared/email"
 	"html/template"
-	"log"
 	"time"
 )
 
@@ -74,7 +72,7 @@ type PowerStatusChangedEmailConfig struct {
 	Status     bool
 }
 
-var mailer email.Client
+var emailClient email.Client
 var htmlTemplate *template.Template
 var textTemplate *template.Template
 
@@ -84,18 +82,10 @@ func init() {
 	// credentials from the shared credentials file ~/.aws/credentials
 	// and region from the shared configuration file ~/.aws/config.
 	var err error
-	sesh, err := session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-		Config: aws.Config{
-			// There is no emailing service in eu-west-2
-			Region: aws.String("eu-west-1"),
-		},
-	})
-	if err != nil {
-		shared.LogErrorAndExit(err)
-	}
-	// Create SES client
-	mailer, err = email.New(sesh)
+	// Create a new session just for emailing (there is no emailing service in eu-west-2)
+	sesh := shared.CreateSession(aws.Config{Region: aws.String("eu-west-1")})
+	// Create a new email client
+	emailClient, err = email.New(sesh)
 	if err != nil {
 		shared.LogErrorAndExit(err)
 	}
@@ -124,7 +114,7 @@ func SendEmail(recipients []string, status PowerStatusChangedEmailConfig) error 
 		return err
 	}
 	// Send the email.
-	err = mailer.SendEmail(recipients, Sender, Subject, htmlBody.String(), textBody.String())
+	err = emailClient.SendEmail(recipients, Sender, Subject, htmlBody.String(), textBody.String())
 	if err != nil {
 		return err
 	}
