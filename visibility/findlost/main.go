@@ -58,7 +58,7 @@ func runJob(ctx context.Context) error {
 	// Request all devices that are considered 'visible'
 	devices, err := iotClient.GetThingsByVisibility(true)
 	if err != nil {
-		return err
+		return shared.LogErrorAndReturn(err)
 	}
 	log.Printf("Checking %d devices for updated visibility status", len(devices))
 	// Iterate through devices
@@ -66,7 +66,7 @@ func runJob(ctx context.Context) error {
 		// Fetch the shadow
 		shdw, err := shadowClient.Get(device.DeviceId)
 		if err != nil {
-			return err
+			return shared.LogErrorAndReturn(err)
 		}
 		_, ok := shdw.State.Reported["status"].(bool)
 		if !ok {
@@ -86,12 +86,12 @@ func runJob(ctx context.Context) error {
 		// The device is lost
 		err = iotClient.SetVisibiltyState(device.DeviceId, false)
 		if err != nil {
-			return err
+			return shared.LogErrorAndReturn(err)
 		}
 		// Email to say so
 		err = visibility.EmailVisiblityStatus(dbClient, device, lastSeen, false)
 		if err != nil {
-			return err
+			return shared.LogErrorAndReturn(err)
 		}
 	}
 	// Return the response
