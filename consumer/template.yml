@@ -6,8 +6,6 @@ Resources:
       Handler: consumer
       Runtime: go1.x
       Policies:
-        - DynamoDBCrudPolicy:
-            TableName: devices
         - DynamoDBReadPolicy:
             TableName: accounts
         - Version: '2012-10-17'
