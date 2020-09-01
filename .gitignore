@@ -1,2 +1,4 @@
 # Ignore go mocks
 mock_*.go
+# Ignore AWS SAM generated outputs
+.aws-sam/
