@@ -68,12 +68,13 @@ func runJob(ctx context.Context) error {
 		if err != nil {
 			return shared.LogErrorAndReturn(err)
 		}
+		// Check we have a reported status
 		_, ok := shdw.State.Reported["status"].(bool)
 		if !ok {
 			return fmt.Errorf("%s doesn't have status", visibility.DeviceString(device))
 		}
+		// Check when the device was last seen
 		lastSeen := shdw.Metadata.Reported["status"].Timestamp.Time
-		// Device hasn't been seen for a while
 		if time.Now().Before(lastSeen.Add(lastSeenDuration)) {
 			// This device was seen recently enough
 			continue
@@ -83,7 +84,7 @@ func runJob(ctx context.Context) error {
 			log.Printf("%s already marked lost despite searching for visible devices", visibility.DeviceString(device))
 			continue
 		}
-		// The device is lost
+		// Mark the device as lost
 		err = iotClient.SetVisibiltyState(device.DeviceId, false)
 		if err != nil {
 			return shared.LogErrorAndReturn(err)
