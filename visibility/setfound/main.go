@@ -55,14 +55,14 @@ func handleRequest(ctx context.Context, event DeviceSeenEvent) error {
 	if err != nil {
 		return shared.LogErrorAndReturn(err)
 	}
-	// Check if it was lost
+	// Check if it is marked as lost
 	if !device.Visibility {
 		err = visibility.EmailVisiblityStatus(dbClient, device, time.Unix(event.Updated.Status.Timestamp, 0), true)
 		if err != nil {
 			return shared.LogErrorAndReturn(err)
 		}
 	}
-	// Update the visibility
+	// Indicate we've now seen it
 	return iotClient.SetVisibiltyState(event.DeviceId, true)
 }
 
