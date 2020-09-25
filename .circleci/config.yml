@@ -14,6 +14,10 @@ commands:
             - "./edge/.venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.6/site-packages"
+  install-mage:
+    steps:
+      - run: go get -u -d github.com/magefile/mage
+      - run: cd $GOPATH/src/github.com/magefile/mage && go run bootstrap.go
 
 executors:
   python-executor:
@@ -21,8 +25,20 @@ executors:
       - image: circleci/python:3.7
         environment:
           PIPENV_VENV_IN_PROJECT: true
+  golang-executor:
+    docker:
+      - image: circleci/golang:1.15
 
 jobs:
+  # Ensure consumer code is formatted correctly
+  consumer-format:
+    executor: golang-executor
+    steps:
+      - install-mage
+      - run:
+          working_directory: ./consumer
+          name: Run format check
+          command: mage -v format:check
   # Ensure edge code is formatted correctly
   edge-format:
     executor: python-executor
@@ -61,3 +77,4 @@ workflows:
       - edge-format
       - edge-lint
       - edge-test
+      - consumer-format
