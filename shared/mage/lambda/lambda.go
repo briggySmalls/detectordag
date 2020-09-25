@@ -12,18 +12,18 @@ const (
 type Lambda mg.Namespace
 
 var LambdaName string
-var cmds []string{}
+var cmds []string
 
 func init() {
 	cmds = []string{"invoke", LambdaName}
 }
 
 // Runs the lambda function locally
-func (Invoke) Run() error {
+func (Lambda) Run() error {
 	return mage.Sam(cmds, false)
 }
 
 // Debugs the lambda function locally
-func (Invoke) Debug() error {
+func (Lambda) Debug() error {
 	return mage.Sam(cmds, true)
 }
