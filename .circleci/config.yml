@@ -17,10 +17,7 @@ commands:
   install-mage:
     steps:
       - run: go get -u -d github.com/magefile/mage
-      - run:
-          name: Bootstrap mage
-          command: go run bootstrap.go
-          working_directory: $GOPATH/src/github.com/magefile/mage
+      - run: cd $GOPATH/src/github.com/magefile/mage && go run bootstrap.go
 
 executors:
   python-executor:
@@ -38,6 +35,10 @@ jobs:
     executor: golang-executor
     steps:
       - install-mage
+      - run:
+          working_directory: ./consumer
+          name: Show directory
+          command: ls -lah
       - run:
           working_directory: ./consumer
           name: Run format check
