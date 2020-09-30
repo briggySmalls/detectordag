@@ -35,6 +35,7 @@ jobs:
     executor: golang-executor
     steps:
       - install-mage
+      - checkout
       - run:
           working_directory: ./consumer
           name: Show directory
