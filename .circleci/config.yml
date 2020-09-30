@@ -38,10 +38,6 @@ jobs:
       - checkout
       - run:
           working_directory: ./consumer
-          name: Show directory
-          command: ls -lah
-      - run:
-          working_directory: ./consumer
           name: Run format check
           command: mage -v format:check
   # Ensure edge code is formatted correctly
