@@ -40,6 +40,16 @@ jobs:
           working_directory: ./consumer
           name: Run format check
           command: mage -v format:check
+  # Ensure api code is formatted correctly
+  api-format:
+    executor: golang-executor
+    steps:
+      - install-mage
+      - checkout
+      - run:
+          working_directory: ./api
+          name: Run format check
+          command: mage -v format:check
   # Ensure edge code is formatted correctly
   edge-format:
     executor: python-executor
@@ -79,3 +89,4 @@ workflows:
       - edge-lint
       - edge-test
       - consumer-format
+      - api-format
