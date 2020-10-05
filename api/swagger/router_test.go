@@ -1,7 +1,7 @@
 package swagger
 
-//go:generate mockgen -destination mock_server.go -package swagger -mock_names Client=MockServer github.com/briggysmalls/detectordag/api/swagger/server Server
-//go:generate mockgen -destination mock_iot.go -package swagger -mock_names Client=MockIoTClient github.com/briggysmalls/detectordag/shared/iot Client
+//go:generate go run github.com/golang/mock/mockgen -destination mock_server.go -package swagger -mock_names Client=MockServer -self_package github.com/briggysmalls/detectordag/api github.com/briggysmalls/detectordag/api/swagger/server Server
+//go:generate go run github.com/golang/mock/mockgen -destination mock_iot.go -package swagger -mock_names Client=MockIoTClient -self_package github.com/briggysmalls/detectordag/api github.com/briggysmalls/detectordag/shared/iot Client
 
 import (
 	"fmt"
