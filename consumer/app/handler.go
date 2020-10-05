@@ -61,7 +61,7 @@ func HandleRequest(ctx context.Context, event StatusUpdatedEvent) {
 		shared.LogErrorAndExit(err)
 	}
 	accountID := device.AccountId
-	log.Printf("Device '%s' associated with account '%d'", event.DeviceId, accountID)
+	log.Printf("Device '%s' associated with account '%s'", event.DeviceId, accountID)
 	// Get the account
 	account, err := db.GetAccountById(accountID)
 	if err != nil {
