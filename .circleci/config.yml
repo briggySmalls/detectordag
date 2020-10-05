@@ -40,6 +40,16 @@ jobs:
           working_directory: ./consumer
           name: Run format check
           command: mage -v format:check
+  # Ensure consumer code is vetted correctly
+  consumer-vet:
+    executor: golang-executor
+    steps:
+      - install-mage
+      - checkout
+      - run:
+          working_directory: ./consumer
+          name: Run vet check
+          command: mage vet
   # Ensure api code is formatted correctly
   api-format:
     executor: golang-executor
@@ -50,6 +60,16 @@ jobs:
           working_directory: ./api
           name: Run format check
           command: mage -v format:check
+  # Ensure api code is vetted correctly
+  consumer-vet:
+    executor: golang-executor
+    steps:
+      - install-mage
+      - checkout
+      - run:
+          working_directory: ./api
+          name: Run vet check
+          command: mage vet
   # Ensure api code passes tests
   api-test:
     executor: golang-executor
@@ -90,6 +110,14 @@ jobs:
           working_directory: ./edge
           name: Run tests
           command: pipenv run invoke test
+  # Ensure frontend is
+  frontend-format:
+    executor: yarn-executor
+    steps:
+      - checkout
+      - run:
+          working_directory: ./frontend
+          name:
 
 workflows:
   version: 2
@@ -99,4 +127,6 @@ workflows:
       - edge-lint
       - edge-test
       - consumer-format
+      - consumer-vet
       - api-format
+      - api-vet

@@ -24,18 +24,26 @@ func (Format) Check() error {
 	return format("-d")
 }
 
+// Vets
+func Vet() error {
+	// Get the go directories
+	packages, err := nonToolsDirs()
+	if err != nil {
+		return err
+	}
+	args := append([]string{"vet"}, packages...)
+	return sh.RunV("go", args...)
+}
+
 // Runs the tests
 func Test() error {
 	// We need mocks for tests
 	mg.Deps(Generate)
 	// Get the go directories
-	output, err := sh.Output("go", "list", "./...")
+	packages, err := nonToolsDirs()
 	if err != nil {
 		return err
 	}
-	// Exclude tools
-	re := regexp.MustCompile(fmt.Sprintf("(?m)[\r\n]+^.*%s.*$", toolsDir))
-	packages := strings.Split(re.ReplaceAllString(output, ""), "\n")
 	args := append([]string{"test", "-v"}, packages...)
 	return sh.RunV("go", args...)
 }
@@ -60,4 +68,16 @@ func format(args ...string) error {
 		return errors.New(output)
 	}
 	return nil
+}
+
+func nonToolsDirs() ([]string, error) {
+	// Get the go directories
+	output, err := sh.Output("go", "list", "./...")
+	if err != nil {
+		return nil, err
+	}
+	// Exclude tools
+	re := regexp.MustCompile(fmt.Sprintf("(?m)[\r\n]+^.*%s.*$", toolsDir))
+	packages := strings.Split(re.ReplaceAllString(output, ""), "\n")
+	return packages, nil
 }

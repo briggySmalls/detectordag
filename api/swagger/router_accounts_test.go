@@ -31,23 +31,23 @@ func TestGetDevicesSuccess(t *testing.T) {
 	// Configure the mock shadow client to expect calls for each device
 	shadows := []shadow.Shadow{
 		{
-			Timestamp: shadow.Timestamp{createTime(t, "2020/03/22 00:27:00")},
+			Timestamp: shadow.Timestamp{Time: createTime(t, "2020/03/22 00:27:00")},
 			State:     shadow.State{Reported: map[string]interface{}{"status": true}},
 			Metadata: shadow.Metadata{
 				Reported: map[string]shadow.MetadataEntry{
 					"status": {
-						Timestamp: shadow.Timestamp{createTime(t, "2020/03/22 01:27:00")},
+						Timestamp: shadow.Timestamp{Time: createTime(t, "2020/03/22 01:27:00")},
 					},
 				},
 			},
 		},
 		{
-			Timestamp: shadow.Timestamp{createTime(t, "2020/03/22 00:27:00")},
+			Timestamp: shadow.Timestamp{Time: createTime(t, "2020/03/22 00:27:00")},
 			State:     shadow.State{Reported: map[string]interface{}{"status": true}},
 			Metadata: shadow.Metadata{
 				Reported: map[string]shadow.MetadataEntry{
 					"status": {
-						Timestamp: shadow.Timestamp{createTime(t, "2020/03/22 01:27:00")},
+						Timestamp: shadow.Timestamp{Time: createTime(t, "2020/03/22 01:27:00")},
 					},
 				},
 			},
