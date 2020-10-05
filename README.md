@@ -1,4 +1,7 @@
+[![detectordag](https://circleci.com/gh/briggySmalls/detectordag.svg?style=shield)](https://circleci.com/gh/briggySmalls/detectordag)
+
 # detectordag
+
 Power outage detector made with ♥ by a dag
 
 # Installation
