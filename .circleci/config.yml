@@ -50,6 +50,16 @@ jobs:
           working_directory: ./api
           name: Run format check
           command: mage -v format:check
+  # Ensure api code passes tests
+  api-test:
+    executor: golang-executor
+    steps:
+      - install-mage
+      - checkout
+      - run:
+          working_directory: ./api
+          name: Run tests
+          command: mage -v test
   # Ensure edge code is formatted correctly
   edge-format:
     executor: python-executor
