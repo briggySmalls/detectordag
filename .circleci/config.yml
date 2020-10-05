@@ -61,7 +61,7 @@ jobs:
           name: Run format check
           command: mage -v format:check
   # Ensure api code is vetted correctly
-  consumer-vet:
+  api-vet:
     executor: golang-executor
     steps:
       - install-mage
