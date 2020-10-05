@@ -1,9 +1,9 @@
-package swagger
+package app
 
 import (
 	"encoding/json"
 	"fmt"
-	models "github.com/briggysmalls/detectordag/api/swagger/go"
+	"github.com/briggysmalls/detectordag/api/app/models"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/golang/mock/gomock"
