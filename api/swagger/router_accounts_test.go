@@ -76,7 +76,7 @@ func TestRegisterDevice(t *testing.T) {
 		desiredName = "device-name"
 		publicCert  = "impublic"
 		privateCert = "imprivate"
-		cert = "imcert"
+		cert        = "imcert"
 	)
 	// Create a client
 	_, _, _, iotClient, tokens, router := createRealRouter(t)
