@@ -76,6 +76,7 @@ func TestRegisterDevice(t *testing.T) {
 		desiredName = "device-name"
 		publicCert  = "impublic"
 		privateCert = "imprivate"
+		cert        = "imcert"
 	)
 	// Create a client
 	_, _, _, iotClient, tokens, router := createRealRouter(t)
@@ -83,7 +84,7 @@ func TestRegisterDevice(t *testing.T) {
 	tokens.EXPECT().Validate(gomock.Eq(token)).Return(accountID, nil)
 	// Configure the IoT client to expect a request to register a new device
 	device := iot.Device{Name: desiredName, AccountId: accountID, DeviceId: deviceID}
-	certs := iot.Certificates{Public: publicCert, Private: privateCert}
+	certs := iot.Certificates{Public: publicCert, Private: privateCert, Certificate: cert}
 	iotClient.EXPECT().RegisterThing(accountID, deviceID, desiredName).Return(&device, &certs, nil)
 	// Create a request for devices
 	req := createRequest(t, "PUT",
@@ -96,6 +97,6 @@ func TestRegisterDevice(t *testing.T) {
 	// Assert status ok
 	assert.Equal(t, http.StatusOK, rr.Code)
 	// Inspect the body of the response
-	const expectedBody = `{"name":"%s","deviceId":"%s","certificate":{"publicKey":"%s","privateKey":"%s"}}`
-	assert.Equal(t, fmt.Sprintf(expectedBody, desiredName, deviceID, publicCert, privateCert), string(rr.Body.Bytes()))
+	const expectedBody = `{"name":"%s","deviceId":"%s","certificate":{"certificate":"%s","publicKey":"%s","privateKey":"%s"}}`
+	assert.Equal(t, fmt.Sprintf(expectedBody, desiredName, deviceID, cert, publicCert, privateCert), string(rr.Body.Bytes()))
 }

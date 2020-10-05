@@ -4,9 +4,15 @@ import (
 	"errors"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
+	"regexp"
+	"fmt"
+	"strings"
 )
 
 type Format mg.Namespace
+
+// Directory to ignore because it only contains tools
+const toolsDir = "tools"
 
 // Fixes formatting
 func (Format) Fix() error {
@@ -22,7 +28,16 @@ func (Format) Check() error {
 func Test() error {
 	// We need mocks for tests
 	mg.Deps(Generate)
-	return sh.RunV("go", "test", "-v", "./...")
+	// Get the go directories
+	output, err := sh.Output("go", "list", "./...")
+	if err != nil {
+		return err
+	}
+	// Exclude tools
+	re := regexp.MustCompile(fmt.Sprintf("(?m)[\r\n]+^.*%s.*$", toolsDir))
+	packages := strings.Split(re.ReplaceAllString(output, ""), "\n")
+	args := append([]string{"test", "-v"}, packages...)
+	return sh.RunV("go", args...)
 }
 
 // Generates the mocks

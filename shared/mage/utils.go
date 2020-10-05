@@ -13,13 +13,13 @@ import (
 )
 
 const (
-    toolsDir = "./tools/tools.go"
+    toolsFile = "./tools/tools.go"
 )
 
 // Installs the module tools
 func InstallTools() error {
     // Read the tools file
-    toolsFile, err := ioutil.ReadFile(toolsDir)
+    toolsFile, err := ioutil.ReadFile(toolsFile)
     if err != nil {
         return err
     }
