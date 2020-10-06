@@ -94,7 +94,7 @@ func CreateRule() error {
 // CreateTables creates dynamoDB tables for the application
 func CreateTables() error {
 	// Create accounts table
-	return sh.Run("aws", "dynamodb", "create-table", "--table-name", accountsTableName, "--cli-json-input", "file://db/accounts.json")
+	return sh.Run("aws", "dynamodb", "create-table", "--table-name", accountsTableName, "--cli-json-input", "file://config/accounts.json")
 }
 
 // CreateThingType creates the 'detectordag' thing type
