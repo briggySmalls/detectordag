@@ -1,11 +1,15 @@
 package models
 
+type Emails struct {
+	// The emails associated with the account
+	Emails []string `json:"emails"`
+}
+
 // swagger:model account
 type Account struct {
 	// The username of the account
 	Username string `json:"username"`
-	// The emails associated with the account
-	Emails []string `json:"emails"`
+	Emails
 }
 
 // Successful account retrieval
