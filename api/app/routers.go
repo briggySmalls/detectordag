@@ -55,7 +55,7 @@ func NewRouter(iot iot.Client, server server.Server, tokens tokens.Tokens) *mux.
 		//       200: tokenResponse
 		//       403: authFailedResponse
 		Route{
-		   "Auth",
+			"Auth",
 			http.MethodPost,
 			"/auth",
 			server.Auth,

@@ -27,13 +27,13 @@ type MutableDevice struct {
 
 type DeviceRegisteredCertificate struct {
 	Certificate string `json:"certificate"`
-	PublicKey string `json:"publicKey"`
-	PrivateKey string `json:"privateKey"`
+	PublicKey   string `json:"publicKey"`
+	PrivateKey  string `json:"privateKey"`
 }
 
 type DeviceRegistered struct {
-	Name string `json:"name"`
-	DeviceId string `json:"deviceId"`
+	Name        string                       `json:"name"`
+	DeviceId    string                       `json:"deviceId"`
 	Certificate *DeviceRegisteredCertificate `json:"certificate"`
 }
 
