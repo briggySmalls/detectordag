@@ -110,6 +110,9 @@ jobs:
           working_directory: ./api
           name: Generate API specification
           command: swagger generate spec --output ../artifacts/api.yaml
+      - run:
+          name: Validate API specification
+          command: swagger validate artifacts/api.yaml
       - persist_to_workspace:
           root: .
           paths: artifacts
