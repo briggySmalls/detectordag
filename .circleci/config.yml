@@ -18,6 +18,14 @@ commands:
     steps:
       - run: go get -u -d github.com/magefile/mage
       - run: cd $GOPATH/src/github.com/magefile/mage && go run bootstrap.go
+  install-go-swagger:
+    steps:
+      - run: >
+          download_url=$(curl -s https://api.github.com/repos/go-swagger/go-swagger/releases/latest |
+          jq -r '.assets[] | select(.name | contains("'"$(uname | tr '[:upper:]' '[:lower:]')"'_amd64")) |
+          .browser_download_url') &&
+          sudo curl -o /usr/local/bin/swagger -L'#' "$download_url"
+      - run: sudo chmod +x /usr/local/bin/swagger
 
 executors:
   python-executor:
@@ -88,6 +96,23 @@ jobs:
           working_directory: ./edge
           name: Run tests
           command: pipenv run invoke test
+  # Generate
+  generate-spec:
+    executor: golang-executor
+    steps:
+      - run: sudo apt-get update && sudo apt-get install -yq curl git jq
+      - install-go-swagger
+      - checkout
+      - run:
+          name: Create output directory
+          command: mkdir -p artifacts
+      - run:
+          working_directory: ./api
+          name: Generate API specification
+          command: swagger generate spec --output ../artifacts/api.yaml
+      - persist_to_workspace:
+          root: .
+          paths: artifacts
 workflows:
   version: 2
   main:
@@ -99,7 +124,7 @@ workflows:
       # consumer
       - go-format:
           name: consumer-format
-          directory: ./consumer
+          directory: ./consumers
       # api
       - go-format:
           name: api-format
@@ -118,3 +143,5 @@ workflows:
       - go-test:
           name: connection-listener-test
           directory: ./connection/listener
+      # Generate openapi spec
+      - generate-spec
