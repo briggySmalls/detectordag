@@ -96,7 +96,7 @@ jobs:
           working_directory: ./edge
           name: Run tests
           command: pipenv run invoke test
-  # Generate
+  # Generate openAPI specification from API code
   generate-spec:
     executor: golang-executor
     steps:
