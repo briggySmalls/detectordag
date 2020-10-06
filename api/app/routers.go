@@ -1,3 +1,20 @@
+// Detectordag
+//
+// API for detectordag backend
+//
+//    Schemes: https
+//    Host: detectorkag.tk
+//    BasePath: /v1
+//    Version: 0.0.1
+//    Contact: Sam Briggs<detectordag@sambriggs.dev>
+//
+//    Consumes:
+//    - application/json
+//
+//    Produces:
+//    - application/json
+//
+// swagger:meta
 package app
 
 import (
@@ -30,8 +47,23 @@ func NewRouter(iot iot.Client, server server.Server, tokens tokens.Tokens) *mux.
 	api := router.PathPrefix("/v1").Subrouter()
 	// Add the non-auth routes
 	nonAuthRoutes := Routes{
-		Route{
-			"Auth",
+		// swagger:route POST /auth authentication auth
+		//
+		// Obtain token for the site
+		//
+		// description:
+		// parameters:
+		// - name: credentials
+		//   in: body
+		//   descrption: Credentials for the account
+		//   type:
+		//   required: true
+		//
+		//     Responses:
+		//       200: tokenResponse
+		//       403: authFailedResponse
+		Rou    te{
+			    "Auth",
 			http.MethodPost,
 			"/auth",
 			server.Auth,
@@ -42,24 +74,64 @@ func NewRouter(iot iot.Client, server server.Server, tokens tokens.Tokens) *mux.
 	// Create subrouter for accounts
 	accounts := api.PathPrefix("/accounts").Subrouter()
 	addRoutes(accounts, Routes{
+		// swagger:route GET /accounts/{accountId} accounts getAccount
+		//
+		// Get account details
+		//
+		//     Responses:
+		//       200: getAccountResponse
+		//       400: accountNotFoundResponse
+		//       401: unauthenticatedResponse
+		//       403: unauthorizedResponse
 		Route{
 			"GetAccount",
 			http.MethodGet,
 			fmt.Sprintf("/{accountId:%s}", uuidRegex),
 			server.GetAccount,
 		},
+		// swagger:route GET /accounts/{accountId}/devices accounts getDevices
+		//
+		// Get all devices associated with the user's account
+		//
+		//     Responses:
+		//       200: getDevicesResponse
+		//       400: accountNotFoundResponse
+		//       401: unauthenticatedResponse
+		//       403: unauthorizedResponse
 		Route{
 			"GetDevices",
 			http.MethodGet,
 			fmt.Sprintf("/{accountId:%s}/devices", uuidRegex),
 			server.GetDevices,
 		},
+		// swagger:route PATCH /accounts/{accountId} accounts updateAccount
+		//
+		// Update an account
+		//
+		// Update account configuration
+		//
+		//     Responses:
+		//       200: getAccountResponse
+		//       400: accountNotFoundResponse
+		//       401: unauthenticatedResponse
+		//       403: unauthorizedResponse
 		Route{
 			"UpdateAccount",
 			http.MethodPatch,
 			fmt.Sprintf("/{accountId:%s}", uuidRegex),
 			server.UpdateAccount,
 		},
+		// swagger:route PUT /accounts/{accountId}/devices/{deviceId} accounts registerDevice
+		//
+		// Register a new device
+		//
+		// Register a new device to the account
+		//
+		//     Responses:
+		//       200: getAccountResponse
+		//       400: accountNotFoundResponse
+		//       401: unauthenticatedResponse
+		//       403: unauthorizedResponse
 		Route{
 			"RegisterDevice",
 			http.MethodPut,
@@ -71,6 +143,17 @@ func NewRouter(iot iot.Client, server server.Server, tokens tokens.Tokens) *mux.
 	// Create subrouter for devices
 	devices := api.PathPrefix("/devices").Subrouter()
 	addRoutes(devices, Routes{
+		// swagger:route PATCH /devices/{deviceId} devices updateDevice
+		//
+		// Update a device
+		//
+		// Update device configuration
+		//
+		//     Responses:
+		//       200: getDeviceResponse
+		//       400: deviceNotFoundResponse
+		//       401: unauthenticatedResponse
+		//       403: unauthorizedResponse
 		Route{
 			"UpdateDevice",
 			http.MethodPatch,

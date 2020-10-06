@@ -1,5 +1,6 @@
 package models
 
+// swagger:model apiResponse
 type ApiResponse struct {
 
 	Code int32 `json:"code,omitempty"`
