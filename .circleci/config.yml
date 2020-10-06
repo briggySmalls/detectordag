@@ -116,6 +116,26 @@ jobs:
       - persist_to_workspace:
           root: .
           paths: artifacts
+  # Generate javascript library from openAPI spec
+  generate-client:
+    docker:
+      - image: circleci/openjdk:latest
+    steps:
+      - run:
+          name: Install swagger-codegen
+          command: wget https://oss.sonatype.org/content/repositories/releases/io/swagger/swagger-codegen-cli/2.2.1/swagger-codegen-cli-2.2.1.jar
+      - attach_workspace:
+          at: .
+      - run:
+          name: Create directory
+          command: mkdir -p lib
+      - run:
+          name: Generate library
+          command: java -jar swagger-codegen-cli-2.2.1.jar generate -i ./artifacts/api.yaml --lang javascript -o ./lib/client
+      - persist_to_workspace:
+          root: .
+          paths: lib
+
 workflows:
   version: 2
   main:
@@ -148,3 +168,6 @@ workflows:
           directory: ./connection/listener
       # Generate openapi spec
       - generate-spec
+      - generate-client:
+          requires:
+            - generate-spec
