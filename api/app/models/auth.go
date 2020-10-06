@@ -41,9 +41,16 @@ type TokenResponse struct {
 	Body Token
 }
 
+// Authentication failed
+// swagger:response authFailedResponse
+type AuthFailedResponse struct {
+	// in:body
+	Body ModelError
+}
+
 // Authorization token missing or invalid
 // swagger:response unauthenticatedResponse
-type AuthFailedResponse struct {
+type UnauthenticatedResponse struct {
 	// in:body
 	Body ModelError
 }
