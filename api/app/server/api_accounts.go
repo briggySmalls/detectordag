@@ -167,11 +167,11 @@ func (s *server) createAccountPayload(account *database.Account) ([]byte, error)
 	// Build the response
 	payload := models.Account{
 		Username: account.Username,
-		Emails:   account.Emails,
+		Emails:   models.Emails{Emails: account.Emails},
 	}
 	// Ensure empty slices appear as '[]' in JSON
-	if payload.Emails == nil {
-		payload.Emails = make([]string, 0)
+	if payload.Emails.Emails == nil {
+		payload.Emails.Emails = make([]string, 0)
 	}
 	// Prepare the JSON response
 	body, err := json.Marshal(payload)
