@@ -1,6 +1,5 @@
 package models
 
-// swagger:model credentials
 type Credentials struct {
 
 	Username string `json:"username"`
@@ -8,7 +7,6 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
-// swagger:model token
 type Token struct {
 
 	Token string `json:"token"`

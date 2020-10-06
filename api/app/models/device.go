@@ -4,7 +4,6 @@ import (
 	"time"
 )
 
-// swagger:model device
 type Device struct {
 	// Name of the device
 	Name string `json:"name"`
@@ -21,7 +20,6 @@ type DeviceState struct {
 	Power bool `json:"power"`
 }
 
-// swagger:model mutableDevice
 type MutableDevice struct {
 	// The name of the device
 	Name string `json:"name"`
