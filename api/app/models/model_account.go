@@ -5,7 +5,6 @@ type Emails struct {
 	Emails []string `json:"emails"`
 }
 
-// swagger:model account
 type Account struct {
 	// The username of the account
 	Username string `json:"username"`
@@ -33,4 +32,13 @@ type AccountParameter struct {
 	// required: true
 	// in: path
 	AccountID string `json:"accountId"`
+}
+
+// swagger:parameters updateAccount
+type EmailsParameter struct {
+	// Properties to update about the account
+	//
+	// required: true
+	// in: body
+	Body Emails
 }
