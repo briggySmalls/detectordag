@@ -22,7 +22,7 @@ type AccountNotFoundResponse struct {
 	Body ModelError
 }
 
-// swagger:parameters getAccount updateAccount registerDevice
+// swagger:parameters getAccount getDevices updateAccount registerDevice
 type AccountParameter struct {
 	// ID of account that is to be queried
 	//

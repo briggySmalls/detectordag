@@ -8,6 +8,23 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
+// swagger:model token
+type Token struct {
+
+	Token string `json:"token"`
+
+	AccountId string `json:"accountId"`
+}
+
+// swagger:parameters getAccount updateAccount getDevices registerDevice updateDevice
+type TokenParameter struct {
+	// A token obtained through authentication
+	//
+	// required: true
+	// in: header
+	Token string `json:"token"`
+}
+
 // Credentials for logging in
 // swagger:parameters auth
 type AuthParameters struct {
@@ -15,6 +32,13 @@ type AuthParameters struct {
 	//
 	// in:body
 	Body Credentials
+}
+
+// Successful authentication
+// swagger:response tokenResponse
+type TokenResponse struct {
+	//in:body
+	Body Token
 }
 
 // Authorization token missing or invalid

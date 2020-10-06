@@ -51,19 +51,11 @@ func NewRouter(iot iot.Client, server server.Server, tokens tokens.Tokens) *mux.
 		//
 		// Obtain token for the site
 		//
-		// description:
-		// parameters:
-		// - name: credentials
-		//   in: body
-		//   descrption: Credentials for the account
-		//   type:
-		//   required: true
-		//
 		//     Responses:
 		//       200: tokenResponse
 		//       403: authFailedResponse
-		Rou    te{
-			    "Auth",
+		Route{
+		   "Auth",
 			http.MethodPost,
 			"/auth",
 			server.Auth,
@@ -128,7 +120,7 @@ func NewRouter(iot iot.Client, server server.Server, tokens tokens.Tokens) *mux.
 		// Register a new device to the account
 		//
 		//     Responses:
-		//       200: getAccountResponse
+		//       200: getDeviceResponse
 		//       400: accountNotFoundResponse
 		//       401: unauthenticatedResponse
 		//       403: unauthorizedResponse
