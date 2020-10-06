@@ -120,7 +120,7 @@ func NewRouter(iot iot.Client, server server.Server, tokens tokens.Tokens) *mux.
 		// Register a new device to the account
 		//
 		//     Responses:
-		//       200: getDeviceResponse
+		//       200: deviceRegisteredResponse
 		//       400: accountNotFoundResponse
 		//       401: unauthenticatedResponse
 		//       403: unauthorizedResponse

@@ -25,6 +25,18 @@ type MutableDevice struct {
 	Name string `json:"name"`
 }
 
+type DeviceRegisteredCertificate struct {
+	Certificate string `json:"certificate"`
+	PublicKey string `json:"publicKey"`
+	PrivateKey string `json:"privateKey"`
+}
+
+type DeviceRegistered struct {
+	Name string `json:"name"`
+	DeviceId string `json:"deviceId"`
+	Certificate *DeviceRegisteredCertificate `json:"certificate"`
+}
+
 // swagger:parameters updateDevice registerDevice
 type DeviceParameter struct {
 	// ID of device
@@ -62,4 +74,11 @@ type GetDeviceResponse struct {
 type DeviceNotFoundResponse struct {
 	// in: body
 	Body ModelError
+}
+
+// Device has been successfully registered
+// swagger:response deviceRegisteredResponse
+type DeviceRegisteredResponse struct {
+	// in:body
+	Body DeviceRegistered
 }
