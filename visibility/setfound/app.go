@@ -38,5 +38,9 @@ func (a *app) handleRequest(ctx context.Context, event DeviceSeenEvent) error {
 		// Short-circuit (it's already marked as visible)
 		return nil
 	}
-	return a.email.SendVisibilityStatus(device, time.Unix(event.Updated.Status.Timestamp, 0), true)
+	return a.email.SendVisibilityStatus(
+		device,
+		time.Unix(event.Updated.Status.Timestamp, 0),
+		true,
+	)
 }
