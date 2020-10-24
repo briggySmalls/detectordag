@@ -34,12 +34,9 @@ func (a *app) handleRequest(ctx context.Context, event DeviceSeenEvent) error {
 		return err
 	}
 	// Check if it is marked as lost
-	if !device.Visibility {
-		err = a.email.SendVisiblityStatus(device, time.Unix(event.Updated.Status.Timestamp, 0), true)
-		if err != nil {
-			return err
-		}
+	if device.Visibility {
+		// Short-circuit (it's already marked as visible)
+		return nil
 	}
-	// Indicate we've now seen it
-	return a.iot.SetVisibiltyState(event.DeviceId, true)
+	return a.email.SendVisiblityStatus(device, time.Unix(event.Updated.Status.Timestamp, 0), true)
 }
