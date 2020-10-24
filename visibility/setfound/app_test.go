@@ -70,9 +70,9 @@ func TestSetFound(t *testing.T) {
 	device := iot.Device{Visibility: true, Name: deviceName, AccountId: accountID, DeviceId: deviceID}
 	mockIoT.EXPECT().GetThing(gomock.Eq(deviceID)).Return(&device, nil)
 	// Successfully email
-	mockEmail.EXPECT().SendVisiblityStatus(
+	mockEmail.EXPECT().SendVisibilityStatus(
 		gomock.Eq(&device),
-		gomock.Eq(createTime(t, "2021/10/11 14:00:00")),
+		gomock.Eq(createTime(t, "2020/03/13 01:30:49")),
 		gomock.Eq(true),
 	)
 	// Update the visibility status

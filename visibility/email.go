@@ -16,7 +16,7 @@ type emailClient struct {
 }
 
 type EmailClient interface {
-	SendVisiblityStatus(device *iot.Device, timestamp time.Time, status bool) error
+	SendVisibilityStatus(device *iot.Device, timestamp time.Time, status bool) error
 }
 
 func New(sesh *session.Session, db database.Client) (EmailClient, error) {
@@ -28,7 +28,7 @@ func New(sesh *session.Session, db database.Client) (EmailClient, error) {
 	return &emailClient{email: email, db: db}, nil
 }
 
-func (e *emailClient) SendVisiblityStatus(device *iot.Device, timestamp time.Time, status bool) error {
+func (e *emailClient) SendVisibilityStatus(device *iot.Device, timestamp time.Time, status bool) error {
 	log.Printf("Sending visibility email for device: %s with state %v", DeviceString(device), status)
 	// Get the account
 	account, err := e.db.GetAccountById(device.AccountId)
