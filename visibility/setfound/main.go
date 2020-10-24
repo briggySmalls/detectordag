@@ -11,7 +11,7 @@ import (
 )
 
 // Prepare an application to reuse across lambda runs
-var setfound app
+var setfound *app
 
 func init() {
 	// Add file/line number to the default logger
@@ -37,7 +37,7 @@ func init() {
 		log.Fatal(err.Error())
 	}
 	// Create an app
-	setfound = app{iot: iotClient, email: visibilityEmailClient}
+	setfound = &app{iot: iotClient, email: visibilityEmailClient}
 }
 
 // main is the entrypoint to the lambda function
