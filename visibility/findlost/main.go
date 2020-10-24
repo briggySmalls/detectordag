@@ -9,12 +9,15 @@ import (
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/visibility"
+	"github.com/briggysmalls/detectordag/visibility/findlost/app"
 	"log"
 	"time"
 )
 
+const lastSeenDurationHours = 24
+
 // Prepare an application to reuse across lambda runs
-var findLost *app
+var findLost app.App
 
 func init() {
 	// Add file/line number to the default logger
@@ -46,20 +49,15 @@ func init() {
 		log.Fatal(err.Error())
 	}
 	// Create the duration
-	lastSeenDuration, err = time.ParseDuration(fmt.Sprintf("%dh", lastSeenDurationHours))
+	lastSeenDuration, err := time.ParseDuration(fmt.Sprintf("%dh", lastSeenDurationHours))
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	// Create the application
-	findLost = &app{
-		iot:              iotClient,
-		email:            visibilityEmailClient,
-		shadow:           shadowClient,
-		lastSeenDuration: lastSeenDuration,
-	}
+	findLost = app.New(iotClient, visibilityEmailClient, shadowClient, lastSeenDuration)
 }
 
 // main is the entrypoint to the lambda function
 func main() {
-	lambda.Start(findLost.runJob)
+	lambda.Start(findLost.RunJob)
 }

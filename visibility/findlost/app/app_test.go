@@ -1,16 +1,19 @@
-package main
+package app
 
-//go:generate go run github.com/golang/mock/mockgen -destination mock_iot.go -package main -mock_names Client=MockIoTClient -self_package github.com/briggysmalls/detectordag/visibility/findlost github.com/briggysmalls/detectordag/shared/iot Client
-//go:generate go run github.com/golang/mock/mockgen -destination mock_visibility.go -package main -mock_names Client=MockVisibilityEmailClient -self_package github.com/briggysmalls/detectordag/visibility/findlost github.com/briggysmalls/detectordag/visibility EmailClient
-//go:generate go run github.com/golang/mock/mockgen -destination mock_shadow.go -package main -mock_names Client=MockShadowClient -self_package github.com/briggysmalls/detectordag/visibility/findlost github.com/briggysmalls/detectordag/shared/shadow Client
+//go:generate go run github.com/golang/mock/mockgen -destination mock_iot.go -package app -mock_names Client=MockIoTClient github.com/briggysmalls/detectordag/shared/iot Client
+//go:generate go run github.com/golang/mock/mockgen -destination mock_visibility.go -package app -mock_names Client=MockVisibilityEmailClient github.com/briggysmalls/detectordag/visibility EmailClient
+//go:generate go run github.com/golang/mock/mockgen -destination mock_shadow.go -package app -mock_names Client=MockShadowClient github.com/briggysmalls/detectordag/shared/shadow Client
 
 import (
 	"errors"
+	"fmt"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
+
+const lastSeenDurationHours = 24
 
 func TestDeviceLookupFailed(t *testing.T) {
 	// Create app under test
@@ -20,7 +23,7 @@ func TestDeviceLookupFailed(t *testing.T) {
 	// Configure lookup to fail
 	mockIoT.EXPECT().GetThingsByVisibility(gomock.Eq(true)).Return(nil, errors.New("Something went wrong"))
 	// Run test
-	assert.NotNil(t, app.runJob(nil))
+	assert.NotNil(t, app.RunJob(nil))
 }
 
 func getStubbedApp(t *testing.T) (*app, *MockIoTClient, *MockEmailClient, *MockShadowClient) {
@@ -32,8 +35,11 @@ func getStubbedApp(t *testing.T) (*app, *MockIoTClient, *MockEmailClient, *MockS
 	email := NewMockEmailClient(ctrl)
 	// Create mock shadow
 	shadow := NewMockShadowClient(ctrl)
+	// Create a 'last seen duration'
+	lastSeenDuration, err := time.ParseDuration(fmt.Sprintf("%dh", lastSeenDurationHours))
+	assert.Nil(t, err)
 	// Bundle up into an app
-	return &app{iot: iot, email: email, shadow: shadow}, iot, email, shadow
+	return &app{iot: iot, email: email, shadow: shadow, lastSeenDuration: lastSeenDuration}, iot, email, shadow
 }
 
 func createTime(t *testing.T, timeString string) time.Time {

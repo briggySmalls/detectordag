@@ -1,19 +1,14 @@
-package main
+package app
 
 import (
 	"context"
 	"fmt"
-	"github.com/briggysmalls/detectordag/shared"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/visibility"
 	"log"
 	"time"
 )
-
-const lastSeenDurationHours = 24
-
-var lastSeenDuration time.Duration
 
 type app struct {
 	iot              iot.Client
@@ -22,14 +17,32 @@ type app struct {
 	lastSeenDuration time.Duration
 }
 
+type App interface {
+	RunJob(ctx context.Context) error
+}
+
+func New(
+	iot iot.Client,
+	email visibility.EmailClient,
+	shadow shadow.Client,
+	lastSeenDuration time.Duration,
+) App {
+	return &app{
+		iot:              iot,
+		email:            email,
+		shadow:           shadow,
+		lastSeenDuration: lastSeenDuration,
+	}
+}
+
 // handleRequest handles a lambda call
-func (a *app) runJob(ctx context.Context) error {
+func (a *app) RunJob(ctx context.Context) error {
 	// Print out handler parameters
 	log.Print("Context: ", ctx)
 	// Request all devices that are considered 'visible'
 	devices, err := a.iot.GetThingsByVisibility(true)
 	if err != nil {
-		return shared.LogErrorAndReturn(err)
+		return err
 	}
 	log.Printf("Checking %d devices for updated visibility status", len(devices))
 	// Iterate through devices
@@ -37,7 +50,7 @@ func (a *app) runJob(ctx context.Context) error {
 		// Fetch the shadow
 		shdw, err := a.shadow.Get(device.DeviceId)
 		if err != nil {
-			return shared.LogErrorAndReturn(err)
+			return err
 		}
 		// Check we have a reported status
 		_, ok := shdw.State.Reported["status"].(bool)
@@ -46,7 +59,7 @@ func (a *app) runJob(ctx context.Context) error {
 		}
 		// Check when the device was last seen
 		lastSeen := shdw.Metadata.Reported["status"].Timestamp.Time
-		if time.Now().Before(lastSeen.Add(lastSeenDuration)) {
+		if time.Now().Before(lastSeen.Add(a.lastSeenDuration)) {
 			// This device was seen recently enough
 			continue
 		}
@@ -58,12 +71,12 @@ func (a *app) runJob(ctx context.Context) error {
 		// Mark the device as lost
 		err = a.iot.SetVisibiltyState(device.DeviceId, false)
 		if err != nil {
-			return shared.LogErrorAndReturn(err)
+			return err
 		}
 		// Email to say so
 		err = a.email.SendVisibilityStatus(device, lastSeen, false)
 		if err != nil {
-			return shared.LogErrorAndReturn(err)
+			return err
 		}
 	}
 	// Return the response
