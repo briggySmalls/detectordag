@@ -2,9 +2,11 @@ package app
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/briggysmalls/detectordag/shared"
 	"github.com/briggysmalls/detectordag/shared/database"
+	"github.com/briggysmalls/detectordag/shared/email"
 	iotp "github.com/briggysmalls/detectordag/shared/iot"
 	"log"
 	"time"
@@ -29,8 +31,15 @@ type StatusUpdatedEvent struct {
 	Updated   updated `json:""`
 }
 
+type PowerStatusChangedEmailConfig struct {
+	DeviceName string
+	Timestamp  time.Time
+	Status     bool
+}
+
 var db database.Client
 var iot iotp.Client
+var emailClient email.Client
 
 func init() {
 	// Create an AWS session
@@ -51,6 +60,13 @@ func init() {
 	if err != nil {
 		shared.LogErrorAndExit(err)
 	}
+	// Create a new session just for emailing (there is no emailing service in eu-west-2)
+	sesh = shared.CreateSession(aws.Config{Region: aws.String("eu-west-1")})
+	// Create a new email client
+	emailClient, err = email.New(sesh, htmlTemplateSource, textTemplateSource)
+	if err != nil {
+		shared.LogErrorAndExit(err)
+	}
 }
 
 // HandleRequest handles a lambda call
@@ -61,7 +77,7 @@ func HandleRequest(ctx context.Context, event StatusUpdatedEvent) {
 		shared.LogErrorAndExit(err)
 	}
 	accountID := device.AccountId
-	log.Printf("Device '%s' associated with account '%d'", event.DeviceId, accountID)
+	log.Printf("Device '%s' associated with account '%s'", event.DeviceId, accountID)
 	// Get the account
 	account, err := db.GetAccountById(accountID)
 	if err != nil {
@@ -75,7 +91,7 @@ func HandleRequest(ctx context.Context, event StatusUpdatedEvent) {
 	}
 	// Send 'power status updated' emails
 	log.Printf("Send emails to: %s", account.Emails)
-	err = SendEmail(account.Emails, update)
+	err = emailClient.SendEmail(account.Emails, Sender, Subject, update)
 	if err != nil {
 		shared.LogErrorAndExit(err)
 	}

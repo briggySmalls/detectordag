@@ -1,10 +1,12 @@
 package email
 
 import (
+	"bytes"
 	"errors"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
+	"html/template"
 	"log"
 )
 
@@ -14,31 +16,56 @@ const (
 )
 
 type Client interface {
-	SendEmail(toAddresses []string, sender, subject, htmlBody, textBody string) error
+	SendEmail(toAddresses []string, sender, subject string, context interface{}) error
 	VerifyEmail(email string) error
 	GetVerificationStatuses(emails []string) (map[string]string, error)
 	VerifyEmailsIfNecessary(emails []string) error
 }
 
 type client struct {
-	ses *ses.SES
+	ses          *ses.SES
+	htmlTemplate *template.Template
+	textTemplate *template.Template
 }
 
 // New gets a new Client
-func New(sesh *session.Session) (Client, error) {
+func New(sesh *session.Session, htmlTemplateSource, textTemplateSource string) (Client, error) {
 	// Create Amazon DynamoDB client
 	svc := ses.New(sesh)
 	if svc == nil {
 		return nil, errors.New("Failed to create email client")
 	}
+	// Create templates
+	htmlTemplate, err := template.New("htmlTemplate").Parse(htmlTemplateSource)
+	if err != nil {
+		return nil, err
+	}
+	textTemplate, err := template.New("textTemplate").Parse(textTemplateSource)
+	if err != nil {
+		return nil, err
+	}
 	// Create our client wrapper
 	client := client{
-		ses: svc,
+		ses:          svc,
+		htmlTemplate: htmlTemplate,
+		textTemplate: textTemplate,
 	}
 	return &client, nil
 }
 
-func (c *client) SendEmail(recipients []string, sender, subject, htmlBody, textBody string) error {
+func (c *client) SendEmail(recipients []string, sender, subject string, context interface{}) error {
+	// Execute the templates
+	var err error
+	var htmlBody bytes.Buffer
+	err = c.htmlTemplate.Execute(&htmlBody, context)
+	if err != nil {
+		return err
+	}
+	var textBody bytes.Buffer
+	err = c.textTemplate.Execute(&textBody, context)
+	if err != nil {
+		return err
+	}
 	// Convert the address into an AWS format
 	toAddresses := make([]*string, len(recipients))
 	for i, recipient := range recipients {
@@ -54,11 +81,11 @@ func (c *client) SendEmail(recipients []string, sender, subject, htmlBody, textB
 			Body: &ses.Body{
 				Html: &ses.Content{
 					Charset: aws.String(CharSet),
-					Data:    aws.String(htmlBody),
+					Data:    aws.String(htmlBody.String()),
 				},
 				Text: &ses.Content{
 					Charset: aws.String(CharSet),
-					Data:    aws.String(textBody),
+					Data:    aws.String(textBody.String()),
 				},
 			},
 			Subject: &ses.Content{
