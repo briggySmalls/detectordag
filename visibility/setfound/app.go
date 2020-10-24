@@ -38,9 +38,14 @@ func (a *app) handleRequest(ctx context.Context, event DeviceSeenEvent) error {
 		// Short-circuit (it's already marked as visible)
 		return nil
 	}
-	return a.email.SendVisibilityStatus(
+	// Update status
+	status := true
+	a.iot.SetVisibiltyState(device.DeviceId, status)
+	// Send emails to indicate visibility status was updated
+	a.email.SendVisibilityStatus(
 		device,
 		time.Unix(event.Updated.Status.Timestamp, 0),
-		true,
+		status,
 	)
+	return nil
 }
