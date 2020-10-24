@@ -7,6 +7,7 @@ package app
 import (
 	"errors"
 	"fmt"
+	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -18,12 +19,19 @@ const lastSeenDurationHours = 24
 func TestDeviceLookupFailed(t *testing.T) {
 	// Create app under test
 	app, mockIoT, _, _ := getStubbedApp(t)
-	// Create some test parameters
-	const deviceID = "f88948e6-5f93-4f11-8d58-15d48075069d"
 	// Configure lookup to fail
 	mockIoT.EXPECT().GetThingsByVisibility(gomock.Eq(true)).Return(nil, errors.New("Something went wrong"))
 	// Run test
 	assert.NotNil(t, app.RunJob(nil))
+}
+
+func TestNoDevices(t *testing.T) {
+	// Create app under test
+	app, mockIoT, _, _ := getStubbedApp(t)
+	// Configure lookup to fail
+	mockIoT.EXPECT().GetThingsByVisibility(gomock.Eq(true)).Return([]*iot.Device{}, nil)
+	// Run test
+	assert.Nil(t, app.RunJob(nil))
 }
 
 func getStubbedApp(t *testing.T) (*app, *MockIoTClient, *MockEmailClient, *MockShadowClient) {

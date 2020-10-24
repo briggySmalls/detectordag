@@ -67,6 +67,7 @@ func TestSetFound(t *testing.T) {
 	)
 	// Configure mocks
 	// Successfully look up a 'thing' that is 'lost'
+	// TODO: find out why setting to "true" still passes 🤔
 	device := iot.Device{Visibility: false, Name: deviceName, AccountId: accountID, DeviceId: deviceID}
 	mockIoT.EXPECT().GetThing(gomock.Eq(deviceID)).Return(&device, nil)
 	// Update the visibility status
