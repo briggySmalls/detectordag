@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/visibility"
+	"log"
 	"time"
 )
 
@@ -28,6 +29,7 @@ type DeviceSeenEvent struct {
 
 // handleRequest handles a lambda call
 func (a *app) handleRequest(ctx context.Context, event DeviceSeenEvent) error {
+	var err error
 	// Get the current device state
 	device, err := a.iot.GetThing(event.DeviceId)
 	if err != nil {
@@ -36,16 +38,19 @@ func (a *app) handleRequest(ctx context.Context, event DeviceSeenEvent) error {
 	// Check if it is marked as lost
 	if device.Visibility {
 		// Short-circuit (it's already marked as visible)
+		log.Print("hello")
 		return nil
 	}
 	// Update status
 	status := true
-	a.iot.SetVisibiltyState(device.DeviceId, status)
+	err = a.iot.SetVisibiltyState(device.DeviceId, status)
+	if err != nil {
+		return err
+	}
 	// Send emails to indicate visibility status was updated
-	a.email.SendVisibilityStatus(
+	return a.email.SendVisibilityStatus(
 		device,
 		time.Unix(event.Updated.Status.Timestamp, 0),
 		status,
 	)
-	return nil
 }

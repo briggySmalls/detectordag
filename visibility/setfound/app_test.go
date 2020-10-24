@@ -67,16 +67,16 @@ func TestSetFound(t *testing.T) {
 	)
 	// Configure mocks
 	// Successfully look up a 'thing' that is 'lost'
-	device := iot.Device{Visibility: true, Name: deviceName, AccountId: accountID, DeviceId: deviceID}
+	device := iot.Device{Visibility: false, Name: deviceName, AccountId: accountID, DeviceId: deviceID}
 	mockIoT.EXPECT().GetThing(gomock.Eq(deviceID)).Return(&device, nil)
-	// Successfully email
+	// Update the visibility status
+	mockIoT.EXPECT().SetVisibiltyState(gomock.Eq(deviceID), gomock.Eq(true)).Return(nil)
+	// Email people
 	mockEmail.EXPECT().SendVisibilityStatus(
 		gomock.Eq(&device),
 		gomock.Eq(createTime(t, "2020/03/13 01:30:49")),
 		gomock.Eq(true),
-	)
-	// Update the visibility status
-	mockIoT.EXPECT().SetVisibiltyState(gomock.Eq(deviceID), gomock.Eq(true))
+	).Return(nil)
 	// Run the handler
 	event := DeviceSeenEvent{
 		DeviceId: deviceID,
