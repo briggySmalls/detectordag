@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/visibility"
-	"log"
 	"time"
 )
 
