@@ -1,0 +1,11 @@
+rule:
+  actions:
+  - lambda:
+      functionArn: arn:aws:lambda:eu-west-2:670763423833:function:detectordag-setfound-SetFound-12IZJ3DCYBSXQ
+  awsIotSqlVersion: '2016-03-23'
+  createdAt: '2020-07-28T09:24:40+01:00'
+  description: The device has been seen at all
+  ruleDisabled: false
+  ruleName: DeviceSeen
+  sql: SELECT topic(3) as deviceId, current.metadata.reported as updated FROM '$aws/things/+/shadow/update/documents'
+ruleArn: arn:aws:iot:eu-west-2:670763423833:rule/DeviceSeen

@@ -1,0 +1,13 @@
+rule:
+  actions:
+  - lambda:
+      functionArn: arn:aws:lambda:eu-west-2:670763423833:function:detectordag-consumer-1MC8WY2DB3JJL
+  awsIotSqlVersion: '2016-03-23'
+  createdAt: '2020-10-25T18:01:18+00:00'
+  description: Run a lambda function to handle power status updates
+  ruleDisabled: false
+  ruleName: PowerStatusChanged
+  sql: SELECT topic(3) as deviceId, timestamp, current.state.reported as state, current.metadata.reported
+    as updated FROM '$aws/things/+/shadow/update/documents' WHERE current.state.reported.status
+    <> previous.state.reported.status
+ruleArn: arn:aws:iot:eu-west-2:670763423833:rule/PowerStatusChanged
