@@ -46,15 +46,19 @@ func (a *app) RunJob(ctx context.Context) error {
 	// Iterate through devices
 	for _, device := range devices {
 		// Process all the devices, logging any errors
-		if err := a.processDevice(device); err != nil {
+		if err := a.processVisibleDevice(device); err != nil {
 			log.Print(err)
 		}
 	}
-	// Return the response
-	return err
+	return nil
 }
 
-func (a *app) processDevice(device *iot.Device) error {
+func (a *app) processVisibleDevice(device *iot.Device) error {
+	// We shouldn't ever process a lost device
+	if !device.Visibility {
+		log.Printf("%s already marked lost despite searching for visible devices", visibility.DeviceString(device))
+		return nil
+	}
 	// Fetch the shadow
 	shdw, err := a.shadow.Get(device.DeviceId)
 	if err != nil {
@@ -71,18 +75,14 @@ func (a *app) processDevice(device *iot.Device) error {
 		// This device was seen recently enough
 		return nil
 	}
-	if !device.Visibility {
-		// We searched for visible devices, something weird has happened
-		log.Printf("%s already marked lost despite searching for visible devices", visibility.DeviceString(device))
-		return nil
-	}
 	// Mark the device as lost
-	err = a.iot.SetVisibiltyState(device.DeviceId, false)
+	lostStatus := false
+	err = a.iot.SetVisibiltyState(device.DeviceId, lostStatus)
 	if err != nil {
 		return err
 	}
 	// Email to say so
-	err = a.email.SendVisibilityStatus(device, lastSeen, false)
+	err = a.email.SendVisibilityStatus(device, lastSeen, lostStatus)
 	if err != nil {
 		return err
 	}

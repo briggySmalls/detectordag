@@ -38,7 +38,6 @@ func (a *app) handleRequest(ctx context.Context, event DeviceSeenEvent) error {
 	// Check if it is marked as lost
 	if device.Visibility {
 		// Short-circuit (it's already marked as visible)
-		log.Print("hello")
 		return nil
 	}
 	// Update status
