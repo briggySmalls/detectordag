@@ -18,6 +18,31 @@ commands:
     steps:
       - run: go get -u -d github.com/magefile/mage
       - run: cd $GOPATH/src/github.com/magefile/mage && go run bootstrap.go
+  format-go:
+    parameters:
+      directory:
+        type: string
+        description: path of the directory in which to run the command
+    steps:
+      - install-mage
+      - checkout
+      - run:
+          working_directory: << parameters.directory >>
+          name: Run format check
+          command: mage -v format:check
+  test-go:
+    parameters:
+      directory:
+        type: string
+        description: path of the directory in which to run the command
+    steps:
+      - install-mage
+      - checkout
+      - run:
+          working_directory: << parameters.directory >>
+          name: Run tests
+          command: mage -v test
+
 
 executors:
   python-executor:
@@ -34,32 +59,20 @@ jobs:
   consumer-format:
     executor: golang-executor
     steps:
-      - install-mage
-      - checkout
-      - run:
-          working_directory: ./consumer
-          name: Run format check
-          command: mage -v format:check
+      - format-go:
+          directory: ./consumer
   # Ensure api code is formatted correctly
   api-format:
     executor: golang-executor
     steps:
-      - install-mage
-      - checkout
-      - run:
-          working_directory: ./api
-          name: Run format check
-          command: mage -v format:check
+      - format-go:
+          directory: ./api
   # Ensure api code passes tests
   api-test:
     executor: golang-executor
     steps:
-      - install-mage
-      - checkout
-      - run:
-          working_directory: ./api
-          name: Run tests
-          command: mage -v test
+      - test-go:
+          directory: ./api
   # Ensure edge code is formatted correctly
   edge-format:
     executor: python-executor
@@ -90,7 +103,6 @@ jobs:
           working_directory: ./edge
           name: Run tests
           command: pipenv run invoke test
-
 workflows:
   version: 2
   main:
