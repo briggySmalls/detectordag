@@ -45,14 +45,14 @@ func init() {
 	// Create a new session just for emailing (there is no emailing service in eu-west-2)
 	emailSesh := shared.CreateSession(aws.Config{Region: aws.String("eu-west-1")})
 	// Create a new email client
-	email, err := email.New(emailSesh)
+	verifier, err := email.NewVerifier(emailSesh)
 	if err != nil {
 		shared.LogErrorAndExit(err)
 	}
 	// Create the tokens
 	tokens := createTokens()
 	// Create the server
-	s := server.New(db, shadow, email, iot, tokens)
+	s := server.New(db, shadow, verifier, iot, tokens)
 	// Create the router
 	r := swagger.NewRouter(iot, s, createTokens())
 	// Create an adapter for aws lambda

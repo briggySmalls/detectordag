@@ -23,7 +23,7 @@ type AccountIdKey struct {
 type server struct {
 	db     database.Client
 	shadow shadow.Client
-	email  email.Client
+	email  email.Verifier
 	iot    iot.Client
 	tokens tokens.Tokens
 }
@@ -37,7 +37,7 @@ type Server interface {
 	RegisterDevice(w http.ResponseWriter, r *http.Request)
 }
 
-func New(db database.Client, shadow shadow.Client, email email.Client, iot iot.Client, tokens tokens.Tokens) Server {
+func New(db database.Client, shadow shadow.Client, email email.Verifier, iot iot.Client, tokens tokens.Tokens) Server {
 	return &server{
 		db:     db,
 		shadow: shadow,

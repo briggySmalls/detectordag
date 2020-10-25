@@ -1,10 +1,10 @@
 package swagger
 
-//go:generate  go run github.com/golang/mock/mockgen -destination mock_db.go -package swagger -mock_names Client=MockDBClient -self_package github.com/briggysmalls/detectordag/api github.com/briggysmalls/detectordag/shared/database Client
-//go:generate  go run github.com/golang/mock/mockgen -destination mock_shadow.go -package swagger -mock_names Client=MockShadowClient -self_package github.com/briggysmalls/detectordag/api github.com/briggysmalls/detectordag/shared/shadow Client
-//go:generate  go run github.com/golang/mock/mockgen -destination mock_email.go -package swagger -mock_names Client=MockEmailClient -self_package github.com/briggysmalls/detectordag/api github.com/briggysmalls/detectordag/shared/email Client
-//go:generate  go run github.com/golang/mock/mockgen -destination mock_iot.go -package swagger -mock_names Client=MockIoTClient -self_package github.com/briggysmalls/detectordag/api github.com/briggysmalls/detectordag/shared/iot Client
-//go:generate  go run github.com/golang/mock/mockgen -destination mock_tokens.go -package swagger -mock_names Client=MockTokens -self_package github.com/briggysmalls/detectordag/api github.com/briggysmalls/detectordag/api/swagger/tokens Tokens
+//go:generate go run github.com/golang/mock/mockgen -destination mock_db.go -package swagger -mock_names Client=MockDBClient -self_package github.com/briggysmalls/detectordag/api github.com/briggysmalls/detectordag/shared/database Client
+//go:generate go run github.com/golang/mock/mockgen -destination mock_shadow.go -package swagger -mock_names Client=MockShadowClient -self_package github.com/briggysmalls/detectordag/api github.com/briggysmalls/detectordag/shared/shadow Client
+//go:generate go run github.com/golang/mock/mockgen -destination mock_email.go -package swagger -self_package github.com/briggysmalls/detectordag/api github.com/briggysmalls/detectordag/shared/email Verifier
+//go:generate go run github.com/golang/mock/mockgen -destination mock_iot.go -package swagger -mock_names Client=MockIoTClient -self_package github.com/briggysmalls/detectordag/api github.com/briggysmalls/detectordag/shared/iot Client
+//go:generate go run github.com/golang/mock/mockgen -destination mock_tokens.go -package swagger -self_package github.com/briggysmalls/detectordag/api github.com/briggysmalls/detectordag/api/swagger/tokens Tokens
 
 import (
 	"bytes"
@@ -29,7 +29,7 @@ func init() {
 	}
 }
 
-func createRealRouter(t *testing.T) (*MockDBClient, *MockShadowClient, *MockEmailClient, *MockIoTClient, *MockTokens, *mux.Router) {
+func createRealRouter(t *testing.T) (*MockDBClient, *MockShadowClient, *MockVerifier, *MockIoTClient, *MockTokens, *mux.Router) {
 	// Create mock controller
 	ctrl := gomock.NewController(t)
 	// Create mock database
@@ -37,7 +37,7 @@ func createRealRouter(t *testing.T) (*MockDBClient, *MockShadowClient, *MockEmai
 	// Create mock shadow
 	shadow := NewMockShadowClient(ctrl)
 	// Create mock email
-	email := NewMockEmailClient(ctrl)
+	email := NewMockVerifier(ctrl)
 	// Create mock iot
 	iot := NewMockIoTClient(ctrl)
 	// Create mock tokens
