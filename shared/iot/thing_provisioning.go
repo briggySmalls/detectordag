@@ -29,7 +29,7 @@ var provisioningTemplate = `
                 "ThingName": {"Ref": "DeviceId"},
                 "ThingGroups": [{"Ref" : "ThingGroup"}],
                 "ThingTypeName" :  {"Ref" : "ThingType"},
-                "AttributePayload" : {"name": {"Ref": "DeviceName"}, "account-id": {"Ref": "AccountId"}, "visibility": "true"}
+                "AttributePayload" : {"name": {"Ref": "DeviceName"}, "account-id": {"Ref": "AccountId"}, "visibility": "false"}
             }
         },
         "certificate" : {
