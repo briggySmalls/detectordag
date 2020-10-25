@@ -19,8 +19,10 @@ func CreateSession(config aws.Config) *session.Session {
 	return sesh
 }
 
-func LogErrorAndReturn(err error) {
-	log.Printf("%+v\n", wrapError(err))
+func LogErrorAndReturn(err error) error {
+	err = wrapError(err)
+	log.Printf("%+v\n", err)
+	return err
 }
 
 func LogErrorAndExit(err error) {

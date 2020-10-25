@@ -107,12 +107,29 @@ workflows:
   version: 2
   main:
     jobs:
+      # edge
       - edge-format
       - edge-lint
       - edge-test
+      # consumer
       - go-format:
           name: consumer-format
           directory: ./consumer
+      # api
       - go-format:
           name: api-format
           directory: ./api
+      # findlost
+      - go-format:
+          name: findlost-format
+          directory: ./visibility/findlost
+      - go-test:
+          name: findlost-test
+          directory: ./visibility/findlost
+      # setfound
+      - go-format:
+          name: setfound-format
+          directory: ./visibility/setfound
+      - go-test:
+          name: findlost-test
+          directory: ./visibility/findlost

@@ -7,13 +7,15 @@ import (
 	"github.com/aws/aws-sdk-go/service/iot"
 	"github.com/aws/aws-sdk-go/service/iot/iotiface"
 	"log"
+	"strconv"
 )
 
 const (
-	accountIDAttributeName = "account-id"
-	nameAttributeName      = "name"
-	thingType              = "detectordag"
-	thingGroup             = "detectordag"
+	accountIDAttributeName  = "account-id"
+	nameAttributeName       = "name"
+	thingType               = "detectordag"
+	thingGroup              = "detectordag"
+	visibilityAttributeName = "visibility"
 )
 
 type client struct {
@@ -22,15 +24,18 @@ type client struct {
 
 type Client interface {
 	GetThing(id string) (*Device, error)
+	GetThingsByVisibility(status bool) ([]*Device, error)
 	GetThingsByAccount(id string) ([]*Device, error)
 	RegisterThing(accountID, deviceID, name string) (*Device, *Certificates, error)
+	SetVisibiltyState(deviceID string, state bool) error
 }
 
 // Device holds the non-state properties of a device
 type Device struct {
-	Name      string
-	DeviceId  string
-	AccountId string
+	Name       string
+	DeviceId   string
+	AccountId  string
+	Visibility bool
 }
 
 type Certificates struct {
@@ -64,29 +69,21 @@ func (c *client) GetThing(id string) (*Device, error) {
 	return d.ToDevice()
 }
 
+// GetThings returns all things which have the specified visiblity status
+func (c *client) GetThingsByVisibility(status bool) ([]*Device, error) {
+	return c.getPaginatedDevices(&iot.ListThingsInput{
+		AttributeName:  aws.String(visibilityAttributeName),
+		AttributeValue: aws.String(strconv.FormatBool(status)),
+	})
+}
+
 // GetThingsByAccount returns all things which are associated with the specified accountg
 func (c *client) GetThingsByAccount(id string) ([]*Device, error) {
 	// Search for things
-	things := []*iot.ThingAttribute{}
-	var err error
-	things, err = c.getPaginatedThings(&iot.ListThingsInput{
+	return c.getPaginatedDevices(&iot.ListThingsInput{
 		AttributeName:  aws.String(accountIDAttributeName),
 		AttributeValue: aws.String(id),
-	}, nil, things)
-	if err != nil {
-		return nil, err
-	}
-	// Wrap up each thing
-	wrappedThings := make([]*Device, len(things))
-	for i, thing := range things {
-		t := thingAttribute{thing}
-		device, err := t.ToDevice()
-		if err != nil {
-			return nil, err
-		}
-		wrappedThings[i] = device
-	}
-	return wrappedThings, nil
+	})
 }
 
 // RegisterThing creates a new thing and provides certificates for it to communicate
@@ -130,6 +127,22 @@ func (c *client) RegisterThing(accountID, deviceID, name string) (*Device, *Cert
 	return &d, &certs, nil
 }
 
+// SetVisibilityState sets attribute indicating if the device is lost
+func (c *client) SetVisibiltyState(deviceID string, state bool) error {
+	// Set the attribute
+	_, err := c.iot.UpdateThing(&iot.UpdateThingInput{
+		ThingName:     aws.String(deviceID),
+		ThingTypeName: aws.String(thingType),
+		AttributePayload: &iot.AttributePayload{
+			Attributes: map[string]*string{
+				visibilityAttributeName: aws.String(strconv.FormatBool(state)),
+			},
+			Merge: aws.Bool(true), // Don't nuke the other attributes
+		},
+	})
+	return err
+}
+
 // createCertificate creates a new certificate
 func (c *client) createCertificate() (*iot.CreateKeysAndCertificateOutput, error) {
 	return c.iot.CreateKeysAndCertificate(&iot.CreateKeysAndCertificateInput{
@@ -151,6 +164,27 @@ func (c *client) registerThing(deviceId, certificateID, name, accountID string) 
 			"CertificateId": aws.String(certificateID),
 		},
 	})
+}
+
+func (c *client) getPaginatedDevices(input *iot.ListThingsInput) ([]*Device, error) {
+	// Search for things
+	things := []*iot.ThingAttribute{}
+	var err error
+	things, err = c.getPaginatedThings(input, nil, things)
+	if err != nil {
+		return nil, err
+	}
+	// Wrap up each thing
+	wrappedThings := make([]*Device, len(things))
+	for i, thing := range things {
+		t := thingAttribute{thing}
+		device, err := t.ToDevice()
+		if err != nil {
+			return nil, err
+		}
+		wrappedThings[i] = device
+	}
+	return wrappedThings, nil
 }
 
 func (c *client) getPaginatedThings(input *iot.ListThingsInput, output *iot.ListThingsOutput, things []*iot.ThingAttribute) ([]*iot.ThingAttribute, error) {
