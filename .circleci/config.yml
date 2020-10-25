@@ -19,17 +19,7 @@ commands:
       - run: go get -u -d github.com/magefile/mage
       - run: cd $GOPATH/src/github.com/magefile/mage && go run bootstrap.go
   format-go:
-    parameters:
-      directory:
-        type: string
-        description: path of the directory in which to run the command
-    steps:
-      - install-mage
-      - checkout
-      - run:
-          working_directory: << parameters.directory >>
-          name: Run format check
-          command: mage -v format:check
+
   test-go:
     parameters:
       directory:
@@ -55,24 +45,34 @@ executors:
       - image: circleci/golang:1.15
 
 jobs:
-  # Ensure consumer code is formatted correctly
-  consumer-format:
+  # Define a generic go formatting job
+  go-format:
     executor: golang-executor
+    parameters:
+      directory:
+        type: string
+        description: path of the directory in which to run the command
     steps:
-      - format-go:
-          directory: ./consumer
-  # Ensure api code is formatted correctly
-  api-format:
+      - install-mage
+      - checkout
+      - run:
+          working_directory: << parameters.directory >>
+          name: Run format check
+          command: mage -v format:check
+  # Define a generic go testing job
+  go-test:
     executor: golang-executor
+    parameters:
+      directory:
+        type: string
+        description: path of the directory in which to run the command
     steps:
-      - format-go:
-          directory: ./api
-  # Ensure api code passes tests
-  api-test:
-    executor: golang-executor
-    steps:
-      - test-go:
-          directory: ./api
+      - install-mage
+      - checkout
+      - run:
+          working_directory: << parameters.directory >>
+          name: Run format check
+          command: mage -v format:check
   # Ensure edge code is formatted correctly
   edge-format:
     executor: python-executor
@@ -110,5 +110,9 @@ workflows:
       - edge-format
       - edge-lint
       - edge-test
-      - consumer-format
-      - api-format
+      - go-format:
+          name: consumer-format
+          directory: ./consumer
+      - go-format:
+          name: api-format
+          directory: ./api
