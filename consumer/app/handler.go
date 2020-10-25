@@ -39,7 +39,7 @@ type PowerStatusChangedEmailConfig struct {
 
 var db database.Client
 var iot iotp.Client
-var emailClient email.Client
+var emailClient email.Emailer
 
 func init() {
 	// Create an AWS session
@@ -63,7 +63,7 @@ func init() {
 	// Create a new session just for emailing (there is no emailing service in eu-west-2)
 	sesh = shared.CreateSession(aws.Config{Region: aws.String("eu-west-1")})
 	// Create a new email client
-	emailClient, err = email.New(sesh, htmlTemplateSource, textTemplateSource)
+	emailClient, err = email.NewEmailer(sesh, htmlTemplateSource, textTemplateSource)
 	if err != nil {
 		shared.LogErrorAndExit(err)
 	}
