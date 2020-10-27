@@ -48,7 +48,7 @@ func (a *app) handleRequest(ctx context.Context, event DeviceSeenEvent) error {
 	// Send emails to indicate visibility status was updated
 	return a.email.SendVisibilityStatus(
 		device,
-		time.Unix(event.Updated.Status.Timestamp, 0),
+		time.Unix(event.Updated.Status.Timestamp, 0).UTC(),
 		status,
 	)
 }
