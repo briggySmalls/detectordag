@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+xAWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Resources:
   FindLost:
@@ -33,6 +33,14 @@ Resources:
           Statement:
             - Effect: Allow
               Action:
+              Action:
+                - 'iot:UpdateThing'
+              Resource:
+              - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
                 - 'iot:GetThingShadow'
               Resource:
                 - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
@@ -47,8 +55,5 @@ Resources:
             - Effect: Allow
               Action:
                 - 'dynamodb:GetItem'
-                - 'dynamodb:UpdateItem'
-                - 'dynamodb:Query'
               Resource:
                 - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/accounts"
-                - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/accounts/index/*"
