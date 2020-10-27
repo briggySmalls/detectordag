@@ -3,6 +3,7 @@ package email
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
@@ -101,7 +102,7 @@ func (c *client) SendEmail(recipients []string, sender, subject string, context 
 	log.Printf("Sending email")
 	result, err := c.ses.SendEmail(input)
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to send email: %w", err)
 	}
 	// Log result
 	log.Printf("Message sent with ID: %s", *result.MessageId)

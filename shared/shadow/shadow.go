@@ -2,6 +2,7 @@ package shadow
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iot"
@@ -77,7 +78,7 @@ func (c *client) Get(deviceId string) (*Shadow, error) {
 		ThingName: aws.String(deviceId),
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Get shadow failure for '%d': %w", deviceId, err)
 	}
 	// Unpack
 	var shadow Shadow
