@@ -1,6 +1,5 @@
 """Main module."""
 import logging
-from threading import Timer
 from types import TracebackType
 from typing import Optional, Type
 
@@ -29,9 +28,6 @@ class EdgeApp:
         self._device = device
         # Create the client
         self._client = CloudClient(client_config)
-        # Preallocate the timer
-        self._timer = None  # type: Optional[Timer]
-        self._is_cancelled = False
 
     def __enter__(self) -> 'EdgeApp':
         self._client.__enter__()
@@ -46,31 +42,15 @@ class EdgeApp:
         # Send messages when power status changes
         self._device.when_activated = self._publish_update
         self._device.when_deactivated = self._publish_update
-        # Start the alive timer
-        self._tick()
 
     def __exit__(self, exc_type: Optional[Type[BaseException]],
                  exc_value: Optional[BaseException],
                  traceback: Optional[TracebackType]) -> None:
         # Teardown the AWS client
         self._client.__exit__(exc_type, exc_value, traceback)
-        # Cancel any running timers
-        if self._timer is not None:
-            self._timer.cancel()
-            self._is_cancelled = True
 
     def _publish_update(self, device: DigitalInputDevice) -> None:
         # Get the status
         status = bool(device.value)
         # Publish
         self._client.power_status_changed(status)
-
-    def _tick(self) -> None:
-        if self._is_cancelled:
-            # Short-circuit if we've cancelled already
-            return
-        # Publish an update
-        self._publish_update(self._device)
-        # Schedule another tick
-        self._timer = Timer(self.config.alive_interval, self._tick)
-        self._timer.start()
