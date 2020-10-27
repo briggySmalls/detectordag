@@ -27,18 +27,16 @@ func New(
 	}
 }
 
-type LifecycleEventType string
-
 const (
-	LifecycleEventTypeConnected    LifecycleEventType = "connected"
-	LifecycleEventTypeDisconnected LifecycleEventType = "connected"
+	LifecycleEventTypeConnected    = "connected"
+	LifecycleEventTypeDisconnected = "disconnected"
 )
 
 // DeviceLifecycleEvent tells us when a device has last been seen
 type DeviceLifecycleEvent struct {
-	DeviceID  string             `json:"clientId"`
-	EventType LifecycleEventType `json:""`
-	Timestamp int64              `json:""`
+	DeviceID  string `json:"clientId"`
+	EventType string `json:""`
+	Timestamp int64  `json:""`
 }
 
 // handleRequest handles a lambda call
