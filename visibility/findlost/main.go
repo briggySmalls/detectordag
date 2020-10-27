@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/briggysmalls/detectordag/shared"
@@ -11,10 +10,9 @@ import (
 	"github.com/briggysmalls/detectordag/visibility"
 	"github.com/briggysmalls/detectordag/visibility/findlost/app"
 	"log"
+	"os"
 	"time"
 )
-
-const lastSeenDurationHours = 24
 
 // Prepare an application to reuse across lambda runs
 var findLost app.App
@@ -48,8 +46,13 @@ func init() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	// Parse the duration from environment variables
 	// Create the duration
-	lastSeenDuration, err := time.ParseDuration(fmt.Sprintf("%dh", lastSeenDurationHours))
+	lastSeenDurationStr := os.Getenv("LAST_SEEN_DURATION")
+	if lastSeenDurationStr == "" {
+		log.Fatal("LAST_SEEN_DURATION not set")
+	}
+	lastSeenDuration, err := time.ParseDuration(lastSeenDurationStr)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

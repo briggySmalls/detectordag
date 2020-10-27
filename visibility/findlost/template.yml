@@ -12,6 +12,9 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: rate(1 day)
+      Environment:
+        Variables:
+          LAST_SEEN_DURATION: "12h"
       Policies:
         - Version: '2012-10-17'
           Statement:
