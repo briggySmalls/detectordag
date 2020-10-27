@@ -57,8 +57,8 @@ func TestEmailsSent(t *testing.T) {
 		timestamp int64
 		time      time.Time
 	}{
-		{event: "connected", status: true, timestamp: 0, time: createTime(t, "1970/01/01 01:00:00")},
-		{event: "disconnected", status: false, timestamp: 0, time: createTime(t, "1970/01/01 01:00:00")},
+		{event: "connected", status: true, timestamp: 0, time: createTime(t, "1970/01/01 00:00:00")},
+		{event: "disconnected", status: false, timestamp: 0, time: createTime(t, "1970/01/01 00:00:00")},
 	}
 	const (
 		deviceID = "792ac520-0733-4ffe-8137-8aba3ca446d7"

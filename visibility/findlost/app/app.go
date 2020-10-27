@@ -51,7 +51,7 @@ func (a *app) RunJob(ctx context.Context, event DeviceLifecycleEvent) error {
 		return fmt.Errorf("Unexpected lifecycle event: %s", event.EventType)
 	}
 	// Parse the time
-	lastSeen := time.Unix(int64(event.Timestamp), 0)
+	lastSeen := time.Unix(int64(event.Timestamp), 0).UTC()
 	// Get the device
 	device, err := a.iot.GetThing(event.DeviceID)
 	if err != nil {
