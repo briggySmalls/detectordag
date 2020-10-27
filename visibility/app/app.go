@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/briggysmalls/detectordag/shared/iot"
-	"github.com/briggysmalls/detectordag/visibility"
 	"time"
 )
 
 type app struct {
 	iot   iot.Client
-	email visibility.EmailClient
+	email EmailClient
 }
 
 type App interface {
@@ -19,7 +18,7 @@ type App interface {
 
 func New(
 	iot iot.Client,
-	email visibility.EmailClient,
+	email EmailClient,
 ) App {
 	return &app{
 		iot:   iot,

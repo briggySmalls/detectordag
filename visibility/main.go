@@ -6,16 +6,17 @@ import (
 	"github.com/briggysmalls/detectordag/shared"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/iot"
-	"github.com/briggysmalls/detectordag/visibility"
+	"github.com/briggysmalls/detectordag/visibility/app"
 	"log"
 )
 
 // Prepare an application to reuse across lambda runs
-var setfound *app
+var findLost app.App
 
 func init() {
 	// Add file/line number to the default logger
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	var err error
 	// Create an AWS session
 	// Good practice will share this session for all services
 	sesh := shared.CreateSession(aws.Config{})
@@ -32,15 +33,15 @@ func init() {
 	// Create a new session just for emailing (there is no emailing service in eu-west-2)
 	emailSesh := shared.CreateSession(aws.Config{Region: aws.String("eu-west-1")})
 	// Create a new visibility email client
-	visibilityEmailClient, err := visibility.New(emailSesh, dbClient)
+	visibilityEmailClient, err := app.NewVisibilityEmailer(emailSesh, dbClient)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	// Create an app
-	setfound = &app{iot: iotClient, email: visibilityEmailClient}
+	// Create the application
+	findLost = app.New(iotClient, visibilityEmailClient)
 }
 
 // main is the entrypoint to the lambda function
 func main() {
-	lambda.Start(setfound.handleRequest)
+	lambda.Start(findLost.RunJob)
 }

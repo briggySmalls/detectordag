@@ -1,11 +1,11 @@
-package visibility
+package app
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
 	"github.com/briggysmalls/detectordag/shared/iot"
-
 	"log"
 	"time"
 )
@@ -19,7 +19,7 @@ type EmailClient interface {
 	SendVisibilityStatus(device *iot.Device, timestamp time.Time, status bool) error
 }
 
-func New(sesh *session.Session, db database.Client) (EmailClient, error) {
+func NewVisibilityEmailer(sesh *session.Session, db database.Client) (EmailClient, error) {
 	// Create a new email client
 	email, err := email.NewEmailer(sesh, htmlTemplateSource, textTemplateSource)
 	if err != nil {
@@ -54,4 +54,8 @@ func (e *emailClient) SendVisibilityStatus(device *iot.Device, timestamp time.Ti
 	}
 	// Send the email.
 	return e.email.SendEmail(account.Emails, Sender, subject, context)
+}
+
+func DeviceString(device *iot.Device) string {
+	return fmt.Sprintf("Device '%s' ('%s')", device.DeviceId, device.Name)
 }
