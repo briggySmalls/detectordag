@@ -63,7 +63,7 @@ func (c *client) GetThing(id string) (*Device, error) {
 	// Fetch the specified thing
 	thing, err := c.iot.DescribeThing(&iot.DescribeThingInput{ThingName: aws.String(id)})
 	if err != nil {
-		return nil, fmt.Errorf("Get shadow failure for '%s': %w", err)
+		return nil, fmt.Errorf("Get shadow failure for '%s': %w", id, err)
 	}
 	// Convert the response to a 'Device'
 	d := describeThingOutput{thing}
@@ -141,7 +141,7 @@ func (c *client) SetVisibiltyState(deviceID string, state bool) error {
 			Merge: aws.Bool(true), // Don't nuke the other attributes
 		},
 	})
-	return fmt.Errorf("Failed to update thing '%s': %w", err)
+	return fmt.Errorf("Failed to update thing '%s': %w", deviceID, err)
 }
 
 // createCertificate creates a new certificate
