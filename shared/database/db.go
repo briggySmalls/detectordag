@@ -61,7 +61,7 @@ func (d *client) GetAccountById(id string) (*Account, error) {
 		},
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to get account '%s': %w", id, err)
 	}
 	// Check we got exactly one account
 	if result.Item == nil {
@@ -76,7 +76,7 @@ func (d *client) GetAccountByUsername(username string) (*Account, error) {
 	kc := expression.Key("username").Equal(expression.Value(username))
 	expr, err := expression.NewBuilder().WithKeyCondition(kc).Build()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed build dynamodb query with username '%s': %w", username, err)
 	}
 	// Request for the account associated with the username
 	result, err := d.db.Query(&dynamodb.QueryInput{
@@ -88,7 +88,7 @@ func (d *client) GetAccountByUsername(username string) (*Account, error) {
 		Select:                    aws.String("ALL_PROJECTED_ATTRIBUTES"),
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Failed to get account with username '%s': %w", username, err)
 	}
 	// Check we got exactly one account
 	if len(result.Items) != 1 {

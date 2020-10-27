@@ -76,6 +76,7 @@ func (a *app) processVisibleDevice(device *iot.Device) error {
 		return nil
 	}
 	// Mark the device as lost
+	log.Printf("Device '%s' identifed as lost", device.DeviceId)
 	lostStatus := false
 	err = a.iot.SetVisibiltyState(device.DeviceId, lostStatus)
 	if err != nil {

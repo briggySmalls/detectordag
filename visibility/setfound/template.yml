@@ -20,7 +20,9 @@ Resources:
             - Effect: Allow
               Action:
                 - 'iot:DescribeThing'
-              Resource: '*'
+                - 'iot:UpdateThing'
+              Resource:
+                - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -32,8 +34,5 @@ Resources:
             - Effect: Allow
               Action:
                 - 'dynamodb:GetItem'
-                - 'dynamodb:UpdateItem'
-                - 'dynamodb:Query'
               Resource:
                 - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/accounts"
-                - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/accounts/index/*"
