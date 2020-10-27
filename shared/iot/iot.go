@@ -141,7 +141,10 @@ func (c *client) SetVisibiltyState(deviceID string, state bool) error {
 			Merge: aws.Bool(true), // Don't nuke the other attributes
 		},
 	})
-	return fmt.Errorf("Failed to update thing '%s': %w", deviceID, err)
+	if err != nil {
+		return fmt.Errorf("Failed to update thing '%s': %w", deviceID, err)
+	}
+	return err
 }
 
 // createCertificate creates a new certificate
