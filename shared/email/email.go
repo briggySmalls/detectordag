@@ -15,11 +15,14 @@ const (
 	CharSet = "UTF-8"
 )
 
-type Client interface {
-	SendEmail(toAddresses []string, sender, subject string, context interface{}) error
+type Verifier interface {
 	VerifyEmail(email string) error
 	GetVerificationStatuses(emails []string) (map[string]string, error)
 	VerifyEmailsIfNecessary(emails []string) error
+}
+
+type Emailer interface {
+	SendEmail(toAddresses []string, sender, subject string, context interface{}) error
 }
 
 type client struct {
@@ -28,29 +31,28 @@ type client struct {
 	textTemplate *template.Template
 }
 
-// New gets a new Client
-func New(sesh *session.Session, htmlTemplateSource, textTemplateSource string) (Client, error) {
-	// Create Amazon DynamoDB client
-	svc := ses.New(sesh)
-	if svc == nil {
-		return nil, errors.New("Failed to create email client")
-	}
+// NewVerifier gets a new Verifier
+func NewVerifier(sesh *session.Session) (Verifier, error) {
+	return createClient(sesh)
+}
+
+// NewEmailer gets a new Emailer
+func NewEmailer(sesh *session.Session, htmlTemplateSource, textTemplateSource string) (Emailer, error) {
+	// Create a basic client
+	client, err := createClient(sesh)
 	// Create templates
 	htmlTemplate, err := template.New("htmlTemplate").Parse(htmlTemplateSource)
 	if err != nil {
 		return nil, err
 	}
+	client.htmlTemplate = htmlTemplate
 	textTemplate, err := template.New("textTemplate").Parse(textTemplateSource)
 	if err != nil {
 		return nil, err
 	}
+	client.textTemplate = textTemplate
 	// Create our client wrapper
-	client := client{
-		ses:          svc,
-		htmlTemplate: htmlTemplate,
-		textTemplate: textTemplate,
-	}
-	return &client, nil
+	return client, nil
 }
 
 func (c *client) SendEmail(recipients []string, sender, subject string, context interface{}) error {
@@ -158,4 +160,15 @@ func (c *client) VerifyEmailsIfNecessary(emails []string) error {
 		}
 	}
 	return nil
+}
+
+func createClient(sesh *session.Session) (*client, error) {
+	// Create Amazon DynamoDB client
+	svc := ses.New(sesh)
+	if svc == nil {
+		return nil, errors.New("Failed to create email client")
+	}
+	return &client{
+		ses: svc,
+	}, nil
 }

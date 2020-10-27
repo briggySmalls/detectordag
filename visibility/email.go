@@ -11,7 +11,7 @@ import (
 )
 
 type emailClient struct {
-	email email.Client
+	email email.Emailer
 	db    database.Client
 }
 
@@ -21,7 +21,7 @@ type EmailClient interface {
 
 func New(sesh *session.Session, db database.Client) (EmailClient, error) {
 	// Create a new email client
-	email, err := email.New(sesh, htmlTemplateSource, textTemplateSource)
+	email, err := email.NewEmailer(sesh, htmlTemplateSource, textTemplateSource)
 	if err != nil {
 		return nil, err
 	}
