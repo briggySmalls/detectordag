@@ -1,4 +1,4 @@
-xAWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Resources:
   FindLost:
@@ -36,7 +36,7 @@ Resources:
               Action:
                 - 'iot:UpdateThing'
               Resource:
-              - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
+                - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
