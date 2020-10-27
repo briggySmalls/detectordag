@@ -2,7 +2,6 @@ package app
 
 //go:generate go run github.com/golang/mock/mockgen -destination mock_iot.go -package app -mock_names Client=MockIoTClient github.com/briggysmalls/detectordag/shared/iot Client
 //go:generate go run github.com/golang/mock/mockgen -destination mock_visibility.go -package app -mock_names Client=MockVisibilityEmailClient github.com/briggysmalls/detectordag/visibility EmailClient
-//go:generate go run github.com/golang/mock/mockgen -destination mock_shadow.go -package app -mock_names Client=MockShadowClient github.com/briggysmalls/detectordag/shared/shadow Client
 
 import (
 	"errors"

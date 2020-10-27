@@ -6,12 +6,9 @@ import (
 	"github.com/briggysmalls/detectordag/shared"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/iot"
-	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/visibility"
 	"github.com/briggysmalls/detectordag/visibility/findlost/app"
 	"log"
-	"os"
-	"time"
 )
 
 // Prepare an application to reuse across lambda runs
@@ -29,11 +26,6 @@ func init() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	// Create a new shadow client
-	shadowClient, err := shadow.New(sesh)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
 	// Create a new Db client
 	dbClient, err := database.New(sesh)
 	if err != nil {
@@ -46,18 +38,8 @@ func init() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	// Parse the duration from environment variables
-	// Create the duration
-	lastSeenDurationStr := os.Getenv("LAST_SEEN_DURATION")
-	if lastSeenDurationStr == "" {
-		log.Fatal("LAST_SEEN_DURATION not set")
-	}
-	lastSeenDuration, err := time.ParseDuration(lastSeenDurationStr)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
 	// Create the application
-	findLost = app.New(iotClient, visibilityEmailClient, shadowClient, lastSeenDuration)
+	findLost = app.New(iotClient, visibilityEmailClient)
 }
 
 // main is the entrypoint to the lambda function
