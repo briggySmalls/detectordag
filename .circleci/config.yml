@@ -18,21 +18,6 @@ commands:
     steps:
       - run: go get -u -d github.com/magefile/mage
       - run: cd $GOPATH/src/github.com/magefile/mage && go run bootstrap.go
-  format-go:
-
-  test-go:
-    parameters:
-      directory:
-        type: string
-        description: path of the directory in which to run the command
-    steps:
-      - install-mage
-      - checkout
-      - run:
-          working_directory: << parameters.directory >>
-          name: Run tests
-          command: mage -v test
-
 
 executors:
   python-executor:
