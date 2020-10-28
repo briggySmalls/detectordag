@@ -12,8 +12,6 @@ import (
 	"time"
 )
 
-const lastSeenDurationHours = 24
-
 func TestInvalidEventType(t *testing.T) {
 	testParams := []struct {
 		event string
