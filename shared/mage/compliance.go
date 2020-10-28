@@ -2,10 +2,10 @@ package mage
 
 import (
 	"errors"
+	"fmt"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 	"regexp"
-	"fmt"
 	"strings"
 )
 
@@ -38,6 +38,11 @@ func Test() error {
 	packages := strings.Split(re.ReplaceAllString(output, ""), "\n")
 	args := append([]string{"test", "-v"}, packages...)
 	return sh.RunV("go", args...)
+}
+
+// Cleans
+func Clean() error {
+	return sh.RunV("find", ".", "-name", "'mock_*.go'", "-delete")
 }
 
 // Generates the mocks

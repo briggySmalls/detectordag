@@ -31,7 +31,6 @@ class AppConfig:
         'aws_endpoint': ConfigMapper('AWS_ENDPOINT', 'str'),
         'aws_port': ConfigMapper('AWS_PORT', 'int', default=8883),
         'certs_dir': ConfigMapper('CERT_DIR', 'path', '~/.detectordag/certs'),
-        'alive_interval': ConfigMapper('ALIVE_INTERVAL', 'int', default=3600),
     }
     _certs = {
         'aws_root_cert': 'root-CA.crt',
@@ -46,7 +45,6 @@ class AppConfig:
     aws_endpoint: str
     aws_port: int
     certs_dir: Path
-    alive_interval: int
 
     @classmethod
     def from_env(cls) -> 'AppConfig':

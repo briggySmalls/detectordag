@@ -1,9 +1,9 @@
-package visibility
+package app
 
 const (
-	// Address from which emails will be sent
-	Sender     = "briggySmalls90@gmail.com"
-	DateFormat = "15:04 2/1/06"
+  // Address from which emails will be sent
+  Sender     = "briggySmalls90@gmail.com"
+  DateFormat = "15:04 2/1/06"
 )
 
 const textTemplateSource = `
@@ -25,7 +25,7 @@ Sent with ❤ from a dag
 const htmlTemplateSource = `
 <h1>Visibility status update</h1>
 <p>
-	Whilst keeping an eye on your dag, we noticed something change.
+  Whilst keeping an eye on your dag, we noticed something change.
 </p>
 <table>
   <tr>
@@ -43,14 +43,14 @@ const htmlTemplateSource = `
 </table>
 {{ if .Status }}
 <p>
-	We're back in business!
+  We're back in business!
 </p>
 {{ else }}
 <p>
-	Maybe it's time to send a neighbour round?
+  Maybe it's time to send a neighbour round?
 </p>
 {{ end }}
 <p>
-	Sent with ❤ from a dag
+  Sent with ❤ from a dag
 </p>
 `
