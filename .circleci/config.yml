@@ -104,17 +104,10 @@ workflows:
       - go-format:
           name: api-format
           directory: ./api
-      # findlost
+      # visibility
       - go-format:
-          name: findlost-format
-          directory: ./visibility/findlost
+          name: visibility-format
+          directory: ./visibility
       - go-test:
-          name: findlost-test
-          directory: ./visibility/findlost
-      # setfound
-      - go-format:
-          name: setfound-format
-          directory: ./visibility/setfound
-      - go-test:
-          name: findlost-test
-          directory: ./visibility/findlost
+          name: visibility-test
+          directory: ./visibility
