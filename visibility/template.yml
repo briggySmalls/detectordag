@@ -26,6 +26,7 @@ Resources:
             - Effect: Allow
               Action:
               Action:
+                - 'iot:DescribeThing'
                 - 'iot:UpdateThing'
               Resource:
                 - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
