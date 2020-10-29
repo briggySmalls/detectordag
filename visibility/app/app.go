@@ -56,6 +56,11 @@ func (a *app) RunJob(ctx context.Context, event DeviceLifecycleEvent) error {
 	if err != nil {
 		return err
 	}
+	// Record the new device status
+	err = a.iot.SetVisibiltyState(device.DeviceId, visibility)
+	if err != nil {
+		return err
+	}
 	// Indicate the device status has changed
 	err = a.email.SendVisibilityStatus(device, lastSeen, visibility)
 	if err != nil {
