@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"html/template"
-	"log"
 )
 
 const (
@@ -99,13 +98,10 @@ func (c *client) SendEmail(recipients []string, sender, subject string, context 
 		Source: aws.String(sender),
 	}
 	// Attempt to send the email.
-	log.Printf("Sending email")
-	result, err := c.ses.SendEmail(input)
+	_, err = c.ses.SendEmail(input)
 	if err != nil {
 		return fmt.Errorf("Failed to send email: %w", err)
 	}
-	// Log result
-	log.Printf("Message sent with ID: %s", *result.MessageId)
 	return nil
 }
 
