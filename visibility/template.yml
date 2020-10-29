@@ -7,14 +7,6 @@ Resources:
       Handler: api
       Runtime: go1.x
       Timeout: 5
-      Events:
-        CheckWebsiteScheduledEvent:
-          Type: Schedule
-          Properties:
-            Schedule: rate(1 day)
-      Environment:
-        Variables:
-          LAST_SEEN_DURATION: "12h"
       Policies:
         - Version: '2012-10-17'
           Statement:
