@@ -72,6 +72,8 @@ func TestEmailsSent(t *testing.T) {
 			AccountId: "af6f3796-c446-4850-9fda-65936cab9b6d",
 		}
 		mockIoT.EXPECT().GetThing(gomock.Eq(deviceID)).Return(&device, nil)
+		// Configure call to update visibility state
+		mockIoT.EXPECT().SetVisibiltyState(gomock.Eq(device.DeviceId), gomock.Eq(params.status))
 		// Configure call to send emails
 		mockEmail.EXPECT().SendVisibilityStatus(gomock.Eq(&device), gomock.Eq(params.time), gomock.Eq(params.status))
 		// Prepare an event
