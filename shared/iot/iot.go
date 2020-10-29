@@ -63,7 +63,7 @@ func (c *client) GetThing(id string) (*Device, error) {
 	// Fetch the specified thing
 	thing, err := c.iot.DescribeThing(&iot.DescribeThingInput{ThingName: aws.String(id)})
 	if err != nil {
-		return nil, fmt.Errorf("Get shadow failure for '%s': %w", id, err)
+		return nil, fmt.Errorf("Get thing failure for '%s': %w", id, err)
 	}
 	// Convert the response to a 'Device'
 	d := describeThingOutput{thing}
