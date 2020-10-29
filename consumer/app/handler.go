@@ -71,6 +71,8 @@ func init() {
 
 // HandleRequest handles a lambda call
 func HandleRequest(ctx context.Context, event StatusUpdatedEvent) {
+	// Print the event
+	log.Printf("%v\n", event)
 	// Get the device
 	device, err := iot.GetThing(event.DeviceId)
 	if err != nil {
