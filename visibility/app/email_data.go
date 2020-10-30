@@ -1,9 +1,9 @@
 package app
 
 const (
-  // Address from which emails will be sent
-  Sender     = "briggySmalls90@gmail.com"
-  DateFormat = "15:04 2/1/06"
+	// Address from which emails will be sent
+	Sender     = "briggySmalls90@gmail.com"
+	DateFormat = "15:04 2/1/06"
 )
 
 const textTemplateSource = `
