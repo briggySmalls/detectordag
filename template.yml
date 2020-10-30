@@ -11,13 +11,15 @@ Resources:
     Properties:
       Bucket: !Ref FrontendBucket
       PolicyDocument:
+        Id: FrontendBucketPolicy
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Action:
               - "s3:GetObject"
-            Resource:
-              - !Join ['/', [!Ref FrontendBucket, 'public']]
+            Resource: !Sub
+              - "arn:${AWS::Partition}:s3:${AWS::Region}:${AWS::AccountId}:${BucketName}/*"
+              - { BucketName: !Ref FrontendBucket}
             Principal: "*"
   Api:
     Type: AWS::Serverless::Function
