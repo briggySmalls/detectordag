@@ -56,8 +56,8 @@ jobs:
       - checkout
       - run:
           working_directory: << parameters.directory >>
-          name: Run format check
-          command: mage -v format:check
+          name: Run tests
+          command: mage -v test
   # Ensure edge code is formatted correctly
   edge-format:
     executor: python-executor
