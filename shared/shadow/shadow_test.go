@@ -3,10 +3,12 @@ package shadow
 //go:generate mockgen -destination mock_iotdataplane.go -package shadow github.com/aws/aws-sdk-go/service/iotdataplane/iotdataplaneiface IoTDataPlaneAPI
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iotdataplane"
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
@@ -58,5 +60,35 @@ func TestGetShadow(t *testing.T) {
 		if cmp.Equal(shadow, params.shadow) {
 			t.Errorf("Unexpected shadow: %v", shadow)
 		}
+	}
+}
+
+func TestSetVisibilityStatus(t *testing.T) {
+	// Create some test iterations
+	testParams := []struct {
+		deviceID string
+		status   bool
+	}{
+		{deviceID: "eb49b2e7-fd3a-4c03-b47f-b819281475e5", status: true},
+		{deviceID: "eb49b2e7-fd3a-4c03-b47f-b819281475e5", status: false},
+	}
+	// Iterate the tests
+	for _, params := range testParams {
+		// Create mock controller
+		ctrl := gomock.NewController(t)
+		// Create mock database client
+		mock := NewMockIoTDataPlaneAPI(ctrl)
+		// Create the unit under test
+		client := client{
+			dp: mock,
+		}
+		// Configure expectations
+		mock.EXPECT().UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
+			ThingName: aws.String(params.deviceID),
+			Payload:   []byte(fmt.Sprintf(`{"state":{"reported"{"connection"{"transient":%v}}`, params.status)),
+		})
+		// Run the test
+		err := client.UpdateConnectionStatus(params.deviceID, ConnectionStatusUpdate{Status: params.status})
+		assert.Nil(t, err)
 	}
 }

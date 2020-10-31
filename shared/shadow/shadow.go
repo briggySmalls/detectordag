@@ -54,6 +54,10 @@ type Shadow struct {
 	State     State     `json:""`
 }
 
+type ConnectionStatusUpdate struct {
+	Status bool
+}
+
 // New creates a new shadow client
 func New(sess *session.Session) (Client, error) {
 	// We need to use an IoT control plane client to get an endpoint address
@@ -78,7 +82,7 @@ func (c *client) Get(deviceId string) (*Shadow, error) {
 		ThingName: aws.String(deviceId),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("Get shadow failure for '%d': %w", deviceId, err)
+		return nil, fmt.Errorf("Get shadow failure for '%s': %w", deviceId, err)
 	}
 	// Unpack
 	var shadow Shadow
@@ -88,4 +92,8 @@ func (c *client) Get(deviceId string) (*Shadow, error) {
 	}
 	// Return
 	return &shadow, nil
+}
+
+func (c *client) UpdateConnectionStatus(deviceId string, update ConnectionStatusUpdate) error {
+	return nil
 }
