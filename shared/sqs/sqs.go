@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
+	"time"
 )
 
 type client struct {
@@ -15,7 +16,8 @@ type client struct {
 }
 
 type ConnectionStatusPayload struct {
-	Connected bool `json:"connected"`
+	Connected bool      `json:"connected"`
+	Time      time.Time `json:"time"`
 }
 
 // Client is a client for sending status updates to the queue

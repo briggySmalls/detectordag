@@ -7,6 +7,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
 
 const (
@@ -18,11 +19,14 @@ func TestSend(t *testing.T) {
 	client, isqs := createUnitAndMocks(t)
 	// Configure mock to expect a call
 	isqs.EXPECT().SendMessage(gomock.Not(gomock.Nil())).Do(func(input *sqs.SendMessageInput) {
-		assert.Equal(t, `{"connected":true}`, *input.MessageBody)
+		assert.Equal(t, `{"connected":true,"time":"1970-01-01T00:00:00Z"}`, *input.MessageBody)
 		assert.Equal(t, QueueUrl, *input.QueueUrl)
 	}).Return(nil, nil)
 	// Make the call
-	client.SendMessage(ConnectionStatusPayload{Connected: true})
+	client.SendMessage(ConnectionStatusPayload{
+		Connected: true,
+		Time:      time.Unix(0, 0).UTC(),
+	})
 }
 
 func createUnitAndMocks(t *testing.T) (Client, *MockSQSAPI) {
