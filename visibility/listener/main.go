@@ -4,10 +4,11 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/briggysmalls/detectordag/shared"
-	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/iot"
-	"github.com/briggysmalls/detectordag/visibility/app"
+	"github.com/briggysmalls/detectordag/shared/sqs"
+	"github.com/briggysmalls/detectordag/visibility/listener/app"
 	"log"
+	"os"
 )
 
 // Prepare an application to reuse across lambda runs
@@ -25,15 +26,10 @@ func init() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	// Create a new Db client
-	dbClient, err := database.New(sesh)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
 	// Create a new session just for emailing (there is no emailing service in eu-west-2)
 	emailSesh := shared.CreateSession(aws.Config{Region: aws.String("eu-west-1")})
 	// Create a new visibility email client
-	visibilityEmailClient, err := app.NewVisibilityEmailer(emailSesh, dbClient)
+	visibilityEmailClient, err := sqs.New(emailSesh, os.Getenv("DELAY_QUEUE_URL"))
 	if err != nil {
 		log.Fatal(err.Error())
 	}

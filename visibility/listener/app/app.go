@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/briggysmalls/detectordag/shared/iot"
+	"github.com/briggysmalls/detectordag/shared/sqs"
 	"log"
 	"time"
 )
 
 type app struct {
-	iot   iot.Client
-	email EmailClient
+	iot iot.Client
+	sqs sqs.Client
 }
 
 type App interface {
@@ -19,11 +20,11 @@ type App interface {
 
 func New(
 	iot iot.Client,
-	email EmailClient,
+	sqs sqs.Client,
 ) App {
 	return &app{
-		iot:   iot,
-		email: email,
+		iot: iot,
+		sqs: sqs,
 	}
 }
 
@@ -52,8 +53,6 @@ func (a *app) RunJob(ctx context.Context, event DeviceLifecycleEvent) error {
 	} else {
 		return fmt.Errorf("Unexpected lifecycle event: %s", event.EventType)
 	}
-	// Parse the time
-	lastSeen := time.Unix(event.Timestamp/1000, 0).UTC()
 	// Get the device
 	device, err := a.iot.GetThing(event.DeviceID)
 	if err != nil {
@@ -65,7 +64,10 @@ func (a *app) RunJob(ctx context.Context, event DeviceLifecycleEvent) error {
 		return err
 	}
 	// Indicate the device status has changed
-	err = a.email.SendVisibilityStatus(device, lastSeen, visibility)
+	err = a.sqs.SendMessage(sqs.ConnectionStatusPayload{
+		Connected: visibility,
+		Time:      time.Unix(event.Timestamp/1000, 0).UTC(),
+	})
 	if err != nil {
 		return err
 	}

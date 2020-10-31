@@ -1,11 +1,12 @@
 package app
 
 //go:generate go run github.com/golang/mock/mockgen -destination mock_iot.go -package app -mock_names Client=MockIoTClient github.com/briggysmalls/detectordag/shared/iot Client
-//go:generate go run github.com/golang/mock/mockgen -destination mock_email.go -package app github.com/briggysmalls/detectordag/visibility/app EmailClient
+//go:generate go run github.com/golang/mock/mockgen -destination mock_sqs.go -package app -mock_names Client=MockSQSClient github.com/briggysmalls/detectordag/shared/sqs Client
 
 import (
 	"errors"
 	"github.com/briggysmalls/detectordag/shared/iot"
+	"github.com/briggysmalls/detectordag/shared/sqs"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -48,7 +49,7 @@ func TestDeviceLookupFailed(t *testing.T) {
 	assert.NotNil(t, app.RunJob(nil, event))
 }
 
-func TestEmailsSent(t *testing.T) {
+func TestMessageSent(t *testing.T) {
 	testParams := []struct {
 		event     string
 		status    bool
@@ -64,7 +65,7 @@ func TestEmailsSent(t *testing.T) {
 	// Run the test
 	for _, params := range testParams {
 		// Create app under test
-		app, mockIoT, mockEmail := getStubbedApp(t)
+		app, mockIoT, mockSQS := getStubbedApp(t)
 		// Configure lookup to pass
 		device := iot.Device{
 			Name:      "1",
@@ -75,7 +76,10 @@ func TestEmailsSent(t *testing.T) {
 		// Configure call to update visibility state
 		mockIoT.EXPECT().SetVisibiltyState(gomock.Eq(device.DeviceId), gomock.Eq(params.status))
 		// Configure call to send emails
-		mockEmail.EXPECT().SendVisibilityStatus(gomock.Eq(&device), gomock.Eq(params.time), gomock.Eq(params.status))
+		mockSQS.EXPECT().SendMessage(gomock.Eq(sqs.ConnectionStatusPayload{
+			Connected: params.status,
+			Time:      params.time,
+		}))
 		// Prepare an event
 		event := DeviceLifecycleEvent{DeviceID: deviceID, EventType: params.event, Timestamp: params.timestamp}
 		// Run the test
@@ -83,15 +87,15 @@ func TestEmailsSent(t *testing.T) {
 	}
 }
 
-func getStubbedApp(t *testing.T) (*app, *MockIoTClient, *MockEmailClient) {
+func getStubbedApp(t *testing.T) (*app, *MockIoTClient, *MockSQSClient) {
 	// Create mock controller
 	ctrl := gomock.NewController(t)
 	// Create mock iot
 	iot := NewMockIoTClient(ctrl)
-	// Create mock visibility
-	email := NewMockEmailClient(ctrl)
+	// Create mock sqs
+	sqs := NewMockSQSClient(ctrl)
 	// Bundle up into an app
-	return &app{iot: iot, email: email}, iot, email
+	return &app{iot: iot, sqs: sqs}, iot, sqs
 }
 
 func createTime(t *testing.T, timeString string) time.Time {
