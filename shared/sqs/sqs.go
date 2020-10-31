@@ -23,7 +23,6 @@ type ConnectionStatusPayload struct {
 // Client is a client for sending status updates to the queue
 type Client interface {
 	SendMessage(payload ConnectionStatusPayload) error
-	ReceiveMessage() (*ConnectionStatusPayload, error)
 }
 
 // NewSender gets a new Client
@@ -53,19 +52,4 @@ func (c *client) SendMessage(payload ConnectionStatusPayload) error {
 		QueueUrl:    aws.String(c.queueUrl),
 	})
 	return err
-}
-
-func (c *client) ReceiveMessage() (*ConnectionStatusPayload, error) {
-	// Receive the message
-	msgResult, err := c.sqs.ReceiveMessage(&sqs.ReceiveMessageInput{
-		QueueUrl:            aws.String(c.queueUrl),
-		MaxNumberOfMessages: aws.Int64(1),
-	})
-	if err != nil {
-		return nil, err
-	}
-	// Deserialise the data
-	var payload ConnectionStatusPayload
-	err = json.Unmarshal([]byte(*msgResult.Messages[0].Body), &payload)
-	return &payload, err
 }
