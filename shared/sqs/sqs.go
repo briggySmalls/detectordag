@@ -16,6 +16,7 @@ type client struct {
 }
 
 type ConnectionStatusPayload struct {
+	DeviceID  string    `json:"deviceId"`
 	Connected bool      `json:"connected"`
 	Time      time.Time `json:"time"`
 }
