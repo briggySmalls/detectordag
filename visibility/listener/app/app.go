@@ -65,6 +65,7 @@ func (a *app) RunJob(ctx context.Context, event DeviceLifecycleEvent) error {
 	}
 	// Indicate the device status has changed
 	err = a.sqs.SendMessage(sqs.ConnectionStatusPayload{
+		DeviceID:  device.DeviceId,
 		Connected: visibility,
 		Time:      time.Unix(event.Timestamp/1000, 0).UTC(),
 	})

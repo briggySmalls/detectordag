@@ -77,6 +77,7 @@ func TestMessageSent(t *testing.T) {
 		mockIoT.EXPECT().SetVisibiltyState(gomock.Eq(device.DeviceId), gomock.Eq(params.status))
 		// Configure call to send emails
 		mockSQS.EXPECT().SendMessage(gomock.Eq(sqs.ConnectionStatusPayload{
+			DeviceID:  deviceID,
 			Connected: params.status,
 			Time:      params.time,
 		}))
