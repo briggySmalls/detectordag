@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/iot"
 	"github.com/aws/aws-sdk-go/service/iotdataplane"
 	"github.com/aws/aws-sdk-go/service/iotdataplane/iotdataplaneiface"
+	"log"
 	"strconv"
 	"time"
 )
@@ -44,18 +45,23 @@ type Metadata struct {
 	Reported map[string]MetadataEntry `json:""`
 }
 
-type State struct {
-	Reported map[string]interface{} `json:""`
-}
-
 type Shadow struct {
 	Timestamp Timestamp `json:""`
 	Metadata  Metadata  `json:""`
 	State     State     `json:""`
 }
 
-type ConnectionStatusUpdate struct {
-	Status bool
+type ReportedState struct {
+	Connection bool `json:"connection"`
+	Status     bool `json:"status"`
+}
+
+type State struct {
+	Reported ReportedState `json:"reported"`
+}
+
+type ShadowUpdatePayload struct {
+	State State `json:"state"`
 }
 
 // New creates a new shadow client
@@ -94,6 +100,24 @@ func (c *client) Get(deviceId string) (*Shadow, error) {
 	return &shadow, nil
 }
 
-func (c *client) UpdateConnectionStatus(deviceId string, update ConnectionStatusUpdate) error {
+func (c *client) UpdateConnectionStatus(deviceID string, status bool) error {
+	// Create new reported state
+	newState := ReportedState{Connection: status}
+	return c.updateShadow(deviceID, newState)
+}
+
+func (c *client) updateShadow(deviceID string, update ReportedState) error {
+	// Bundle up the request
+	payloadStruct := ShadowUpdatePayload{State: State{Reported: update}}
+	payload, err := json.Marshal(payloadStruct)
+	if err != nil {
+		return nil
+	}
+	// Form the request
+	log.Print(string(payload))
+	c.dp.UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
+		ThingName: aws.String(deviceID),
+		Payload:   payload,
+	})
 	return nil
 }

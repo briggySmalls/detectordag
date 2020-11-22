@@ -32,7 +32,7 @@ func TestGetShadow(t *testing.T) {
 						"status": {Timestamp: Timestamp{time.Unix(1584803417, 0)}},
 					},
 				},
-				State: State{Reported: map[string]interface{}{"status": false}},
+				State: State{Reported: ReportedState{Status: false}},
 			},
 		},
 	}
@@ -85,10 +85,11 @@ func TestSetVisibilityStatus(t *testing.T) {
 		// Configure expectations
 		mock.EXPECT().UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
 			ThingName: aws.String(params.deviceID),
-			Payload:   []byte(fmt.Sprintf(`{"state":{"reported"{"connection"{"transient":%v}}`, params.status)),
+			// Payload:   []byte(fmt.Sprintf(`{"state":{"reported":{"connection":{"transient":%v}}}}`, params.status)),
+			Payload: []byte(fmt.Sprintf(`{"state":{"reported":{"connection":%v,"status":false}}}`, params.status)),
 		})
 		// Run the test
-		err := client.UpdateConnectionStatus(params.deviceID, ConnectionStatusUpdate{Status: params.status})
+		err := client.UpdateConnectionStatus(params.deviceID, params.status)
 		assert.Nil(t, err)
 	}
 }
