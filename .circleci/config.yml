@@ -104,10 +104,17 @@ workflows:
       - go-format:
           name: api-format
           directory: ./api
-      # visibility
+      # visibility-emailer
       - go-format:
-          name: visibility-format
-          directory: ./visibility
+          name: visibility-emailer-format
+          directory: ./visibility/emailer
       - go-test:
-          name: visibility-test
-          directory: ./visibility
+          name: visibility-emailer-test
+          directory: ./visibility/emailer
+      # visibility-listener
+      - go-format:
+          name: visibility-listener-format
+          directory: ./visibility/listener
+      - go-test:
+          name: visibility-listener-test
+          directory: ./visibility/listener
