@@ -48,20 +48,23 @@ type Metadata struct {
 type Shadow struct {
 	Timestamp Timestamp `json:""`
 	Metadata  Metadata  `json:""`
-	State     State     `json:""`
+	State     struct {
+		Reported map[string]interface{} `json:"reported"`
+	} `json:""`
 }
 
-type ReportedState struct {
-	Connection bool `json:"connection"`
-	Status     bool `json:"status"`
+type ConnectionState struct {
+	Transient *bool `json:"connection"`
+	Version   *int  `json:"version"`
+	Current   *bool `json:"current"`
 }
 
-type State struct {
-	Reported ReportedState `json:"reported"`
-}
-
-type ShadowUpdatePayload struct {
-	State State `json:"state"`
+type ConnectionUpdatePayload struct {
+	State struct {
+		Reported struct {
+			Connection ConnectionState
+		} `json:"reported"`
+	} `json:"state"`
 }
 
 // New creates a new shadow client
@@ -100,15 +103,27 @@ func (c *client) Get(deviceId string) (*Shadow, error) {
 	return &shadow, nil
 }
 
-func (c *client) UpdateConnectionStatus(deviceID string, status bool) error {
+func (c *client) UpdateConnectionStatus(deviceID string, status bool, version int) error {
 	// Create new reported state
-	newState := ReportedState{Connection: status}
+	newState := ConnectionUpdatePayload{State: {Reported: {Connection: {Transient: status, Version: version}}}}
 	return c.updateShadow(deviceID, newState)
 }
 
-func (c *client) updateShadow(deviceID string, update ReportedState) error {
+// func (c *client) DebounceConnectionStatus(deviceID string) error {
+// 	// Get the device shadow
+// 	shadow, err := c.Get(deviceId)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	// Check if transient differs from current
+
+// 	// Create new reported state
+// 	newState := ConnectionUpdatePayload{State: {Reported: {Connection: {Current}}}}
+// 	return c.updateShadow(deviceID, newState)
+// }
+
+func (c *client) updateShadow(deviceID string, payload ConnectionUpdatePayload) error {
 	// Bundle up the request
-	payloadStruct := ShadowUpdatePayload{State: State{Reported: update}}
 	payload, err := json.Marshal(payloadStruct)
 	if err != nil {
 		return nil
