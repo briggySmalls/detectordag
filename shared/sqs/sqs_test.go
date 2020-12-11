@@ -24,14 +24,13 @@ func TestSend(t *testing.T) {
 	)
 	// Configure mock to expect a call
 	isqs.EXPECT().SendMessage(gomock.Not(gomock.Nil())).Do(func(input *sqs.SendMessageInput) {
-		assert.Equal(t, fmt.Sprintf(`{"deviceId":"%s","connected":true,"time":"1970-01-01T00:00:00Z"}`, deviceId), *input.MessageBody)
+		assert.Equal(t, fmt.Sprintf(`{"deviceId":"%s","time":"1970-01-01T00:00:00Z"}`, deviceId), *input.MessageBody)
 		assert.Equal(t, QueueUrl, *input.QueueUrl)
 	}).Return(nil, nil)
 	// Make the call
-	client.SendMessage(ConnectionStatusPayload{
-		DeviceID:  deviceId,
-		Connected: true,
-		Time:      time.Unix(0, 0).UTC(),
+	client.QueueDisconnectedEvent(DisconnectedPayload{
+		DeviceID: deviceId,
+		Time:     time.Unix(0, 0).UTC(),
 	})
 }
 

@@ -15,15 +15,14 @@ type client struct {
 	queueUrl string
 }
 
-type ConnectionStatusPayload struct {
-	DeviceID  string    `json:"deviceId"`
-	Connected bool      `json:"connected"`
-	Time      time.Time `json:"time"`
+type DisconnectedPayload struct {
+	DeviceID string    `json:"deviceId"`
+	Time     time.Time `json:"time"`
 }
 
 // Client is a client for sending status updates to the queue
 type Client interface {
-	SendMessage(payload ConnectionStatusPayload) error
+	QueueDisconnectedEvent(payload DisconnectedPayload) error
 }
 
 // NewSender gets a new Client
@@ -41,7 +40,7 @@ func New(sesh *session.Session, queueUrl string) (Client, error) {
 	return &client, nil
 }
 
-func (c *client) SendMessage(payload ConnectionStatusPayload) error {
+func (c *client) QueueDisconnectedEvent(payload DisconnectedPayload) error {
 	// Marshal the payload to a string
 	body, err := json.Marshal(payload)
 	if err != nil {
