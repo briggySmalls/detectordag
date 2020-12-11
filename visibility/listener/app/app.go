@@ -40,37 +40,35 @@ type DeviceLifecycleEvent struct {
 	Timestamp int64  `json:""`
 }
 
-// handleRequest handles a lambda call
+// RunJob handles a lambda call
+// The visibility status approach depends on the following invariants:
+// - Connection events will always alternate (never consecutive "connected" or "disconnected")
+// - "Connected" events are always geniune
+// - "Disconnected" events may be spurious (quickly followed with a "connected" event)
 func (a *app) RunJob(ctx context.Context, event DeviceLifecycleEvent) error {
 	// Print the event
 	log.Printf("%v\n", event)
-	// Determine the event
-	var visibility bool
+	// Handle a connected event
 	if event.EventType == LifecycleEventTypeConnected {
-		visibility = true
-	} else if event.EventType == LifecycleEventTypeDisconnected {
-		visibility = false
-	} else {
-		return fmt.Errorf("Unexpected lifecycle event: %s", event.EventType)
+		// "Connected" is always trustworthy, so update directly
+		err = a.iot.SetVisibiltyState(event.DeviceId, true)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
-	// Get the device
-	device, err := a.iot.GetThing(event.DeviceID)
-	if err != nil {
-		return err
+	// Handle a disconnected event
+	if event.EventType == LifecycleEventTypeDisconnected {
+		// Delay dealing with disconnected events, to debounce
+		err = a.sqs.SendMessage(sqs.ConnectionStatusPayload{
+			DeviceID: event.DeviceId,
+			Time:     time.Unix(event.Timestamp/1000, 0).UTC(),
+		})
+		if err != nil {
+			return err
+		}
+		return nil
 	}
-	// Record the new device status
-	err = a.iot.SetVisibiltyState(device.DeviceId, visibility)
-	if err != nil {
-		return err
-	}
-	// Indicate the device status has changed
-	err = a.sqs.SendMessage(sqs.ConnectionStatusPayload{
-		DeviceID:  device.DeviceId,
-		Connected: visibility,
-		Time:      time.Unix(event.Timestamp/1000, 0).UTC(),
-	})
-	if err != nil {
-		return err
-	}
-	return nil
+	// Something went wrong
+	return fmt.Errorf("Unexpected lifecycle event: %s", event.EventType)
 }

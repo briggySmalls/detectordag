@@ -30,25 +30,6 @@ func TestInvalidEventType(t *testing.T) {
 	}
 }
 
-func TestDeviceLookupFailed(t *testing.T) {
-	// Create app under test
-	app, mockIoT, _ := getStubbedApp(t)
-	// Prepare some test parameters
-	const (
-		deviceID = "b6d62b30-00ac-49c4-9268-88559a46889f"
-	)
-	// Prepare an event
-	event := DeviceLifecycleEvent{
-		DeviceID:  deviceID,
-		Timestamp: 0,
-		EventType: "connected",
-	}
-	// Configure lookup to fail
-	mockIoT.EXPECT().GetThing(gomock.Eq(deviceID)).Return(nil, errors.New("Something went wrong"))
-	// Run test
-	assert.NotNil(t, app.RunJob(nil, event))
-}
-
 func TestMessageSent(t *testing.T) {
 	testParams := []struct {
 		event     string

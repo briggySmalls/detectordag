@@ -12,7 +12,7 @@ import (
 )
 
 // Prepare an application to reuse across lambda runs
-var findLost app.App
+var listener app.App
 
 func init() {
 	// Add file/line number to the default logger
@@ -34,10 +34,10 @@ func init() {
 		log.Fatal(err.Error())
 	}
 	// Create the application
-	findLost = app.New(iotClient, visibilityEmailClient)
+	listener = app.New(iotClient, visibilityEmailClient)
 }
 
 // main is the entrypoint to the lambda function
 func main() {
-	lambda.Start(findLost.RunJob)
+	lambda.Start(listener.RunJob)
 }
