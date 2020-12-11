@@ -12,12 +12,12 @@ type ConnectionState struct {
 type ConnectionStateSchema struct {
 	State struct {
 		Reported struct {
-			ConnectionState bool
+			Connection bool `json:""`
 		} `json:""`
 	} `json:""`
 	Metadata struct {
 		Reported struct {
-			ConnectionState MetadataEntry
+			Connection MetadataEntry
 		}
 	}
 }
@@ -25,8 +25,8 @@ type ConnectionStateSchema struct {
 // Flatten converts the information into a more user-friendly form
 func (c *ConnectionStateSchema) Flatten() ConnectionState {
 	return ConnectionState{
-		State:     c.State.Reported.ConnectionState,
-		Timestamp: c.Metadata.Reported.ConnectionState.Timestamp,
+		State:     c.State.Reported.Connection,
+		Timestamp: c.Metadata.Reported.Connection.Timestamp,
 	}
 }
 

@@ -3,40 +3,38 @@ package shadow
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
 
 func TestUnmarshal(t *testing.T) {
 	payload := `
 	{
-		"state": {
-			"desired":{
-				"status":true,
-				"connection":true
-			},
-			"reported":{
-				"status":false
-			},
-			"delta":{
-				"status":true
-			}
-		},
-		"metadata":{
-			"desired":{
-				"status":{
-					"timestamp":1584003580
-				}
-			},
-			"reported":{
-				"status":{
-					"timestamp":1584803417
-				},
-				"connection":{
-					"timestamp":1584803417
-				}
-			}
-		},
-		"version":50,
-		"timestamp":1584810789
+	  "metadata": {
+	    "desired": {
+	      "status": {
+	        "timestamp": 1584003580
+	      }
+	    },
+	    "reported": {
+	      "connection": {
+	        "timestamp": 1584803417
+	      },
+	      "status": {
+	        "timestamp": 1584803417
+	      }
+	    }
+	  },
+	  "state": {
+	    "desired": {
+	      "status": true
+	    },
+	    "reported": {
+	      "connection": true,
+	      "status": false
+	    }
+	  },
+	  "timestamp": 1584810789,
+	  "version": 50
 	}`
 	// Unpack the payload
 	var connState ConnectionStateSchema
@@ -44,6 +42,6 @@ func TestUnmarshal(t *testing.T) {
 	assert.Nil(t, err)
 	// Flatten
 	flat := connState.Flatten()
-	assert.Equal(t, flat.State, true)
-	assert.Equal(t, flat.Timestamp, 1584803417)
+	assert.Equal(t, true, flat.State)
+	assert.Equal(t, time.Unix(1584803417, 0), flat.Timestamp.Time)
 }
