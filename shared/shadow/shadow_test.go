@@ -90,11 +90,10 @@ func TestSetVisibilityStatus(t *testing.T) {
 			dp: mock,
 		}
 		// Configure expectations
-		mock.EXPECT().UpdateThingShadow(gomock.Any()).Do(
-			func(input *iotdataplane.UpdateThingShadowInput) {
-				assert.Equal(t, params.deviceID, *input.ThingName)
-				assert.Equal(t, []byte(params.payload), input.Payload)
-			})
+		mock.EXPECT().UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
+			ThingName: aws.String(params.deviceID),
+			Payload:   []byte(params.payload),
+		})
 		// Run the test
 		err := client.UpdateConnectionStatus(params.deviceID, params.status)
 		assert.Nil(t, err)
