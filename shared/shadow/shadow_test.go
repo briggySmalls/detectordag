@@ -27,7 +27,7 @@ func TestGetShadow(t *testing.T) {
 			error:    nil,
 			shadow: Shadow{
 				Timestamp: Timestamp{time.Unix(1584810789, 0)},
-				Metadata: Metadata{
+				Metadata: {
 					Reported: map[string]MetadataEntry{
 						"status": {Timestamp: Timestamp{time.Unix(1584803417, 0)}},
 					},
@@ -85,11 +85,55 @@ func TestSetVisibilityStatus(t *testing.T) {
 		// Configure expectations
 		mock.EXPECT().UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
 			ThingName: aws.String(params.deviceID),
-			// Payload:   []byte(fmt.Sprintf(`{"state":{"reported":{"connection":{"transient":%v}}}}`, params.status)),
-			Payload: []byte(fmt.Sprintf(`{"state":{"reported":{"connection":%v,"status":false}}}`, params.status)),
+			Payload:   []byte(fmt.Sprintf(`{"state":{"reported":{"connection":%v,"status":false}}}`, params.status)),
 		})
 		// Run the test
 		err := client.UpdateConnectionStatus(params.deviceID, params.status)
 		assert.Nil(t, err)
+	}
+}
+
+func TestGetConnectionStatus(t *testing.T) {
+	// Create some test iterations
+	testParams := []struct {
+		deviceID string
+		payload  string
+		status   bool
+		time     time.Time
+	}{
+		{
+			deviceID: "eb49b2e7-fd3a-4c03-b47f-b819281475e5",
+			payload:  `{"state":{"reported":{"connection":true}},"metadata":{"reported":{"connection":1584803417"}}}`,
+			status:   true,
+			time:     time.Unix(1584803417, 0),
+		},
+		{
+			deviceID: "eb49b2e7-fd3a-4c03-b47f-b819281475e5",
+			payload:  `{"state":{"reported":{"connection":false}},"metadata":{"reported":{"connection":1584803417"}}}`,
+			status:   false,
+			time:     time.Unix(1584803417, 0),
+		},
+	}
+	// Iterate the tests
+	for _, params := range testParams {
+		// Create mock controller
+		ctrl := gomock.NewController(t)
+		// Create mock database client
+		mock := NewMockIoTDataPlaneAPI(ctrl)
+		// Create the unit under test
+		client := client{
+			dp: mock,
+		}
+		// Configure expectations
+		mock.EXPECT().UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
+			ThingName: aws.String(params.deviceID),
+			Payload:   []byte(params.payload),
+		})
+		// Run the test
+		state, err := client.GetConnectionStatus(params.deviceID)
+		// Assert the result
+		assert.Nil(t, err)
+		assert.Equal(t, state.State, params.status)
+		assert.Equal(t, state.Timestamp.Time, params.time)
 	}
 }
