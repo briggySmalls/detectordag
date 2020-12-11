@@ -17,7 +17,7 @@ import (
 type Client interface {
 	Get(deviceId string) (*Shadow, error)
 	UpdateConnectionStatus(deviceID string, status bool) error
-	GetConnectionStatus(deviceID string) (ConnectionState, error)
+	GetConnectionStatus(deviceID string) (*ConnectionState, error)
 }
 
 type Timestamp struct {
@@ -50,16 +50,20 @@ type Shadow struct {
 		Reported map[string]MetadataEntry `json:""`
 	} `json:""`
 	State struct {
-		Reported map[string]interface{} `json:"reported"`
+		Reported map[string]interface{} `json:""`
 	} `json:""`
 }
 
 type ConnectionUpdatePayload struct {
 	State struct {
 		Reported struct {
-			ConnectionState bool
+			Connection bool `json:"connection"`
 		} `json:"reported"`
 	} `json:"state"`
+}
+
+func (p *ConnectionUpdatePayload) Dump() ([]byte, error) {
+	return json.Marshal(p)
 }
 
 // New creates a new shadow client
@@ -95,11 +99,12 @@ func (c *client) Get(deviceId string) (*Shadow, error) {
 
 func (c *client) UpdateConnectionStatus(deviceID string, status bool) error {
 	// Create new reported state
-	newState := ConnectionUpdatePayload{State: {Reported: {ConnectionState: status}}}
+	updatePayload := ConnectionUpdatePayload{}
+	updatePayload.State.Reported.Connection = status
 	// Bundle up the request
-	payload, err := json.Marshal(newState)
+	payload, err := updatePayload.Dump()
 	if err != nil {
-		return nil
+		return err
 	}
 	// Form the request
 	log.Print(string(payload))
