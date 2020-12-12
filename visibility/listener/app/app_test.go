@@ -1,11 +1,9 @@
 package app
 
-//go:generate go run github.com/golang/mock/mockgen -destination mock_iot.go -package app -mock_names Client=MockIoTClient github.com/briggysmalls/detectordag/shared/iot Client
+//go:generate go run github.com/golang/mock/mockgen -destination mock_shadow.go -package app -mock_names Client=MockShadowClient github.com/briggysmalls/detectordag/shared/shadow Client
 //go:generate go run github.com/golang/mock/mockgen -destination mock_sqs.go -package app -mock_names Client=MockSQSClient github.com/briggysmalls/detectordag/shared/sqs Client
 
 import (
-	"errors"
-	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/sqs"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -30,54 +28,53 @@ func TestInvalidEventType(t *testing.T) {
 	}
 }
 
-func TestMessageSent(t *testing.T) {
-	testParams := []struct {
-		event     string
-		status    bool
-		timestamp int64
-		time      time.Time
-	}{
-		{event: "connected", status: true, timestamp: 0, time: createTime(t, "1970/01/01 00:00:00")},
-		{event: "disconnected", status: false, timestamp: 0, time: createTime(t, "1970/01/01 00:00:00")},
-	}
+func TestConnectedEvent(t *testing.T) {
 	const (
-		deviceID = "792ac520-0733-4ffe-8137-8aba3ca446d7"
+		deviceID  = "792ac520-0733-4ffe-8137-8aba3ca446d7"
+		eventType = "connected"
+		status    = true
+		timestamp = 0
 	)
+	// Create app under test
+	app, mockShadow, _ := getStubbedApp(t)
+	// Configure call to update the connection status
+	mockShadow.EXPECT().UpdateConnectionStatus(deviceID, status)
+	// Prepare an event
+	event := DeviceLifecycleEvent{DeviceID: deviceID, EventType: eventType, Timestamp: timestamp}
 	// Run the test
-	for _, params := range testParams {
-		// Create app under test
-		app, mockIoT, mockSQS := getStubbedApp(t)
-		// Configure lookup to pass
-		device := iot.Device{
-			Name:      "1",
-			DeviceId:  deviceID,
-			AccountId: "af6f3796-c446-4850-9fda-65936cab9b6d",
-		}
-		mockIoT.EXPECT().GetThing(gomock.Eq(deviceID)).Return(&device, nil)
-		// Configure call to update visibility state
-		mockIoT.EXPECT().SetVisibiltyState(gomock.Eq(device.DeviceId), gomock.Eq(params.status))
-		// Configure call to send emails
-		mockSQS.EXPECT().SendMessage(gomock.Eq(sqs.ConnectionStatusPayload{
-			DeviceID:  deviceID,
-			Connected: params.status,
-			Time:      params.time,
-		}))
-		// Prepare an event
-		event := DeviceLifecycleEvent{DeviceID: deviceID, EventType: params.event, Timestamp: params.timestamp}
-		// Run the test
-		assert.Nil(t, app.RunJob(nil, event))
-	}
+	assert.Nil(t, app.RunJob(nil, event))
 }
 
-func getStubbedApp(t *testing.T) (*app, *MockIoTClient, *MockSQSClient) {
+func TestDisconnectedEvent(t *testing.T) {
+	const (
+		deviceID   = "792ac520-0733-4ffe-8137-8aba3ca446d7"
+		eventType  = "disconnected"
+		status     = false
+		timestamp  = 0
+		timeString = "1970/01/01 00:00:00"
+	)
+	// Create app under test
+	app, _, mockSQS := getStubbedApp(t)
+	// Configure call to queue the disconnected event
+	mockSQS.EXPECT().QueueDisconnectedEvent(sqs.DisconnectedPayload{
+		DeviceID: deviceID,
+		Time:     createTime(t, timeString),
+	})
+	// Prepare an event
+	event := DeviceLifecycleEvent{DeviceID: deviceID, EventType: eventType, Timestamp: timestamp}
+	// Run the test
+	assert.Nil(t, app.RunJob(nil, event))
+}
+
+func getStubbedApp(t *testing.T) (*app, *MockShadowClient, *MockSQSClient) {
 	// Create mock controller
 	ctrl := gomock.NewController(t)
-	// Create mock iot
-	iot := NewMockIoTClient(ctrl)
+	// Create mock shadow
+	shadow := NewMockShadowClient(ctrl)
 	// Create mock sqs
 	sqs := NewMockSQSClient(ctrl)
 	// Bundle up into an app
-	return &app{iot: iot, sqs: sqs}, iot, sqs
+	return &app{shadow: shadow, sqs: sqs}, shadow, sqs
 }
 
 func createTime(t *testing.T, timeString string) time.Time {

@@ -3,15 +3,15 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/briggysmalls/detectordag/shared/iot"
+	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/shared/sqs"
 	"log"
 	"time"
 )
 
 type app struct {
-	iot iot.Client
-	sqs sqs.Client
+	shadow shadow.Client
+	sqs    sqs.Client
 }
 
 type App interface {
@@ -19,12 +19,12 @@ type App interface {
 }
 
 func New(
-	iot iot.Client,
+	shadow shadow.Client,
 	sqs sqs.Client,
 ) App {
 	return &app{
-		iot: iot,
-		sqs: sqs,
+		shadow: shadow,
+		sqs:    sqs,
 	}
 }
 
@@ -51,23 +51,15 @@ func (a *app) RunJob(ctx context.Context, event DeviceLifecycleEvent) error {
 	// Handle a connected event
 	if event.EventType == LifecycleEventTypeConnected {
 		// "Connected" is always trustworthy, so update directly
-		err = a.iot.SetVisibiltyState(event.DeviceId, true)
-		if err != nil {
-			return err
-		}
-		return nil
+		return a.shadow.UpdateConnectionStatus(event.DeviceID, true)
 	}
 	// Handle a disconnected event
 	if event.EventType == LifecycleEventTypeDisconnected {
 		// Delay dealing with disconnected events, to debounce
-		err = a.sqs.SendMessage(sqs.ConnectionStatusPayload{
-			DeviceID: event.DeviceId,
+		return a.sqs.QueueDisconnectedEvent(sqs.DisconnectedPayload{
+			DeviceID: event.DeviceID,
 			Time:     time.Unix(event.Timestamp/1000, 0).UTC(),
 		})
-		if err != nil {
-			return err
-		}
-		return nil
 	}
 	// Something went wrong
 	return fmt.Errorf("Unexpected lifecycle event: %s", event.EventType)
