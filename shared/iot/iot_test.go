@@ -16,7 +16,6 @@ func TestGetThing(t *testing.T) {
 		deviceID   = "261f3f87-84bb-4c0e-91bc-ba41c3bc0668"
 		deviceName = "Testing"
 		accountID  = "9962902c-f7e7-417d-bea0-dc2eb0bc67d7"
-		visibility
 	)
 	// Create unit under test and mocks
 	mock, c := createUnitAndMocks(t)
@@ -27,9 +26,8 @@ func TestGetThing(t *testing.T) {
 	}).Return(&iot.DescribeThingOutput{
 		ThingName: aws.String(deviceID),
 		Attributes: map[string]*string{
-			accountIDAttributeName:  aws.String(accountID),
-			nameAttributeName:       aws.String(deviceName),
-			visibilityAttributeName: aws.String("true"),
+			accountIDAttributeName: aws.String(accountID),
+			nameAttributeName:      aws.String(deviceName),
 		},
 	}, nil)
 	// Query for a known device
@@ -38,71 +36,6 @@ func TestGetThing(t *testing.T) {
 	// Assert it has expected fields
 	assert.Equal(t, accountID, device.AccountId)
 	assert.Equal(t, deviceName, device.Name)
-	assert.Equal(t, true, device.Visibility)
-}
-
-func GetThingsByVisibility(t *testing.T) {
-	const (
-		accountID     = "9962902c-f7e7-417d-bea0-dc2eb0bc67d7"
-		nextToken     = "1a13f6f2-13e5-408d-a184-1ce292320175"
-		deviceOne     = "4fa62730-dd7a-421b-91b9-ec1f20ad265b"
-		deviceOneName = "One"
-		deviceTwo     = "70c3e40a-fbc2-40d7-9cb3-7f7637f85cb4"
-		deviceTwoName = "Two"
-	)
-	// Create unit under test and mocks
-	mock, c := createUnitAndMocks(t)
-	// Expect a call to ListDevices
-	gomock.InOrder(
-		mock.EXPECT().ListThings(gomock.Not(gomock.Nil())).Do(func(input *iot.ListThingsInput) {
-			// Assert that the search is setting the correct parameters
-			assert.Nil(t, input.ThingTypeName)
-			assert.Equal(t, visibilityAttributeName, *input.AttributeName)
-			assert.Equal(t, "true", *input.AttributeValue)
-		}).Return(&iot.ListThingsOutput{
-			Things: []*iot.ThingAttribute{
-				{
-					ThingName: aws.String(deviceOne),
-					Attributes: map[string]*string{
-						accountIDAttributeName:  aws.String(accountID),
-						nameAttributeName:       aws.String(deviceOneName),
-						visibilityAttributeName: aws.String("true"),
-					},
-				},
-			},
-			NextToken: aws.String(nextToken), // Indicate there are more things to come
-		}, nil),
-		mock.EXPECT().ListThings(gomock.Not(gomock.Nil())).Do(func(input *iot.ListThingsInput) {
-			// Assert that the search is setting the correct parameters
-			assert.Nil(t, input.ThingTypeName)
-			assert.Equal(t, visibilityAttributeName, *input.AttributeName)
-			assert.Equal(t, "true", *input.AttributeValue)
-			assert.Equal(t, nextToken, *input.NextToken)
-		}).Return(&iot.ListThingsOutput{
-			Things: []*iot.ThingAttribute{
-				{
-					ThingName: aws.String(deviceTwo),
-					Attributes: map[string]*string{
-						accountIDAttributeName:  aws.String(accountID),
-						nameAttributeName:       aws.String(deviceTwoName),
-						visibilityAttributeName: aws.String("true"),
-					},
-				},
-			},
-		}, nil),
-	)
-	// Query for devices
-	devices, err := c.GetThingsByVisibility(true)
-	assert.NoError(t, err)
-	// Assert the returned devices
-	expectedDevices := []Device{
-		{DeviceId: deviceOne, Name: deviceOneName, AccountId: accountID, Visibility: true},
-		{DeviceId: deviceTwo, Name: deviceTwoName, AccountId: accountID, Visibility: true},
-	}
-	assert.Len(t, devices, len(expectedDevices))
-	for i, device := range devices {
-		assert.Equal(t, expectedDevices[i], *device)
-	}
 }
 
 func TestGetThingsByAccount(t *testing.T) {
@@ -128,9 +61,8 @@ func TestGetThingsByAccount(t *testing.T) {
 				{
 					ThingName: aws.String(deviceOne),
 					Attributes: map[string]*string{
-						accountIDAttributeName:  aws.String(accountID),
-						nameAttributeName:       aws.String(deviceOneName),
-						visibilityAttributeName: aws.String("true"),
+						accountIDAttributeName: aws.String(accountID),
+						nameAttributeName:      aws.String(deviceOneName),
 					},
 				},
 			},
@@ -146,9 +78,8 @@ func TestGetThingsByAccount(t *testing.T) {
 				{
 					ThingName: aws.String(deviceTwo),
 					Attributes: map[string]*string{
-						accountIDAttributeName:  aws.String(accountID),
-						nameAttributeName:       aws.String(deviceTwoName),
-						visibilityAttributeName: aws.String("false"),
+						accountIDAttributeName: aws.String(accountID),
+						nameAttributeName:      aws.String(deviceTwoName),
 					},
 				},
 			},
@@ -159,8 +90,8 @@ func TestGetThingsByAccount(t *testing.T) {
 	assert.NoError(t, err)
 	// Assert the returned devices
 	expectedDevices := []Device{
-		{DeviceId: deviceOne, Name: deviceOneName, AccountId: accountID, Visibility: true},
-		{DeviceId: deviceTwo, Name: deviceTwoName, AccountId: accountID, Visibility: false},
+		{DeviceId: deviceOne, Name: deviceOneName, AccountId: accountID},
+		{DeviceId: deviceTwo, Name: deviceTwoName, AccountId: accountID},
 	}
 	assert.Len(t, devices, len(expectedDevices))
 	for i, device := range devices {
@@ -217,34 +148,6 @@ func TestRegisterDevice(t *testing.T) {
 	assert.Equal(t, certificatePem, certs.Certificate)
 	assert.Equal(t, certificatePublicKey, certs.Public)
 	assert.Equal(t, certificatePrivateKey, certs.Private)
-}
-
-func TestSetVisibiltyState(t *testing.T) {
-	// Define some test parameters
-	const (
-		deviceID   = "261f3f87-84bb-4c0e-91bc-ba41c3bc0668"
-		deviceName = "Testing"
-		accountID  = "9962902c-f7e7-417d-bea0-dc2eb0bc67d7"
-	)
-	// Create unit under test and mocks
-	mock, c := createUnitAndMocks(t)
-	// Create a helper for asserting the attribute update request
-	updateThingAssertion := func(state string) *gomock.Call {
-		return mock.EXPECT().UpdateThing(gomock.Not(gomock.Nil())).Do(func(input *iot.UpdateThingInput) {
-			assert.Equal(t, deviceID, *input.ThingName)
-			assert.Equal(t, thingType, *input.ThingTypeName)
-			assert.Equal(t, state, *input.AttributePayload.Attributes[visibilityAttributeName])
-			assert.Equal(t, true, *input.AttributePayload.Merge)
-		})
-	}
-	// Configure mock to set the state
-	gomock.InOrder(
-		updateThingAssertion("true"),
-		updateThingAssertion("false"),
-	)
-	// Run the test
-	c.SetVisibiltyState(deviceID, true)
-	c.SetVisibiltyState(deviceID, false)
 }
 
 func createUnitAndMocks(t *testing.T) (*MockIoTAPI, Client) {

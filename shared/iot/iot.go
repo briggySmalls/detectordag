@@ -8,15 +8,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/iot"
 	"github.com/aws/aws-sdk-go/service/iot/iotiface"
 	"log"
-	"strconv"
 )
 
 const (
-	accountIDAttributeName  = "account-id"
-	nameAttributeName       = "name"
-	thingType               = "detectordag"
-	thingGroup              = "detectordag"
-	visibilityAttributeName = "visibility"
+	accountIDAttributeName = "account-id"
+	nameAttributeName      = "name"
+	thingType              = "detectordag"
+	thingGroup             = "detectordag"
 )
 
 type client struct {
@@ -25,18 +23,15 @@ type client struct {
 
 type Client interface {
 	GetThing(id string) (*Device, error)
-	GetThingsByVisibility(status bool) ([]*Device, error)
 	GetThingsByAccount(id string) ([]*Device, error)
 	RegisterThing(accountID, deviceID, name string) (*Device, *Certificates, error)
-	SetVisibiltyState(deviceID string, state bool) error
 }
 
 // Device holds the non-state properties of a device
 type Device struct {
-	Name       string
-	DeviceId   string
-	AccountId  string
-	Visibility bool
+	Name      string
+	DeviceId  string
+	AccountId string
 }
 
 type Certificates struct {
@@ -68,14 +63,6 @@ func (c *client) GetThing(id string) (*Device, error) {
 	// Convert the response to a 'Device'
 	d := describeThingOutput{thing}
 	return d.ToDevice()
-}
-
-// GetThings returns all things which have the specified visiblity status
-func (c *client) GetThingsByVisibility(status bool) ([]*Device, error) {
-	return c.getPaginatedDevices(&iot.ListThingsInput{
-		AttributeName:  aws.String(visibilityAttributeName),
-		AttributeValue: aws.String(strconv.FormatBool(status)),
-	})
 }
 
 // GetThingsByAccount returns all things which are associated with the specified accountg
@@ -126,25 +113,6 @@ func (c *client) RegisterThing(accountID, deviceID, name string) (*Device, *Cert
 		NewStatus:     aws.String("ACTIVE"),
 	})
 	return &d, &certs, nil
-}
-
-// SetVisibilityState sets attribute indicating if the device is lost
-func (c *client) SetVisibiltyState(deviceID string, state bool) error {
-	// Set the attribute
-	_, err := c.iot.UpdateThing(&iot.UpdateThingInput{
-		ThingName:     aws.String(deviceID),
-		ThingTypeName: aws.String(thingType),
-		AttributePayload: &iot.AttributePayload{
-			Attributes: map[string]*string{
-				visibilityAttributeName: aws.String(strconv.FormatBool(state)),
-			},
-			Merge: aws.Bool(true), // Don't nuke the other attributes
-		},
-	})
-	if err != nil {
-		return fmt.Errorf("Failed to update thing '%s': %w", deviceID, err)
-	}
-	return err
 }
 
 // createCertificate creates a new certificate

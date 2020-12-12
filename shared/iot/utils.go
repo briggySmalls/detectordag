@@ -3,7 +3,6 @@ package iot
 import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/service/iot"
-	"strconv"
 )
 
 type thingAttribute struct {
@@ -29,23 +28,12 @@ func (t *thingAttribute) ToDevice() (*Device, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Get the visibility state
-	visibilityStr, err := t.getAttribute(visibilityAttributeName)
-	if err != nil {
-		return nil, err
-	}
-	// Convert visibility state to a boolean
-	visibility, err := strconv.ParseBool(visibilityStr)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to parse Visibility attribute to bool: '%s'", visibilityStr)
-	}
 	// Get the device ID
 	deviceID := t.ThingName
 	return &Device{
-		Name:       name,
-		DeviceId:   *deviceID,
-		AccountId:  accountID,
-		Visibility: visibility,
+		Name:      name,
+		DeviceId:  *deviceID,
+		AccountId: accountID,
 	}, nil
 }
 
@@ -67,23 +55,12 @@ func (t *describeThingOutput) ToDevice() (*Device, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Get the visibility state
-	visibilityStr, err := t.getAttribute(visibilityAttributeName)
-	if err != nil {
-		return nil, err
-	}
-	// Convert visibility state to a boolean
-	visibility, err := strconv.ParseBool(visibilityStr)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to parse Visibility attribute to bool: '%s'", visibilityStr)
-	}
 	// Get the device ID
 	deviceID := t.ThingName
 	return &Device{
-		Name:       name,
-		DeviceId:   *deviceID,
-		AccountId:  accountID,
-		Visibility: visibility,
+		Name:      name,
+		DeviceId:  *deviceID,
+		AccountId: accountID,
 	}, nil
 }
 
