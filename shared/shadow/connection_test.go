@@ -43,5 +43,5 @@ func TestUnmarshal(t *testing.T) {
 	// Flatten
 	flat := connState.Flatten()
 	assert.Equal(t, true, flat.State)
-	assert.Equal(t, time.Unix(1584803417, 0), flat.Timestamp.Time)
+	assert.Equal(t, time.Unix(1584803417, 0), flat.Updated)
 }

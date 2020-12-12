@@ -140,6 +140,6 @@ func TestGetConnectionStatus(t *testing.T) {
 		// Assert the result
 		assert.Nil(t, err)
 		assert.Equal(t, params.status, state.State)
-		assert.Equal(t, params.time, state.Timestamp.Time)
+		assert.Equal(t, params.time, state.Updated)
 	}
 }

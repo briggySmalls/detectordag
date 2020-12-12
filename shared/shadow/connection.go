@@ -2,11 +2,12 @@ package shadow
 
 import (
 	"encoding/json"
+	"time"
 )
 
 type ConnectionState struct {
-	State     bool      `json:""`
-	Timestamp Timestamp `json:""`
+	State   bool      `json:""`
+	Updated time.Time `json:""`
 }
 
 type ConnectionStateSchema struct {
@@ -25,8 +26,8 @@ type ConnectionStateSchema struct {
 // Flatten converts the information into a more user-friendly form
 func (c *ConnectionStateSchema) Flatten() ConnectionState {
 	return ConnectionState{
-		State:     c.State.Reported.Connection,
-		Timestamp: c.Metadata.Reported.Connection.Timestamp,
+		State:   c.State.Reported.Connection,
+		Updated: c.Metadata.Reported.Connection.Timestamp.Time,
 	}
 }
 
