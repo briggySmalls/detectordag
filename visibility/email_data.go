@@ -1,4 +1,4 @@
-package app
+package visibility
 
 const (
   // Address from which emails will be sent
