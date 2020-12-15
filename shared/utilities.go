@@ -3,9 +3,17 @@ package shared
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/go-playground/validator"
 	"github.com/pkg/errors"
 	"log"
 )
+
+var Validate *validator.Validate
+
+func init() {
+	// Create a global validator
+	Validate = validator.New()
+}
 
 func CreateSession(config aws.Config) *session.Session {
 	// Create a new session just for emailing (we have to use a different region)

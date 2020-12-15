@@ -37,7 +37,9 @@ func New(
 func (a *app) Handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 	// Handle SQS events
 	for _, message := range sqsEvent.Records {
-		a.processMessage(message)
+		if err := a.processMessage(message); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -47,6 +49,10 @@ func (a *app) processMessage(message events.SQSMessage) error {
 	var payload sqs.DisconnectedPayload
 	err := json.Unmarshal([]byte(message.Body), &payload)
 	if err != nil {
+		return err
+	}
+	// Validate the parsed struct
+	if err := payload.Validate(); err != nil {
 		return err
 	}
 	// Get the current connection status

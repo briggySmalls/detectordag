@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
+	"github.com/briggysmalls/detectordag/shared"
 	"time"
 )
 
@@ -16,8 +17,12 @@ type client struct {
 }
 
 type DisconnectedPayload struct {
-	DeviceID string    `json:"deviceId"`
-	Time     time.Time `json:"time"`
+	DeviceID string    `json:"deviceId" validate:"uuid"`
+	Time     time.Time `json:"time" validate:"required"`
+}
+
+func (d *DisconnectedPayload) Validate() error {
+	return shared.Validate.Struct(d)
 }
 
 // Client is a client for sending status updates to the queue
@@ -41,6 +46,10 @@ func New(sesh *session.Session, queueUrl string) (Client, error) {
 }
 
 func (c *client) QueueDisconnectedEvent(payload DisconnectedPayload) error {
+	// Ensure the struct is valid
+	if err := shared.Validate.Struct(payload); err != nil {
+		return err
+	}
 	// Marshal the payload to a string
 	body, err := json.Marshal(payload)
 	if err != nil {

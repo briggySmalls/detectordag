@@ -20,7 +20,7 @@ func TestInvalidPayload(t *testing.T) {
 		event string
 	}{
 		{event: "other"},
-		{event: `{"dummy": "text"}`},
+		{event: `{"dummy":"text"}`},
 		{event: `{"deviceId:"e35238bb-ca2c-4e2b-88da-3d305ffe904c"}`},
 		{event: `{"deviceId":"not-uuid","time":"2020-12-12T19:58:16+00:00"}`},
 		{event: `{"deviceId:"e35238bb-ca2c-4e2b-88da-3d305ffe904c","time":"some-bad-time"}`},
