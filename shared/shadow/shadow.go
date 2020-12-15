@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/iot"
 	"github.com/aws/aws-sdk-go/service/iotdataplane"
 	"github.com/aws/aws-sdk-go/service/iotdataplane/iotdataplaneiface"
+	"log"
 	"strconv"
 	"time"
 )
@@ -15,12 +16,15 @@ import (
 // Client represents a client to the device shadow service
 type Client interface {
 	Get(deviceId string) (*Shadow, error)
+	UpdateConnectionStatus(deviceID string, status bool) error
+	GetConnectionStatus(deviceID string) (*ConnectionState, error)
 }
 
 type Timestamp struct {
 	time.Time
 }
 
+// UnmarshalJSON defines a custom method of deserialising a timestamp
 func (t *Timestamp) UnmarshalJSON(data []byte) error {
 	// Parse data to int
 	epoch, err := strconv.Atoi(string(data))
@@ -40,18 +44,26 @@ type MetadataEntry struct {
 	Timestamp Timestamp `json:""`
 }
 
-type Metadata struct {
-	Reported map[string]MetadataEntry `json:""`
-}
-
-type State struct {
-	Reported map[string]interface{} `json:""`
-}
-
 type Shadow struct {
 	Timestamp Timestamp `json:""`
-	Metadata  Metadata  `json:""`
-	State     State     `json:""`
+	Metadata  struct {
+		Reported map[string]MetadataEntry `json:""`
+	} `json:""`
+	State struct {
+		Reported map[string]interface{} `json:""`
+	} `json:""`
+}
+
+type ConnectionUpdatePayload struct {
+	State struct {
+		Reported struct {
+			Connection bool `json:"connection"`
+		} `json:"reported"`
+	} `json:"state"`
+}
+
+func (p *ConnectionUpdatePayload) Dump() ([]byte, error) {
+	return json.Marshal(p)
 }
 
 // New creates a new shadow client
@@ -74,18 +86,60 @@ func New(sess *session.Session) (Client, error) {
 
 func (c *client) Get(deviceId string) (*Shadow, error) {
 	// Request the shadow
-	resp, err := c.dp.GetThingShadow(&iotdataplane.GetThingShadowInput{
-		ThingName: aws.String(deviceId),
-	})
-	if err != nil {
-		return nil, fmt.Errorf("Get shadow failure for '%d': %w", deviceId, err)
-	}
+	payload, err := c.getShadow(deviceId)
 	// Unpack
 	var shadow Shadow
-	err = json.Unmarshal(resp.Payload, &shadow)
+	err = json.Unmarshal(payload, &shadow)
 	if err != nil {
 		return nil, err
 	}
 	// Return
 	return &shadow, nil
+}
+
+func (c *client) UpdateConnectionStatus(deviceID string, status bool) error {
+	// Create new reported state
+	updatePayload := ConnectionUpdatePayload{}
+	updatePayload.State.Reported.Connection = status
+	// Bundle up the request
+	payload, err := updatePayload.Dump()
+	if err != nil {
+		return err
+	}
+	// Form the request
+	log.Print(string(payload))
+	c.dp.UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
+		ThingName: aws.String(deviceID),
+		Payload:   payload,
+	})
+	return nil
+}
+
+func (c *client) GetConnectionStatus(deviceID string) (*ConnectionState, error) {
+	// Request the shadow
+	payload, err := c.getShadow(deviceID)
+	if err != nil {
+		return nil, err
+	}
+	// Unpack the payload
+	var connState ConnectionStateSchema
+	if err := connState.Load(payload); err != nil {
+		return nil, err
+	}
+	// Repackage nicely
+	flat := connState.Flatten()
+	return &flat, nil
+}
+
+func (c *client) getShadow(deviceID string) ([]byte, error) {
+	// Request the shadow
+	resp, err := c.dp.GetThingShadow(&iotdataplane.GetThingShadowInput{
+		ThingName: aws.String(deviceID),
+	})
+	// Bail on error
+	if err != nil {
+		return nil, fmt.Errorf("Get shadow failure for '%s': %w", deviceID, err)
+	}
+	// Just return the payload
+	return resp.Payload, nil
 }

@@ -1,4 +1,4 @@
-package app
+package connection
 
 import (
 	"fmt"
@@ -6,30 +6,36 @@ import (
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
 	"github.com/briggysmalls/detectordag/shared/iot"
+	"github.com/briggysmalls/detectordag/shared/shadow"
 	"log"
 	"time"
 )
 
-type emailClient struct {
-	email email.Emailer
-	db    database.Client
+type connectionUpdater struct {
+	email  email.Emailer
+	db     database.Client
+	shadow shadow.Client
 }
 
-type EmailClient interface {
-	SendVisibilityStatus(device *iot.Device, timestamp time.Time, status bool) error
+type ConnectionUpdater interface {
+	UpdateConnectionStatus(device *iot.Device, timestamp time.Time, status bool) error
 }
 
-func NewVisibilityEmailer(sesh *session.Session, db database.Client) (EmailClient, error) {
+func NewConnectionUpdater(sesh *session.Session, db database.Client, shadow shadow.Client) (ConnectionUpdater, error) {
 	// Create a new email client
 	email, err := email.NewEmailer(sesh, htmlTemplateSource, textTemplateSource)
 	if err != nil {
 		return nil, err
 	}
-	return &emailClient{email: email, db: db}, nil
+	return &connectionUpdater{email: email, db: db, shadow: shadow}, nil
 }
 
-func (e *emailClient) SendVisibilityStatus(device *iot.Device, timestamp time.Time, status bool) error {
+func (e *connectionUpdater) UpdateConnectionStatus(device *iot.Device, timestamp time.Time, status bool) error {
 	log.Printf("Sending visibility email for device: %s with state %v", DeviceString(device), status)
+	// Update the internal record of connection status
+	if err := e.shadow.UpdateConnectionStatus(device.DeviceId, status); err != nil {
+		return err
+	}
 	// Get the account
 	account, err := e.db.GetAccountById(device.AccountId)
 	if err != nil {

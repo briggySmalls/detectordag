@@ -9,7 +9,7 @@ Resources:
         Variables:
           DETECTORDAG_JWT_DURATION: "2h"
           DETECTORDAG_JWT_SECRET: "dummy-secret"
-      Handler: api
+      Handler: main
       Runtime: go1.x
       Timeout: 5
       Events:
@@ -121,7 +121,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./consumer
-      Handler: consumer
+      Handler: main
       Runtime: go1.x
       Policies:
         - DynamoDBReadPolicy:
@@ -147,11 +147,67 @@ Resources:
                 - 'iot:DescribeThing'
               Resource:
                 - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
-  FindLost:
+  ConnectionStatusQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      DelaySeconds: 5
+  ConnectionStatusQueueMap:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: !GetAtt ConnectionStatusQueue.Arn
+      FunctionName: !GetAtt Disconnected.Arn
+  ConnectionStatusListener:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./visibility
-      Handler: findlost
+      CodeUri: ./connection/listener
+      Handler: main
+      Runtime: go1.x
+      Timeout: 5
+      Environment:
+        Variables:
+          DELAY_QUEUE_URL: !Ref ConnectionStatusQueue
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'ses:SendEmail'
+                - 'ses:SendRawEmail'
+              Resource: '*'
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+              Action:
+                - 'iot:DescribeThing'
+                - 'iot:GetThingShadow'
+                - 'iot:UpdateThingShadow'
+              Resource:
+                - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'iot:DescribeEndpoint'
+              Resource: '*'
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'sqs:SendMessage'
+              Resource: !Sub ${ConnectionStatusQueue.Arn}
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'dynamodb:GetItem'
+              Resource:
+                - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/accounts"
+  Disconnected:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./connection/disconnected
+      Handler: main
       Runtime: go1.x
       Timeout: 5
       Policies:
@@ -166,22 +222,10 @@ Resources:
           Statement:
             - Effect: Allow
               Action:
-                - 'iot:ListThings'
-              Resource: '*'
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
               Action:
                 - 'iot:DescribeThing'
-                - 'iot:UpdateThing'
-              Resource:
-                - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
                 - 'iot:GetThingShadow'
+                - 'iot:UpdateThingShadow'
               Resource:
                 - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
         - Version: '2012-10-17'
@@ -197,3 +241,11 @@ Resources:
                 - 'dynamodb:GetItem'
               Resource:
                 - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/accounts"
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'sqs:DeleteMessage'
+                - 'sqs:GetQueueAttributes'
+                - 'sqs:ReceiveMessage'
+              Resource: !Sub ${ConnectionStatusQueue.Arn}
