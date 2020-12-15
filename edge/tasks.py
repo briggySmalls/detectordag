@@ -83,7 +83,7 @@ def lint_flake8(c):
     """
     Lint code with flake8
     """
-    _run("flake8 {}".format(" ".join(PYTHON_DIRS)))
+    _run(c, "flake8 {}".format(" ".join(PYTHON_DIRS)))
 
 
 @task
@@ -91,7 +91,7 @@ def lint_pylint(c):
     """
     Lint code with pylint
     """
-    _run("pylint {}".format(" ".join(PYTHON_DIRS)))
+    _run(c, "pylint {}".format(" ".join(PYTHON_DIRS)))
 
 
 @task
@@ -99,7 +99,7 @@ def lint_mypy(c):
     """
     Lint code with mypy
     """
-    _run("mypy --strict --allow-untyped-decorators")
+    _run(c, "mypy --strict --allow-untyped-decorators")
 
 
 @task(lint_flake8, lint_pylint, lint_mypy)
@@ -116,7 +116,7 @@ def test(c):
     Run tests
     """
     pty = platform.system() != "Windows"
-    _run("python {} test".format(SETUP_FILE), pty=pty)
+    _run(c, "python {} test".format(SETUP_FILE), pty=pty)
 
 
 @task(help={"publish": "Publish the result via coveralls"})

@@ -72,7 +72,7 @@ class AppConfig:
                         mapping.identifier, default=mapping.default
                     )
             except EnvValidationError as exc:
-                raise ConfigError(exc)
+                raise ConfigError(exc) from exc
 
         # Write to a file
         cls._convert_certs(parsed)

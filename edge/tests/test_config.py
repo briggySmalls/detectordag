@@ -86,7 +86,7 @@ _VARIABLES = {
 
 
 @pytest.mark.parametrize("to_drop", _VARIABLES.keys())
-def test_missing(monkeypatch: Any, tmp_path: Path, to_drop: bool) -> None:
+def test_missing(monkeypatch: Any, tmp_path: Path, to_drop: str) -> None:
     """Run a test, dropping each of the keys in turn"""
     # Delete existing environment variables
     for var in AppConfig.variables():
