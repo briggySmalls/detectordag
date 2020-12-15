@@ -151,6 +151,11 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       DelaySeconds: 600
+  ConnectionStatusQueueMap:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: !GetAtt ConnectionStatusQueue.Arn
+      FunctionName: !GetAtt ConnectionStatusEmailer.Arn
   ConnectionStatusListener:
     Type: AWS::Serverless::Function
     Properties:
@@ -179,13 +184,11 @@ Resources:
             - Effect: Allow
               Action:
                 - 'sqs:SendMessage'
-              Resource: !Sub
-                - "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:${QueueName}"
-                - { QueueName: !Ref ConnectionStatusQueue }
+              Resource: !Sub ${ConnectionStatusQueue.Arn}
   ConnectionStatusEmailer:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./visibility/listener
+      CodeUri: ./visibility/disconnected
       Handler: emailer
       Runtime: go1.x
       Timeout: 5
@@ -208,7 +211,7 @@ Resources:
           Statement:
             - Effect: Allow
               Action:
+                - 'sqs:DeleteMessage'
+                - 'sqs:GetQueueAttributes'
                 - 'sqs:ReceiveMessage'
-              Resource: !Sub
-                - "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:${QueueName}"
-                - { QueueName: !Ref ConnectionStatusQueue }
+              Resource: !Sub ${ConnectionStatusQueue.Arn}
