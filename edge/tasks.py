@@ -3,13 +3,12 @@ Tasks for maintaining the project.
 
 Execute 'invoke --list' for guidance on using Invoke
 """
-import shutil
 import platform
+import shutil
+import webbrowser
+from pathlib import Path
 
 from invoke import task
-from pathlib import Path
-import webbrowser
-
 
 ROOT_DIR = Path(__file__).parent
 SETUP_FILE = ROOT_DIR.joinpath("setup.py")
@@ -25,30 +24,58 @@ DOCS_INDEX = DOCS_BUILD_DIR.joinpath("index.html")
 PYTHON_DIRS = [str(d) for d in [SOURCE_DIR, TEST_DIR]]
 
 
-def _delete_file(file):
-    try:
-        file.unlink(missing_ok=True)
-    except TypeError:
-        # missing_ok argument added in 3.8
-        try:
-            file.unlink()
-        except FileNotFoundError:
-            pass
+def _run(c, command, *args, **kwargs):
+    """Helper function for running commands"""
+    pty = platform.system() != "Windows"
+    c.run(command, *args, pty=pty, **kwargs)
 
 
-@task(help={'check': "Checks if source is formatted without applying changes"})
-def format(c, check=False):
+def _format_dirs_string(c):
+    """Get the directories/files to format"""
+    return " ".join((str(f) for f in (*c.PYTHON_FILES, *c.PYTHON_DIRS)))
+
+
+@task(
+    help=dict(check="Checks if source is formatted without applying changes"),
+)
+def format_black(c, check=False):
     """
     Format code
     """
-    python_dirs_string = " ".join(PYTHON_DIRS)
-    # Run yapf
-    yapf_options = '--recursive {}'.format('--diff' if check else '--in-place')
-    c.run("yapf {} {}".format(yapf_options, python_dirs_string))
+    black_options = "--line-length 79"
+    if check:
+        black_options += " --check --diff"
+    _run(c, f"black {black_options} {_format_dirs_string(c)}")
+
+
+@task(
+    help=dict(
+        check="Checks if imports are formatted without applying changes"
+    ),
+)
+def format_isort(c, check=False):
+    """
+    Format imports
+    """
+    # Create options
+    isort_options = "--profile black --line-length 79"
+    if check:
+        isort_options += " --check-only --diff"
+    # Run the ting
+    _run(c, f"isort {isort_options} {_format_dirs_string(c)}")
+
+
+@task(
+    help=dict(check="Checks if source is formatted without applying changes"),
+)
+def format(c, check=False):
+    """
+    Do some clever formatting
+    """
+    # Format code using black
+    format_black(c, check)
     # Run isort
-    isort_options = '--recursive {}'.format(
-        '--check-only' if check else '')
-    c.run("isort {} {}".format(isort_options, python_dirs_string))
+    format_isort(c, check)
 
 
 @task
@@ -56,7 +83,7 @@ def lint_flake8(c):
     """
     Lint code with flake8
     """
-    c.run("flake8 {}".format(" ".join(PYTHON_DIRS)))
+    _run("flake8 {}".format(" ".join(PYTHON_DIRS)))
 
 
 @task
@@ -64,7 +91,7 @@ def lint_pylint(c):
     """
     Lint code with pylint
     """
-    c.run("pylint {}".format(" ".join(PYTHON_DIRS)))
+    _run("pylint {}".format(" ".join(PYTHON_DIRS)))
 
 
 @task
@@ -72,7 +99,7 @@ def lint_mypy(c):
     """
     Lint code with mypy
     """
-    c.run("mypy --strict --config mypy.ini --allow-untyped-decorators")
+    _run("mypy --strict --allow-untyped-decorators")
 
 
 @task(lint_flake8, lint_pylint, lint_mypy)
@@ -80,6 +107,7 @@ def lint(c):
     """
     Run all linting
     """
+    pass
 
 
 @task
@@ -87,11 +115,11 @@ def test(c):
     """
     Run tests
     """
-    pty = platform.system() != 'Windows'
-    c.run("python {} test".format(SETUP_FILE), pty=pty)
+    pty = platform.system() != "Windows"
+    _run("python {} test".format(SETUP_FILE), pty=pty)
 
 
-@task(help={'publish': "Publish the result via coveralls"})
+@task(help={"publish": "Publish the result via coveralls"})
 def coverage(c, publish=False):
     """
     Create coverage report
@@ -122,61 +150,3 @@ def clean_docs(c):
     Clean up files from documentation builds
     """
     c.run("rm -fr {}".format(DOCS_BUILD_DIR))
-
-
-@task
-def clean_build(c):
-    """
-    Clean up files from package building
-    """
-    c.run("rm -fr build/")
-    c.run("rm -fr dist/")
-    c.run("rm -fr .eggs/")
-    c.run("find . -name '*.egg-info' -exec rm -fr {} +")
-    c.run("find . -name '*.egg' -exec rm -f {} +")
-
-
-@task
-def clean_python(c):
-    """
-    Clean up python file artifacts
-    """
-    c.run("find . -name '*.pyc' -exec rm -f {} +")
-    c.run("find . -name '*.pyo' -exec rm -f {} +")
-    c.run("find . -name '*~' -exec rm -f {} +")
-    c.run("find . -name '__pycache__' -exec rm -fr {} +")
-
-
-@task
-def clean_tests(c):
-    """
-    Clean up files from testing
-    """
-    _delete_file(COVERAGE_FILE)
-    shutil.rmtree(TOX_DIR, ignore_errors=True)
-    shutil.rmtree(COVERAGE_DIR, ignore_errors=True)
-
-
-@task(pre=[clean_build, clean_python, clean_tests, clean_docs])
-def clean(c):
-    """
-    Runs all clean sub-tasks
-    """
-    pass
-
-
-@task(clean)
-def dist(c):
-    """
-    Build source and wheel packages
-    """
-    c.run("python setup.py sdist")
-    c.run("python setup.py bdist_wheel")
-
-
-@task(pre=[clean, dist])
-def release(c):
-    """
-    Make a release of the python package to pypi
-    """
-    c.run("twine upload dist/*")

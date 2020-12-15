@@ -15,6 +15,7 @@ logging.getLogger("AWSIoTPythonSDK").setLevel(logging.WARNING)
 @dataclass
 class ClientConfig:
     """Configuration for the CloudClient"""
+
     device_id: str
     root_cert: Path
     thing_cert: Path
@@ -35,12 +36,13 @@ class DeviceShadowState:
         Returns:
             str: AWS shadow JSON payload
         """
-        payload = {'state': {'reported': asdict(self)}}
+        payload = {"state": {"reported": asdict(self)}}
         return json.dumps(payload)
 
 
 class CloudClient:
     """Client for interfacing with the cloud"""
+
     _QOS = 1
     _DISCONNECT_TIMEOUT = 10
     _OPERATION_TIMEOUT = 5
@@ -55,26 +57,32 @@ class CloudClient:
         self.client.configureEndpoint(self.config.endpoint, self.config.port)
         # Used to configure the rootCA, private key and certificate files.
         # configureCredentials(CAFilePath, KeyPath='', CertificatePath='')
-        self.client.configureCredentials(str(self.config.root_cert.resolve()),
-                                         str(self.config.thing_key.resolve()),
-                                         str(self.config.thing_cert.resolve()))
+        self.client.configureCredentials(
+            str(self.config.root_cert.resolve()),
+            str(self.config.thing_key.resolve()),
+            str(self.config.thing_cert.resolve()),
+        )
         # Configure connect/disconnect timeout to be 10 seconds
         self.client.configureConnectDisconnectTimeout(self._DISCONNECT_TIMEOUT)
         # Configure MQTT operation timeout to be 5 seconds
         self.client.configureMQTTOperationTimeout(self._OPERATION_TIMEOUT)
         # Create the shadow handler
         self.shadow = self.client.createShadowHandlerWithName(
-            config.device_id, False)
+            config.device_id, False
+        )
 
-    def __enter__(self) -> 'CloudClient':
+    def __enter__(self) -> "CloudClient":
         # Connect
         self.client.connect()
         # Return this
         return self
 
-    def __exit__(self, exc_type: Optional[Type[BaseException]],
-                 exc_value: Optional[BaseException],
-                 traceback: Optional[TracebackType]) -> None:
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         del exc_type, exc_value, traceback
         self.client.disconnect()
 
@@ -85,14 +93,16 @@ class CloudClient:
             status (bool): New power status
         """
         payload = DeviceShadowState(status=status).to_json()
-        _LOGGER.info('Publishing status update: %s', payload)
-        token = self.shadow.shadowUpdate(payload, self.shadow_update_handler,
-                                         self._OPERATION_TIMEOUT)
+        _LOGGER.info("Publishing status update: %s", payload)
+        token = self.shadow.shadowUpdate(
+            payload, self.shadow_update_handler, self._OPERATION_TIMEOUT
+        )
         _LOGGER.debug("Status update returned token: %s", token)
 
     @staticmethod
-    def shadow_update_handler(payload: str, response_status: str,
-                              token: str) -> None:
+    def shadow_update_handler(
+        payload: str, response_status: str, token: str
+    ) -> None:
         """Handle a device shadow update response
 
         Args:
@@ -104,11 +114,15 @@ class CloudClient:
             RuntimeError: Unexpected response
         """
         del token
-        if response_status == 'accepted':
+        if response_status == "accepted":
             _LOGGER.info("Shadow update accepted: payload=%s", payload)
-        elif response_status in ['timeout', 'rejected']:
-            _LOGGER.error("Shadow update failed: status=%s, payload=%s",
-                          response_status, payload)
+        elif response_status in ["timeout", "rejected"]:
+            _LOGGER.error(
+                "Shadow update failed: status=%s, payload=%s",
+                response_status,
+                payload,
+            )
         else:
             raise RuntimeError(
-                f"Unexpected response_status: {response_status}")
+                f"Unexpected response_status: {response_status}"
+            )

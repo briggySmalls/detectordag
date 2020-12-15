@@ -22,7 +22,7 @@ def main(ctx: Any) -> None:
     logging.basicConfig(level=logging.DEBUG)
     logging.info("Starting")
     # Parse config
-    ctx.obj['config'] = AppConfig.from_env()
+    ctx.obj["config"] = AppConfig.from_env()
 
 
 @main.command()
@@ -30,10 +30,13 @@ def main(ctx: Any) -> None:
 def app(ctx: Any) -> None:
     """Run the 'production' edge software"""
     # Track power status GPIO
-    from gpiozero import DigitalInputDevice  # noqa: E501, pylint: disable=import-error,import-outside-toplevel
+    from gpiozero import (  # noqa: E501, pylint: disable=import-error,import-outside-toplevel
+        DigitalInputDevice,
+    )
+
     power_status_device = DigitalInputDevice(_POWER_PIN, bounce_time=0.2)
     # Start the application
-    with EdgeApp(power_status_device, ctx.obj['config']):
+    with EdgeApp(power_status_device, ctx.obj["config"]):
         while True:
             pass
 
@@ -43,20 +46,23 @@ def app(ctx: Any) -> None:
 def mock(ctx: Any) -> None:
     """Run the mock edge software"""
     # Create a mock device
-    from edge.mocks import MockDigitalInputDevice  # noqa: E501, pylint: disable=import-outside-toplevel
+    from edge.mocks import (  # noqa: E501, pylint: disable=import-outside-toplevel
+        MockDigitalInputDevice,
+    )
+
     power_status_device = MockDigitalInputDevice(_POWER_PIN)
     # Run the 'real' software
-    with EdgeApp(power_status_device, ctx.obj['config']):
+    with EdgeApp(power_status_device, ctx.obj["config"]):
         # Allow the user to toggle the power status
         while True:
             char = click.getchar()
-            if char == 't':
+            if char == "t":
                 # Toggle power status
                 power_status_device.toggle()
-            elif char == 'h':
+            elif char == "h":
                 # Set power status high
                 power_status_device.high()
-            elif char == 'l':
+            elif char == "l":
                 # Set power status low
                 power_status_device.low()
 
