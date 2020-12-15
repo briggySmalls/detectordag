@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from environs import Env, EnvValidationError
+from environs import Env, EnvError
 
 
 class ConfigError(Exception):
@@ -71,7 +71,7 @@ class AppConfig:
                     parsed[name] = getattr(env, mapping.parser)(
                         mapping.identifier, default=mapping.default
                     )
-            except EnvValidationError as exc:
+            except EnvError as exc:
                 raise ConfigError(exc) from exc
 
         # Write to a file
