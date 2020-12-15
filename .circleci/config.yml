@@ -5,11 +5,15 @@ commands:
     steps:
       - run:
           working_directory: ./edge
-          command: |  # use pipenv to install dependencies
-            sudo pip install pipenv
-            pipenv install --dev
+          command: |  # use poetry to install dependencies
+            curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+            source $HOME/.poetry/env
+            poetry config --local virtualenvs.in-project true
+            poetry --version
+            poetry install
+            poetry shell
       - save_cache:  # Save a cache of dependencies, tied to lockfile
-          key: deps9-{{ .Branch }}-{{ checksum "./edge/Pipfile.lock" }}
+          key: deps9-{{ .Branch }}-{{ checksum "./edge/poetry.lock" }}
           paths:
             - "./edge/.venv"
             - "/usr/local/bin"
