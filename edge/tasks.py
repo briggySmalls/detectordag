@@ -10,16 +10,11 @@ from pathlib import Path
 from invoke import task  # pylint: disable=no-name-in-module
 
 ROOT_DIR = Path(__file__).parent
-SETUP_FILE = ROOT_DIR.joinpath("setup.py")
 TEST_DIR = ROOT_DIR.joinpath("tests")
 SOURCE_DIR = ROOT_DIR.joinpath("edge")
-TOX_DIR = ROOT_DIR.joinpath(".tox")
 COVERAGE_FILE = ROOT_DIR.joinpath(".coverage")
 COVERAGE_DIR = ROOT_DIR.joinpath("htmlcov")
 COVERAGE_REPORT = COVERAGE_DIR.joinpath("index.html")
-DOCS_DIR = ROOT_DIR.joinpath("docs")
-DOCS_BUILD_DIR = DOCS_DIR.joinpath("_build")
-DOCS_INDEX = DOCS_BUILD_DIR.joinpath("index.html")
 PYTHON_DIRS = [str(d) for d in [SOURCE_DIR, TEST_DIR]]
 
 
@@ -113,7 +108,7 @@ def test(ctx):
     """
     Run tests
     """
-    _run(ctx, "python {} test".format(SETUP_FILE))
+    _run(ctx, "pytest -v")
 
 
 @task(help={"publish": "Publish the result via coveralls"})
