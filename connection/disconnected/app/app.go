@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/briggysmalls/detectordag/connection"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/shared/sqs"
-	"github.com/briggysmalls/detectordag/connection"
 )
 
 type app struct {

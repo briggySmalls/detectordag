@@ -6,12 +6,12 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"fmt"
 	"testing"
 	"time"
 )
@@ -105,8 +105,8 @@ func TestDeviceLookupFailed(t *testing.T) {
 func TestEmailsSent(t *testing.T) {
 	// Prepare some test parameters
 	const (
-		deviceID = "b6d62b30-00ac-49c4-9268-88559a46889f"
-		accountID = "c6d62b30-00ac-49c4-9268-88559a46889f"
+		deviceID     = "b6d62b30-00ac-49c4-9268-88559a46889f"
+		accountID    = "c6d62b30-00ac-49c4-9268-88559a46889f"
 		eventTimeStr = "2020-12-12T19:58:16+00:00"
 	)
 	// Create app under test
@@ -120,15 +120,15 @@ func TestEmailsSent(t *testing.T) {
 	// Configure lookup to succeed
 	device := iot.Device{
 		AccountId: accountID,
-		DeviceId: deviceID,
-		Name: "Alderney",
+		DeviceId:  deviceID,
+		Name:      "Alderney",
 	}
 	mockIoT.EXPECT().GetThing(deviceID).Return(
 		&device,
 		nil,
 	)
 	// Expect a call to update status
-	eventTime, err := time.Parse(time.RFC3339, eventTimeStr);
+	eventTime, err := time.Parse(time.RFC3339, eventTimeStr)
 	assert.Nil(t, err)
 	mockUpdater.EXPECT().UpdateConnectionStatus(&device, eventTime, false)
 	// Run test

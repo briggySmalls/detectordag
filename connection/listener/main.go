@@ -3,13 +3,13 @@ package main
 import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/briggysmalls/detectordag/connection"
+	"github.com/briggysmalls/detectordag/connection/listener/app"
 	"github.com/briggysmalls/detectordag/shared"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/shared/sqs"
-	"github.com/briggysmalls/detectordag/connection"
-	"github.com/briggysmalls/detectordag/connection/listener/app"
 	"log"
 	"os"
 )
