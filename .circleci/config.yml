@@ -147,7 +147,7 @@ workflows:
       # consumer
       - go-format:
           name: consumer-format
-          directory: ./consumers
+          directory: ./consumer
       # api
       - go-format:
           name: api-format
