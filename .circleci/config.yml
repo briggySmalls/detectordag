@@ -11,7 +11,7 @@ commands:
             poetry config --local virtualenvs.in-project true
             poetry --version
             poetry install
-            poetry shell
+            source $(dirname $(poetry run which python))/activate
       - save_cache:  # Save a cache of dependencies, tied to lockfile
           key: deps9-{{ .Branch }}-{{ checksum "./edge/poetry.lock" }}
           paths:
@@ -71,7 +71,7 @@ jobs:
       - run:
           working_directory: ./edge
           name: Run format check
-          command: pipenv run invoke format --check
+          command: invoke format --check
   # Ensure edge code is linting correctly
   edge-lint:
     executor: python-executor
@@ -81,7 +81,7 @@ jobs:
       - run:
           working_directory: ./edge
           name: Run linting
-          command: pipenv run invoke lint
+          command: invoke lint
   # Ensure edge code is passing tests
   edge-test:
     executor: python-executor
@@ -91,7 +91,7 @@ jobs:
       - run:
           working_directory: ./edge
           name: Run tests
-          command: pipenv run invoke test
+          command: invoke test
 workflows:
   version: 2
   main:
