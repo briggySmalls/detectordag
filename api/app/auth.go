@@ -1,10 +1,10 @@
-package swagger
+package app
 
 import (
 	"context"
 	"errors"
-	"github.com/briggysmalls/detectordag/api/swagger/server"
-	"github.com/briggysmalls/detectordag/api/swagger/tokens"
+	"github.com/briggysmalls/detectordag/api/app/server"
+	"github.com/briggysmalls/detectordag/api/app/tokens"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/gorilla/mux"
 	"net/http"

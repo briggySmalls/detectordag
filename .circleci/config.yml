@@ -18,6 +18,14 @@ commands:
     steps:
       - run: go get -u -d github.com/magefile/mage
       - run: cd $GOPATH/src/github.com/magefile/mage && go run bootstrap.go
+  install-go-swagger:
+    steps:
+      - run: >
+          download_url=$(curl -s https://api.github.com/repos/go-swagger/go-swagger/releases/latest |
+          jq -r '.assets[] | select(.name | contains("'"$(uname | tr '[:upper:]' '[:lower:]')"'_amd64")) |
+          .browser_download_url') &&
+          sudo curl -o /usr/local/bin/swagger -L'#' "$download_url"
+      - run: sudo chmod +x /usr/local/bin/swagger
 
 executors:
   python-executor:
@@ -88,6 +96,46 @@ jobs:
           working_directory: ./edge
           name: Run tests
           command: pipenv run invoke test
+  # Generate openAPI specification from API code
+  generate-spec:
+    executor: golang-executor
+    steps:
+      - run: sudo apt-get update && sudo apt-get install -yq curl git jq
+      - install-go-swagger
+      - checkout
+      - run:
+          name: Create output directory
+          command: mkdir -p artifacts
+      - run:
+          working_directory: ./api
+          name: Generate API specification
+          command: swagger generate spec --output ../artifacts/api.yaml
+      - run:
+          name: Validate API specification
+          command: swagger validate artifacts/api.yaml
+      - persist_to_workspace:
+          root: .
+          paths: artifacts
+  # Generate javascript library from openAPI spec
+  generate-client:
+    docker:
+      - image: circleci/openjdk:latest
+    steps:
+      - run:
+          name: Install swagger-codegen
+          command: wget https://oss.sonatype.org/content/repositories/releases/io/swagger/swagger-codegen-cli/2.2.1/swagger-codegen-cli-2.2.1.jar
+      - attach_workspace:
+          at: .
+      - run:
+          name: Create directory
+          command: mkdir -p lib
+      - run:
+          name: Generate library
+          command: java -jar swagger-codegen-cli-2.2.1.jar generate -i ./artifacts/api.yaml --lang javascript -o ./lib/client
+      - persist_to_workspace:
+          root: .
+          paths: lib
+
 workflows:
   version: 2
   main:
@@ -118,3 +166,8 @@ workflows:
       - go-test:
           name: connection-listener-test
           directory: ./connection/listener
+      # Generate openapi spec
+      - generate-spec
+      - generate-client:
+          requires:
+            - generate-spec

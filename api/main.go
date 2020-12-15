@@ -1,16 +1,14 @@
 package main
 
-//go:generate swagger-codegen generate -i ../shared/api.yaml --lang go-server -Dmodels --output swagger
-
 import (
 	"context"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
-	"github.com/briggysmalls/detectordag/api/swagger"
-	"github.com/briggysmalls/detectordag/api/swagger/server"
-	"github.com/briggysmalls/detectordag/api/swagger/tokens"
+	"github.com/briggysmalls/detectordag/api/app"
+	"github.com/briggysmalls/detectordag/api/app/server"
+	"github.com/briggysmalls/detectordag/api/app/tokens"
 	"github.com/briggysmalls/detectordag/shared"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
@@ -54,7 +52,7 @@ func init() {
 	// Create the server
 	s := server.New(db, shadow, verifier, iot, tokens)
 	// Create the router
-	r := swagger.NewRouter(iot, s, createTokens())
+	r := app.NewRouter(iot, s, createTokens())
 	// Create an adapter for aws lambda
 	adapter = gorillamux.New(r)
 }
