@@ -26,8 +26,6 @@ func (Format) Check() error {
 
 // Runs the tests
 func Test() error {
-	// We need mocks for tests
-	mg.Deps(Generate)
 	// Get the go directories
 	output, err := sh.Output("go", "list", "./...")
 	if err != nil {
