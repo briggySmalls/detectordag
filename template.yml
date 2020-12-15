@@ -9,7 +9,7 @@ Resources:
         Variables:
           DETECTORDAG_JWT_DURATION: "2h"
           DETECTORDAG_JWT_SECRET: "dummy-secret"
-      Handler: api
+      Handler: main
       Runtime: go1.x
       Timeout: 5
       Events:
@@ -121,7 +121,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./consumer
-      Handler: consumer
+      Handler: main
       Runtime: go1.x
       Policies:
         - DynamoDBReadPolicy:
@@ -160,15 +160,19 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./visibility/listener
-      Handler: listener
+      Handler: main
       Runtime: go1.x
       Timeout: 5
+      Environment:
+        Variables:
+          DELAY_QUEUE_URL: !Ref ConnectionStatusQueue
       Policies:
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
               Action:
-                - 'iot:ListThings'
+                - 'ses:SendEmail'
+                - 'ses:SendRawEmail'
               Resource: '*'
         - Version: '2012-10-17'
           Statement:
@@ -176,20 +180,34 @@ Resources:
               Action:
               Action:
                 - 'iot:DescribeThing'
-                - 'iot:UpdateThing'
+                - 'iot:GetThingShadow'
+                - 'iot:UpdateThingShadow'
               Resource:
                 - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
               Action:
+                - 'iot:DescribeEndpoint'
+              Resource: '*'
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
                 - 'sqs:SendMessage'
               Resource: !Sub ${ConnectionStatusQueue.Arn}
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'dynamodb:GetItem'
+              Resource:
+                - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/accounts"
   ConnectionStatusEmailer:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./visibility/disconnected
-      Handler: emailer
+      Handler: main
       Runtime: go1.x
       Timeout: 5
       Policies:
@@ -199,6 +217,22 @@ Resources:
               Action:
                 - 'ses:SendEmail'
                 - 'ses:SendRawEmail'
+              Resource: '*'
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+              Action:
+                - 'iot:DescribeThing'
+                - 'iot:GetThingShadow'
+                - 'iot:UpdateThingShadow'
+              Resource:
+                - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'iot:DescribeEndpoint'
               Resource: '*'
         - Version: '2012-10-17'
           Statement:
