@@ -150,16 +150,16 @@ Resources:
   ConnectionStatusQueue:
     Type: AWS::SQS::Queue
     Properties:
-      DelaySeconds: 600
+      DelaySeconds: 5
   ConnectionStatusQueueMap:
     Type: AWS::Lambda::EventSourceMapping
     Properties:
       EventSourceArn: !GetAtt ConnectionStatusQueue.Arn
-      FunctionName: !GetAtt ConnectionStatusEmailer.Arn
+      FunctionName: !GetAtt Disconnected.Arn
   ConnectionStatusListener:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./visibility/listener
+      CodeUri: ./connection/listener
       Handler: main
       Runtime: go1.x
       Timeout: 5
@@ -203,10 +203,10 @@ Resources:
                 - 'dynamodb:GetItem'
               Resource:
                 - !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/accounts"
-  ConnectionStatusEmailer:
+  Disconnected:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./visibility/disconnected
+      CodeUri: ./connection/disconnected
       Handler: main
       Runtime: go1.x
       Timeout: 5

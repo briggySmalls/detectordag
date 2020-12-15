@@ -104,17 +104,17 @@ workflows:
       - go-format:
           name: api-format
           directory: ./api
-      # visibility-emailer
+      # connection-disconnected
       - go-format:
-          name: visibility-emailer-format
-          directory: ./visibility/emailer
+          name: connection-disconnected-format
+          directory: ./connection/disconnected
       - go-test:
-          name: visibility-emailer-test
-          directory: ./visibility/emailer
-      # visibility-listener
+          name: connection-disconnected-test
+          directory: ./connection/disconnected
+      # connection-listener
       - go-format:
-          name: visibility-listener-format
-          directory: ./visibility/listener
+          name: connection-listener-format
+          directory: ./connection/listener
       - go-test:
-          name: visibility-listener-test
-          directory: ./visibility/listener
+          name: connection-listener-test
+          directory: ./connection/listener

@@ -1,4 +1,4 @@
-package visibility
+package connection
 
 const (
   // Address from which emails will be sent

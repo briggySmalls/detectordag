@@ -7,12 +7,12 @@ import (
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/shared/sqs"
-	"github.com/briggysmalls/detectordag/visibility"
+	"github.com/briggysmalls/detectordag/connection"
 )
 
 type app struct {
 	iot     iot.Client
-	updater visibility.ConnectionUpdater
+	updater connection.ConnectionUpdater
 	shadow  shadow.Client
 }
 
@@ -21,7 +21,7 @@ type App interface {
 }
 
 func New(
-	updater visibility.ConnectionUpdater,
+	updater connection.ConnectionUpdater,
 	iot iot.Client,
 	shadow shadow.Client,
 ) App {

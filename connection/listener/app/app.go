@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/sqs"
-	"github.com/briggysmalls/detectordag/visibility"
+	"github.com/briggysmalls/detectordag/connection"
 	"log"
 	"time"
 )
@@ -13,7 +13,7 @@ import (
 type app struct {
 	sqs     sqs.Client
 	iot     iot.Client
-	updater visibility.ConnectionUpdater
+	updater connection.ConnectionUpdater
 }
 
 type App interface {
@@ -21,7 +21,7 @@ type App interface {
 }
 
 func New(
-	updater visibility.ConnectionUpdater,
+	updater connection.ConnectionUpdater,
 	iot iot.Client,
 	sqs sqs.Client,
 ) App {

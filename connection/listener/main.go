@@ -8,8 +8,8 @@ import (
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/shared/sqs"
-	"github.com/briggysmalls/detectordag/visibility"
-	"github.com/briggysmalls/detectordag/visibility/listener/app"
+	"github.com/briggysmalls/detectordag/connection"
+	"github.com/briggysmalls/detectordag/connection/listener/app"
 	"log"
 	"os"
 )
@@ -46,12 +46,12 @@ func init() {
 	}
 	// Create a new session just for emailing (there is no emailing service in eu-west-2)
 	emailSesh := shared.CreateSession(aws.Config{Region: aws.String("eu-west-1")})
-	visibilityEmailClient, err := visibility.NewConnectionUpdater(emailSesh, dbClient, shadowClient)
+	connectionUpdater, err := connection.NewConnectionUpdater(emailSesh, dbClient, shadowClient)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	// Create the application
-	listener = app.New(visibilityEmailClient, iotClient, sqsQueue)
+	listener = app.New(connectionUpdater, iotClient, sqsQueue)
 }
 
 // main is the entrypoint to the lambda function

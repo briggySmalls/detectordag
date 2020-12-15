@@ -1,4 +1,4 @@
-package visibility
+package connection
 
 import (
 	"fmt"
