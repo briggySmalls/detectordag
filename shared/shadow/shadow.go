@@ -2,8 +2,16 @@ package shadow
 
 import (
 	"encoding/json"
+	"github.com/briggysmalls/detectordag/shared"
 	"strconv"
 	"time"
+)
+
+const (
+	CONNECTION_STATUS_CONNECTED    = "connected"
+	CONNECTION_STATUS_DISCONNECTED = "disconnected"
+	POWER_STATUS_ON                = "on"
+	POWER_STATUS_OFF               = "off"
 )
 
 type Timestamp struct {
@@ -30,11 +38,11 @@ type Shadow struct {
 	Time       time.Time
 	Version    int
 	Connection struct {
-		Value   bool
+		Value   string
 		Updated time.Time
 	}
 	Power struct {
-		Value   bool
+		Value   string
 		Updated time.Time
 	}
 }
@@ -44,14 +52,14 @@ type DeviceShadowSchema struct {
 	Version   int
 	State     struct {
 		Reported struct {
-			Connection bool `json:""`
-			Status     bool
-		} `json:""`
-	} `json:""`
+			Connection string `validate:"required"`
+			Status     string `validate:"required"`
+		}
+	}
 	Metadata struct {
 		Reported struct {
-			Connection MetadataEntry
-			Status     MetadataEntry
+			Connection MetadataEntry `validate:"required"`
+			Status     MetadataEntry `validate:"required"`
 		}
 	}
 }
@@ -60,6 +68,10 @@ type DeviceShadowSchema struct {
 func (c *DeviceShadowSchema) Extract(payload []byte) (*Shadow, error) {
 	// Load the json into this struct
 	if err := json.Unmarshal(payload, c); err != nil {
+		return nil, err
+	}
+	// Validate the struct
+	if err := shared.Validate.Struct(c); err != nil {
 		return nil, err
 	}
 	// Create a shadow

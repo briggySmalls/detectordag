@@ -21,8 +21,8 @@ func TestUnmarshal(t *testing.T) {
 	  },
 	  "state": {
 	    "reported": {
-	      "connection": true,
-	      "status": false
+	      "connection": "connected",
+	      "status": "off"
 	    }
 	  },
 	  "timestamp": 1584810789,
@@ -36,9 +36,9 @@ func TestUnmarshal(t *testing.T) {
 	assert.Equal(t, time.Unix(1584810789, 0), shadow.Time)
 	assert.Equal(t, 50, shadow.Version)
 	// Assert the connection values
-	assert.Equal(t, true, shadow.Connection.Value)
+	assert.Equal(t, CONNECTION_STATUS_CONNECTED, shadow.Connection.Value)
 	assert.Equal(t, time.Unix(1584803417, 0), shadow.Connection.Updated)
 	// Assert the power values
-	assert.Equal(t, false, shadow.Power.Value)
+	assert.Equal(t, POWER_STATUS_OFF, shadow.Power.Value)
 	assert.Equal(t, time.Unix(1584803414, 0), shadow.Power.Updated)
 }

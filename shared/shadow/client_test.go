@@ -22,14 +22,14 @@ func TestGetShadow(t *testing.T) {
 	}{
 		{
 			deviceID: "63eda5eb-7f56-417f-88ed-44a9eb9e5f67",
-			payload:  `{"metadata":{"reported":{"connection":{"timestamp":1584803417},"status":{"timestamp":1584803414}}},"state":{"reported":{"connection":true,"status":false}},"timestamp":1584810789,"version":50}`,
+			payload:  `{"metadata":{"reported":{"connection":{"timestamp":1584803417},"status":{"timestamp":1584803414}}},"state":{"reported":{"connection":"connected","status":"off"}},"timestamp":1584810789,"version":50}`,
 			error:    nil,
 			shadow: func() Shadow {
 				// Create a shadow
 				s := Shadow{}
-				s.Connection.Value = true
+				s.Connection.Value = CONNECTION_STATUS_CONNECTED
 				s.Connection.Updated = time.Unix(1584803417, 0)
-				s.Power.Value = false
+				s.Power.Value = POWER_STATUS_OFF
 				s.Power.Updated = time.Unix(1584803414, 0)
 				return s
 			}(),
