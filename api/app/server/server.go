@@ -11,6 +11,7 @@ import (
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"net/http"
+	"log"
 )
 
 var (
@@ -49,6 +50,7 @@ func New(db database.Client, shadow shadow.Client, email email.Verifier, iot iot
 
 func SetError(w http.ResponseWriter, err error, status int) {
 	// TODO: If 5xx error then hide message unless in debug
+	log.Printf("%+v", err)
 	// Create the error struct
 	m := models.ModelError{
 		Error_: err.Error(),
