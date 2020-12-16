@@ -1,6 +1,6 @@
 package iot
 
-//go:generate mockgen -destination mock_iot.go -package iot -mock_names Client=MockIoT github.com/aws/aws-sdk-go/service/iot/iotiface IoTAPI
+//go:generate go run github.com/golang/mock/mockgen -destination mock_iot.go -package iot -mock_names Client=MockIoT github.com/aws/aws-sdk-go/service/iot/iotiface IoTAPI
 
 import (
 	"github.com/aws/aws-sdk-go/aws"

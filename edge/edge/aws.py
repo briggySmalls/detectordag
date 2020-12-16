@@ -1,12 +1,13 @@
 """Logic for connecting to AWS IoT"""
-import json
 import logging
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
 from typing import Optional, Type
 
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
+
+from edge.data import DeviceShadowState, PowerStatus
 
 _LOGGER = logging.getLogger(__file__)
 logging.getLogger("AWSIoTPythonSDK").setLevel(logging.WARNING)
@@ -22,22 +23,6 @@ class ClientConfig:
     thing_key: Path
     endpoint: str
     port: int
-
-
-@dataclass
-class DeviceShadowState:
-    """Helper function for capturing a device shadow update"""
-
-    status: bool
-
-    def to_json(self) -> str:
-        """Convert shadow state to an AWS shadow JSON payload
-
-        Returns:
-            str: AWS shadow JSON payload
-        """
-        payload = {"state": {"reported": asdict(self)}}
-        return json.dumps(payload)
 
 
 class CloudClient:
@@ -57,6 +42,11 @@ class CloudClient:
         self.client.configureEndpoint(self.config.endpoint, self.config.port)
         # Used to configure the rootCA, private key and certificate files.
         # configureCredentials(CAFilePath, KeyPath='', CertificatePath='')
+        self.client.configureCredentials(
+            str(self.config.root_cert.resolve()),
+            str(self.config.thing_key.resolve()),
+            str(self.config.thing_cert.resolve()),
+        )
         self.client.configureCredentials(
             str(self.config.root_cert.resolve()),
             str(self.config.thing_key.resolve()),
@@ -92,7 +82,8 @@ class CloudClient:
         Args:
             status (bool): New power status
         """
-        payload = DeviceShadowState(status=status).to_json()
+        status_enum = PowerStatus.ON if status else PowerStatus.OFF
+        payload = DeviceShadowState(status=status_enum).json()
         _LOGGER.info("Publishing status update: %s", payload)
         token = self.shadow.shadowUpdate(
             payload, self.shadow_update_handler, self._OPERATION_TIMEOUT

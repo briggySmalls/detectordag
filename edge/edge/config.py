@@ -1,5 +1,6 @@
 """Logic for parsing configuration"""
 import base64
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -49,13 +50,15 @@ class AppConfig:
     certs_dir: Path
 
     @classmethod
-    def from_env(cls) -> "AppConfig":
+    def from_env(cls, dotenv=True) -> "AppConfig":
         """Parse configuration from environment variables
 
         Returns:
             AppConfig: Application configuration
         """
         env = Env()
+        if dotenv:
+            env.read_env(str(Path(os.getcwd()) / ".env"))
         # Parse our variables
         parsed = {}
         for name, mapping in cls._parsers.items():

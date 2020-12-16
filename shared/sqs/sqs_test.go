@@ -1,6 +1,6 @@
 package sqs
 
-//go:generate mockgen -destination mock_sqs.go -package sqs github.com/aws/aws-sdk-go/service/sqs/sqsiface SQSAPI
+//go:generate go run github.com/golang/mock/mockgen -destination mock_sqs.go -package sqs github.com/aws/aws-sdk-go/service/sqs/sqsiface SQSAPI
 
 import (
 	"fmt"

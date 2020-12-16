@@ -1,4 +1,6 @@
 [SIMILARITIES]
 
+extension-pkg-whitelist=pydantic
+
 # Minimum lines number of a similarity.
 min-similarity-lines=7
