@@ -57,6 +57,9 @@ class CloudClient:
         self.client.configureEndpoint(self.config.endpoint, self.config.port)
         # Used to configure the rootCA, private key and certificate files.
         # configureCredentials(CAFilePath, KeyPath='', CertificatePath='')
+        self.client.configureCredentials(str(self.config.root_cert.resolve()),
+                                         str(self.config.thing_key.resolve()),
+                                         str(self.config.thing_cert.resolve()))
         self.client.configureCredentials(
             str(self.config.root_cert.resolve()),
             str(self.config.thing_key.resolve()),
