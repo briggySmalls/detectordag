@@ -50,14 +50,15 @@ class AppConfig:
     certs_dir: Path
 
     @classmethod
-    def from_env(cls) -> "AppConfig":
+    def from_env(cls, dotenv=True) -> "AppConfig":
         """Parse configuration from environment variables
 
         Returns:
             AppConfig: Application configuration
         """
         env = Env()
-        env.read_env(str(Path(os.getcwd()) / ".env"))
+        if dotenv:
+            env.read_env(str(Path(os.getcwd()) / ".env"))
         # Parse our variables
         parsed = {}
         for name, mapping in cls._parsers.items():

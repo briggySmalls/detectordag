@@ -53,7 +53,7 @@ def test_present(monkeypatch: Any, tmp_path: Path) -> None:
     )
     monkeypatch.setenv("CERT_DIR", str(tmp_path))
     # Create the config
-    config = AppConfig.from_env()
+    config = AppConfig.from_env(dotenv=False)
     # Assert certificates are created
     aws_root_cert_path = tmp_path / "root-CA.crt"
     aws_root_cert_path.exists()
@@ -95,4 +95,4 @@ def test_missing(monkeypatch: Any, tmp_path: Path, to_drop: str) -> None:
     monkeypatch.setenv("CERT_DIR", str(tmp_path))
     # Expect an error
     with pytest.raises(ConfigError):
-        AppConfig.from_env()
+        AppConfig.from_env(dotenv=False)
