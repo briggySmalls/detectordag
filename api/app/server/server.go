@@ -10,8 +10,8 @@ import (
 	"github.com/briggysmalls/detectordag/shared/email"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
-	"net/http"
 	"log"
+	"net/http"
 )
 
 var (
