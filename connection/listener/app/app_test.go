@@ -6,6 +6,7 @@ package app
 
 import (
 	"github.com/briggysmalls/detectordag/shared/iot"
+	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/shared/sqs"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -35,7 +36,7 @@ func TestConnectedEvent(t *testing.T) {
 		deviceID   = "792ac520-0733-4ffe-8137-8aba3ca446d7"
 		accountID  = "0ba69d11-28a2-433a-8403-8a269b94e61f"
 		eventType  = "connected"
-		status     = true
+		status     = shadow.CONNECTION_STATUS_CONNECTED
 		timestamp  = 0
 		timeString = "1970/01/01 00:00:00"
 	)
