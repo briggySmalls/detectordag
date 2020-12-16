@@ -1,25 +1,25 @@
-from dataclasses import dataclass
 from enum import Enum
 import json
+from typing import Any, Dict
+
+from pydantic import BaseModel
+from stringcase import camelcase
 
 
-class PowerStatus(Enum):
-    ON
-    OFF
+class PowerStatus(str, Enum):
+    ON = "on"
+    OFF = "off"
 
 
-@dataclass
-class DeviceShadowState:
+class DeviceShadowState(BaseModel):
     """Helper function for capturing a device shadow update"""
 
-    status: bool
+    status: PowerStatus
 
-    def to_json(self) -> str:
-        """Convert shadow state to an AWS shadow JSON payload
+    class Config:
+        alias_generator = camelcase
 
-        Returns:
-            str: AWS shadow JSON payload
-        """
-        payload = {'state': {'reported': asdict(self)}}
-        return json.dumps(payload)
-
+    def dict(self) -> Dict[str,Any]:
+        """Serialization step"""
+        # Wrap up the data into AWS IoT-like structure
+        return {'state': {'reported': super().dict()}}
