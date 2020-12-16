@@ -130,7 +130,7 @@ func TestEmailsSent(t *testing.T) {
 	// Expect a call to update status
 	eventTime, err := time.Parse(time.RFC3339, eventTimeStr)
 	assert.Nil(t, err)
-	mockUpdater.EXPECT().UpdateConnectionStatus(&device, eventTime, false)
+	mockUpdater.EXPECT().UpdateConnectionStatus(&device, eventTime, shadow.CONNECTION_STATUS_DISCONNECTED)
 	// Run test
 	// Prepare an event
 	event := events.SQSEvent{
