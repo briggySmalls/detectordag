@@ -19,7 +19,7 @@ class DeviceShadowState(BaseModel):
     class Config:
         alias_generator = camelcase
 
-    def dict(self) -> Dict[str,Any]:
+    def dict(self, *args, **kwargs) -> Dict[str,Any]:
         """Serialization step"""
         # Wrap up the data into AWS IoT-like structure
-        return {'state': {'reported': super().dict()}}
+        return {'state': {'reported': super().dict(*args, **kwargs)}}

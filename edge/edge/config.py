@@ -3,6 +3,7 @@ import base64
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+import os
 
 from environs import Env, EnvError
 
@@ -56,6 +57,7 @@ class AppConfig:
             AppConfig: Application configuration
         """
         env = Env()
+        env.read_env(str(Path(os.getcwd()) / ".env"))
         # Parse our variables
         parsed = {}
         for name, mapping in cls._parsers.items():

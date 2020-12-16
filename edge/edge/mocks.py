@@ -32,12 +32,12 @@ class MockDigitalInputDevice:
         """Simulate reading a new status"""
         self._status = status
         if status:
-            self.when_activated()
+            self.when_activated(self)
         else:
-            self.when_deactivated()
+            self.when_deactivated(self)
 
-    def when_activated(self) -> None:
+    def when_activated(self, device: 'MockDigitalInputDevice') -> None:
         """Faked handler for original DigitalInputDevice"""
 
-    def when_deactivated(self) -> None:
+    def when_deactivated(self, device: 'MockDigitalInputDevice') -> None:
         """Faked handler for original DigitalInputDevice"""
