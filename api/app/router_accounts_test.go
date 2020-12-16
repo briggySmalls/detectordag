@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
-	"time"
 )
 
 func TestGetDevicesSuccess(t *testing.T) {
@@ -30,17 +29,21 @@ func TestGetDevicesSuccess(t *testing.T) {
 	}
 	iotClient.EXPECT().GetThingsByAccount(gomock.Eq(accountID)).Return(devices, nil)
 	// Configure the mock shadow client to expect calls for each device
-	createShadow := func(eventTime, reportedTime time.Time, status bool) shadow.Shadow {
-		// Create a shadow
-		s := shadow.Shadow{}
-		s.Timestamp = shadow.Timestamp{eventTime}
-		s.State.Reported = map[string]interface{}{"status": status}
-		s.Metadata.Reported = map[string]shadow.MetadataEntry{"status": {Timestamp: shadow.Timestamp{reportedTime}}}
-		return s
-	}
 	shadows := []shadow.Shadow{
-		createShadow(createTime(t, "2020/03/22 00:27:00"), createTime(t, "2020/03/22 01:27:00"), true),
-		createShadow(createTime(t, "2020/03/22 00:27:00"), createTime(t, "2020/03/22 01:27:00"), true),
+		{
+			Time: createTime(t, "2020/03/22 00:27:00"),
+			Power: shadow.StringShadowField{
+				Value:   "connected",
+				Updated: createTime(t, "2020/03/22 01:27:00"),
+			},
+		},
+		{
+			Time: createTime(t, "2020/03/22 00:27:00"),
+			Power: shadow.StringShadowField{
+				Value:   "connected",
+				Updated: createTime(t, "2020/03/22 01:27:00"),
+			},
+		},
 	}
 	shdw.EXPECT().Get(gomock.Any()).Return(&shadows[0], nil).Return(&shadows[1], nil).Times(2)
 	// Create a request for devices

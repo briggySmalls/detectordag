@@ -17,7 +17,7 @@ type Device struct {
 
 type DeviceState struct {
 	// Power status of the device
-	Power bool `json:"power"`
+	Power string `json:"power"`
 }
 
 type MutableDevice struct {

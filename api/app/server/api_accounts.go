@@ -55,17 +55,12 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 			SetError(w, err, http.StatusInternalServerError)
 			return
 		}
-		// Coerce the data into the right form
-		status, ok := shdw.State.Reported["status"].(bool)
-		if !ok {
-			SetError(w, err, http.StatusInternalServerError)
-		}
 		// Build the payload
 		payload[i] = models.Device{
 			Name:     device.Name,
 			DeviceId: device.DeviceId,
-			Updated:  shdw.Metadata.Reported["status"].Timestamp.Time,
-			State:    &models.DeviceState{Power: status},
+			Updated:  shdw.Power.Updated,
+			State:    &models.DeviceState{Power: shdw.Power.Value},
 		}
 	}
 	// Prepare the JSON response
