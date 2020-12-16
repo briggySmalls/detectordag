@@ -50,7 +50,7 @@ func TestConnectionStatusLookupFailed(t *testing.T) {
 		},
 	}
 	// Expect a call to shadow
-	shadow.EXPECT().GetConnectionStatus(deviceID).Return(nil, errors.New("Something went wrong"))
+	shadow.EXPECT().Get(deviceID).Return(nil, errors.New("Something went wrong"))
 	// Run the test
 	assert.NotNil(t, app.Handler(nil, event))
 }
@@ -68,8 +68,8 @@ func TestStaleEvent(t *testing.T) {
 		},
 	}
 	// Expect a call to shadow
-	mockShadow.EXPECT().GetConnectionStatus(deviceID).Return(
-		&shadow.ConnectionState{State: true, Updated: createTime(t, "2020/12/12 19:58:17")},
+	mockShadow.EXPECT().Get(deviceID).Return(
+		&shadow.Shadow{Connection: shadow.StringShadowField{Value: shadow.CONNECTION_STATUS_CONNECTED, Updated: createTime(t, "2020/12/12 19:58:17")}},
 		nil,
 	)
 	// Run the test
@@ -91,9 +91,9 @@ func TestDeviceLookupFailed(t *testing.T) {
 		},
 	}
 	// Expect a call to shadow
-	mockShadow.EXPECT().GetConnectionStatus(deviceID).Return(
+	mockShadow.EXPECT().Get(deviceID).Return(
 		// Indicate the status hasn't been updated for a while
-		&shadow.ConnectionState{State: true, Updated: createTime(t, "2020/12/12 00:00:00")},
+		&shadow.Shadow{Connection: shadow.StringShadowField{Value: shadow.CONNECTION_STATUS_CONNECTED, Updated: createTime(t, "2020/12/12 00:00:00")}},
 		nil,
 	)
 	// Configure lookup to fail
@@ -112,9 +112,9 @@ func TestEmailsSent(t *testing.T) {
 	// Create app under test
 	app, mockIoT, mockShadow, mockUpdater := getStubbedApp(t)
 	// Expect a call to shadow
-	mockShadow.EXPECT().GetConnectionStatus(deviceID).Return(
+	mockShadow.EXPECT().Get(deviceID).Return(
 		// Indicate the status hasn't been updated for a while
-		&shadow.ConnectionState{State: true, Updated: createTime(t, "2020/12/12 00:00:00")},
+		&shadow.Shadow{Connection: shadow.StringShadowField{Value: shadow.CONNECTION_STATUS_CONNECTED, Updated: createTime(t, "2020/12/12 00:00:00")}},
 		nil,
 	)
 	// Configure lookup to succeed
