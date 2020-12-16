@@ -18,7 +18,7 @@ type connectionUpdater struct {
 }
 
 type ConnectionUpdater interface {
-	UpdateConnectionStatus(device *iot.Device, timestamp time.Time, status bool) error
+	UpdateConnectionStatus(device *iot.Device, timestamp time.Time, status string) error
 }
 
 func NewConnectionUpdater(sesh *session.Session, db database.Client, shadow shadow.Client) (ConnectionUpdater, error) {
@@ -30,8 +30,8 @@ func NewConnectionUpdater(sesh *session.Session, db database.Client, shadow shad
 	return &connectionUpdater{email: email, db: db, shadow: shadow}, nil
 }
 
-func (e *connectionUpdater) UpdateConnectionStatus(device *iot.Device, timestamp time.Time, status bool) error {
-	log.Printf("Sending visibility email for device: %s with state %v", DeviceString(device), status)
+func (e *connectionUpdater) UpdateConnectionStatus(device *iot.Device, timestamp time.Time, status string) error {
+	log.Printf("Sending visibility email for device: %s with state '%s'", DeviceString(device), status)
 	// Update the internal record of connection status
 	if err := e.shadow.UpdateConnectionStatus(device.DeviceId, status); err != nil {
 		return err

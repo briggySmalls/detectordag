@@ -14,7 +14,7 @@ import (
 // Client represents a client to the device shadow service
 type Client interface {
 	Get(deviceId string) (*Shadow, error)
-	UpdateConnectionStatus(deviceID string, status bool) error
+	UpdateConnectionStatus(deviceID string, status string) error
 }
 
 type client struct {
@@ -24,7 +24,7 @@ type client struct {
 type ConnectionUpdatePayload struct {
 	State struct {
 		Reported struct {
-			Connection bool `json:"connection"`
+			Connection string `json:"connection"`
 		} `json:"reported"`
 	} `json:"state"`
 }
@@ -62,7 +62,7 @@ func (c *client) Get(deviceId string) (*Shadow, error) {
 	return shadowSchema.Extract([]byte(payload))
 }
 
-func (c *client) UpdateConnectionStatus(deviceID string, status bool) error {
+func (c *client) UpdateConnectionStatus(deviceID string, status string) error {
 	// Create new reported state
 	updatePayload := ConnectionUpdatePayload{}
 	updatePayload.State.Reported.Connection = status

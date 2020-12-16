@@ -69,18 +69,18 @@ func TestSetVisibilityStatus(t *testing.T) {
 	// Create some test iterations
 	testParams := []struct {
 		deviceID string
-		status   bool
+		status   string
 		payload  string
 	}{
 		{
 			deviceID: "eb49b2e7-fd3a-4c03-b47f-b819281475e5",
-			status:   true,
-			payload:  `{"state":{"reported":{"connection":true}}}`,
+			status:   CONNECTION_STATUS_CONNECTED,
+			payload:  `{"state":{"reported":{"connection":"connected"}}}`,
 		},
 		{
 			deviceID: "eb49b2e7-fd3a-4c03-b47f-b819281475e5",
-			status:   false,
-			payload:  `{"state":{"reported":{"connection":false}}}`,
+			status:   CONNECTION_STATUS_DISCONNECTED,
+			payload:  `{"state":{"reported":{"connection":"disconnected"}}}`,
 		},
 	}
 	// Iterate the tests
