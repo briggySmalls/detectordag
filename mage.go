@@ -20,9 +20,9 @@ func init() {
 }
 
 func GenerateSpec() error {
-	return sh.Run("docker", "run", "--rm", "-v", fmt.Sprintf("%s:/app", path), "quay.io/goswagger/swagger", "generate", "spec", "-w", "/app/api", "-o", "api.yml")
+	return sh.Run("docker", "run", "--rm", "-v", fmt.Sprintf("%s:/app", path), "quay.io/goswagger/swagger", "generate", "spec", "-w", "/app/api", "-o", "/app/api.yml")
 }
 
 func GenerateLib() error {
-	return sh.Run("docker", "run", "--rm", "-v", fmt.Sprintf("%s:/local", path), "openapitools/openapi-generator-cli", "generate", "-i", "/local/api/api.yml", "-g", "typescript", "-o", "/local/out/js")
+	return sh.Run("docker", "run", "--rm", "-v", fmt.Sprintf("%s:/local", path), "swaggerapi/swagger-codegen-cli", "generate", "-i", "/local/api.yml", "-l", "typescript-jquery", "-o", "/local/out/js")
 }
