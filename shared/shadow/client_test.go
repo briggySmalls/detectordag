@@ -1,6 +1,6 @@
 package shadow
 
-//go:generate mockgen -destination mock_iotdataplane.go -package shadow github.com/aws/aws-sdk-go/service/iotdataplane/iotdataplaneiface IoTDataPlaneAPI
+//go:generate go run github.com/golang/mock/mockgen -destination mock_iotdataplane.go -package shadow github.com/aws/aws-sdk-go/service/iotdataplane/iotdataplaneiface IoTDataPlaneAPI
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
