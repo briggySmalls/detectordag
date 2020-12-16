@@ -68,7 +68,7 @@ jobs:
       - run:
           working_directory: << parameters.directory >>
           name: Run tests
-          command: mage -v test
+          command: mage -v generate test
   # Ensure edge code is formatted correctly
   edge-format:
     executor: python-executor
@@ -151,24 +151,14 @@ workflows:
       - go-format:
           name: consumer-format
           directory: ./consumer
-      # api
+      # all go formatting
       - go-format:
-          name: api-format
-          directory: ./api
-      # connection-disconnected
-      - go-format:
-          name: connection-disconnected-format
-          directory: ./connection/disconnected
+          name: all-format
+          directory: .
+      # all go testing
       - go-test:
-          name: connection-disconnected-test
-          directory: ./connection/disconnected
-      # connection-listener
-      - go-format:
-          name: connection-listener-format
-          directory: ./connection/listener
-      - go-test:
-          name: connection-listener-test
-          directory: ./connection/listener
+          name: all-test
+          directory: .
       # Generate openapi spec
       - generate-spec
       - generate-client:

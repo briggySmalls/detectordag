@@ -7,6 +7,8 @@ import (
 	"github.com/magefile/mage/sh"
 	"log"
 	"os"
+	// mage:import
+	_ "github.com/briggysmalls/detectordag/shared/mage"
 )
 
 var path string
