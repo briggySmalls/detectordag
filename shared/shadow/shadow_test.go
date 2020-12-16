@@ -6,7 +6,23 @@ import (
 	"time"
 )
 
-func TestUnmarshal(t *testing.T) {
+
+func TestInvalid(t *testing.T) {
+	testStrings := []string{
+		`{"metadata":{"reported":{"connection":{"timestamp":1584803417},"status":{"timestamp":1584803414}}},"state":{"reported":{"connection":"dummy","status":"off"}},"timestamp":1584810789,"version":50}`,
+		`{"metadata":{"reported":{"connection":{"timestamp":1584803417},"status":{"timestamp":1584803414}}},"state":{"reported":{"connection":"connected","status":"dummy"}},"timestamp":1584810789,"version":50}`,
+	}
+	for _, str := range testStrings {
+		// Unpack the payload
+		var shadowSchema DeviceShadowSchema
+		_, err := shadowSchema.Extract([]byte(str))
+		// Expect an error
+		assert.NotNil(t, err)
+	}
+}
+
+
+func TestSuccess(t *testing.T) {
 	payload := `
 	{
 	  "metadata": {
