@@ -34,17 +34,16 @@ func (t *Timestamp) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type StringShadowField struct {
+	Value   string
+	Updated time.Time
+}
+
 type Shadow struct {
 	Time       time.Time
 	Version    int
-	Connection struct {
-		Value   string
-		Updated time.Time
-	}
-	Power struct {
-		Value   string
-		Updated time.Time
-	}
+	Connection StringShadowField
+	Power      StringShadowField
 }
 
 type DeviceShadowSchema struct {
@@ -75,13 +74,18 @@ func (c *DeviceShadowSchema) Extract(payload []byte) (*Shadow, error) {
 		return nil, err
 	}
 	// Create a shadow
-	s := Shadow{}
-	s.Time = c.Timestamp.Time
-	s.Version = c.Version
-	s.Connection.Value = c.State.Reported.Connection
-	s.Connection.Updated = c.Metadata.Reported.Connection.Timestamp.Time
-	s.Power.Value = c.State.Reported.Status
-	s.Power.Updated = c.Metadata.Reported.Status.Timestamp.Time
+	s := Shadow{
+		Time:    c.Timestamp.Time,
+		Version: c.Version,
+		Connection: StringShadowField{
+			Value:   c.State.Reported.Connection,
+			Updated: c.Metadata.Reported.Connection.Timestamp.Time,
+		},
+		Power: StringShadowField{
+			Value:   c.State.Reported.Status,
+			Updated: c.Metadata.Reported.Status.Timestamp.Time,
+		},
+	}
 	// Extract the fields we care about
 	return &s, nil
 }
