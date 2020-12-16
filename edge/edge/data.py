@@ -9,6 +9,7 @@ from stringcase import camelcase
 
 class PowerStatus(str, Enum):
     """Enumeration of different power statuses"""
+
     ON = "on"
     OFF = "off"
 
@@ -20,6 +21,7 @@ class DeviceShadowState(BaseModel):  # pylint: disable=too-few-public-methods
 
     class Config:  # pylint: disable=too-few-public-methods
         """Configuration for the pydantic model"""
+
         alias_generator = camelcase
 
     def dict(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:

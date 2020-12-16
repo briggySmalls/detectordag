@@ -50,7 +50,7 @@ class AppConfig:
     certs_dir: Path
 
     @classmethod
-    def from_env(cls, dotenv=True) -> "AppConfig":
+    def from_env(cls, dotenv: bool = True) -> "AppConfig":
         """Parse configuration from environment variables
 
         Returns:
