@@ -147,10 +147,6 @@ workflows:
       - edge-format
       - edge-lint
       - edge-test
-      # consumer
-      - go-format:
-          name: consumer-format
-          directory: ./consumer
       # all go formatting
       - go-format:
           name: all-format
