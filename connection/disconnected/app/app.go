@@ -56,12 +56,12 @@ func (a *app) processMessage(message events.SQSMessage) error {
 		return err
 	}
 	// Get the current device shadow
-	shadow, err := a.shadow.Get(payload.DeviceID)
+	shdw, err := a.shadow.Get(payload.DeviceID)
 	if err != nil {
 		return err
 	}
 	// Check if the connection status has changed in this time
-	if shadow.Connection.Updated.After(payload.Time) {
+	if shdw.Connection.Updated.After(payload.Time) {
 		// Some other status change got there first
 		return nil
 	}
@@ -71,5 +71,5 @@ func (a *app) processMessage(message events.SQSMessage) error {
 		return err
 	}
 	// Send emails to indicate the disconnection
-	return a.updater.UpdateConnectionStatus(device, payload.Time, false)
+	return a.updater.UpdateConnectionStatus(device, payload.Time, shadow.CONNECTION_STATUS_DISCONNECTED)
 }

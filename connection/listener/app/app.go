@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/briggysmalls/detectordag/connection"
 	"github.com/briggysmalls/detectordag/shared/iot"
+	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/shared/sqs"
 	"log"
 	"time"
@@ -61,7 +62,7 @@ func (a *app) RunJob(ctx context.Context, event DeviceLifecycleEvent) error {
 			return err
 		}
 		// "Connected" is always trustworthy, so update directly
-		return a.updater.UpdateConnectionStatus(device, eventTime, true)
+		return a.updater.UpdateConnectionStatus(device, eventTime, shadow.CONNECTION_STATUS_CONNECTED)
 	}
 	// Handle a disconnected event
 	if event.EventType == LifecycleEventTypeDisconnected {

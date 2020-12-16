@@ -49,7 +49,7 @@ func (e *connectionUpdater) UpdateConnectionStatus(device *iot.Device, timestamp
 	}{
 		DeviceName: device.Name,
 		Timestamp:  timestamp,
-		Status:     status,
+		Status:     status == shadow.CONNECTION_STATUS_CONNECTED,
 	}
 	// Determine the subject
 	var subject string
