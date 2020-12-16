@@ -5,11 +5,14 @@ commands:
     steps:
       - run:
           working_directory: ./edge
-          command: |  # use pipenv to install dependencies
-            sudo pip install pipenv
-            pipenv install --dev
+          command: |  # use poetry to install dependencies
+            curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+            source $HOME/.poetry/env
+            poetry config --local virtualenvs.in-project true
+            poetry --version
+            poetry install
       - save_cache:  # Save a cache of dependencies, tied to lockfile
-          key: deps9-{{ .Branch }}-{{ checksum "./edge/Pipfile.lock" }}
+          key: deps9-{{ .Branch }}-{{ checksum "./edge/poetry.lock" }}
           paths:
             - "./edge/.venv"
             - "/usr/local/bin"
@@ -75,7 +78,7 @@ jobs:
       - run:
           working_directory: ./edge
           name: Run format check
-          command: pipenv run invoke format --check
+          command: poetry run invoke format --check
   # Ensure edge code is linting correctly
   edge-lint:
     executor: python-executor
@@ -85,7 +88,7 @@ jobs:
       - run:
           working_directory: ./edge
           name: Run linting
-          command: pipenv run invoke lint
+          command: poetry run invoke lint
   # Ensure edge code is passing tests
   edge-test:
     executor: python-executor
@@ -95,7 +98,7 @@ jobs:
       - run:
           working_directory: ./edge
           name: Run tests
-          command: pipenv run invoke test
+          command: poetry run invoke test
   # Generate openAPI specification from API code
   generate-spec:
     executor: golang-executor

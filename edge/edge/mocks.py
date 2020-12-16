@@ -6,23 +6,21 @@ _LOGGER = logging.getLogger(__file__)
 
 class MockDigitalInputDevice:
     """A mock gpiozero.DigitalInputDevice"""
+
     def __init__(self, pin: int) -> None:
         _LOGGER.debug("Creating MockDigitalInputDevice with pin: %s", pin)
         self._status = 0
 
     def high(self) -> None:
-        """Simulate reading a 'high' value
-        """
+        """Simulate reading a 'high' value"""
         self.set_status(1)
 
     def low(self) -> None:
-        """Simulate reading a 'low' value
-        """
+        """Simulate reading a 'low' value"""
         self.set_status(0)
 
     def toggle(self) -> None:
-        """Simulate the input toggling value
-        """
+        """Simulate the input toggling value"""
         self.set_status(1 if self._status == 0 else 0)
 
     @property
