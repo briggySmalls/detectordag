@@ -1,9 +1,9 @@
 """Logic for parsing configuration"""
 import base64
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-import os
 
 from environs import Env, EnvError
 

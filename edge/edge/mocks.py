@@ -36,8 +36,8 @@ class MockDigitalInputDevice:
         else:
             self.when_deactivated(self)
 
-    def when_activated(self, device: 'MockDigitalInputDevice') -> None:
+    def when_activated(self, device: "MockDigitalInputDevice") -> None:
         """Faked handler for original DigitalInputDevice"""
 
-    def when_deactivated(self, device: 'MockDigitalInputDevice') -> None:
+    def when_deactivated(self, device: "MockDigitalInputDevice") -> None:
         """Faked handler for original DigitalInputDevice"""
