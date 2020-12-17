@@ -6,17 +6,22 @@ import (
 
 type Device struct {
 	// Name of the device
+	// required: true
 	Name string `json:"name"`
 	// ID of the device
+	// required: true
 	DeviceId string `json:"deviceId"`
 	// State of the device
+	// required: true
 	State *DeviceState `json:"state"`
 	// When the state was last updated
+	// required: true
 	Updated time.Time `json:"updated"`
 }
 
 type DeviceState struct {
 	// Power status of the device
+	// required: true
 	Power string `json:"power"`
 }
 

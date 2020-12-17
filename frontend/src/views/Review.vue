@@ -70,22 +70,19 @@ export default class Review extends Vue {
     }
     // Get the devices
     this.$logger.debug('Requesting account\'s devices');
-    this.$clients.accounts.getDevices(`Bearer ${authBundle.token}`, authBundle.accountId, this.handleDevices);
-  }
-
-  private handleDevices(error: Error, data: Device[], response: any): any {
-    // Indicate the request is finished
-    if (error) {
-      // Assign the error
-      this.error = error;
-      // Also log it
-      this.$logger.debug(response.text);
-      // If we have authorization issues, redirect to login
-      this.$router.push('/login');
-      return;
-    }
-    // Display the requested devices
-    this.$store.commit('setDevices', data);
+    this.$clients.accounts.getDevices(authBundle.accountId, `Bearer ${authBundle.token}`)
+      .then((request) => {
+        // Display the requested devices
+        this.$store.commit('setDevices', request.data);
+      })
+      .catch((error) => {
+        // Assign the error
+        this.error = error;
+        // Also log it
+        this.$logger.debug(error.response);
+        // If we have authorization issues, redirect to login
+        this.$router.push('/login');
+      });
   }
 }
 </script>

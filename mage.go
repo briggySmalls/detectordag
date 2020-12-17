@@ -26,5 +26,11 @@ func GenerateSpec() error {
 }
 
 func GenerateLib() error {
-	return sh.Run("docker", "run", "--rm", "-v", fmt.Sprintf("%s:/local", path), "swaggerapi/swagger-codegen-cli", "generate", "-i", "/local/api.yml", "-l", "typescript-jquery", "-o", "/local/out/js")
+	// Remove any existing content
+	const libDir = "frontend/lib/client"
+	err := sh.Run("rm", "-rf", libDir)
+	if err != nil {
+		return err
+	}
+	return sh.Run("docker", "run", "--rm", "-v", fmt.Sprintf("%s:/local", path), "openapitools/openapi-generator-cli", "generate", "-i", "/local/api.yml", "-g", "typescript-axios", "-o", fmt.Sprintf("/local/%s", libDir))
 }

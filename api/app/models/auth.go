@@ -1,14 +1,20 @@
 package models
 
 type Credentials struct {
+	// Username for the user's account
+	// required: true
 	Username string `json:"username"`
-
+	// Password for the user's account
+	// required: true
 	Password string `json:"password"`
 }
 
 type Token struct {
+	// Token that grants access
+	// required: true
 	Token string `json:"token"`
-
+	// Identifier for user's account
+	// required: true
 	AccountId string `json:"accountId"`
 }
 
@@ -18,7 +24,7 @@ type TokenParameter struct {
 	//
 	// required: true
 	// in: header
-	Token string `json:"token"`
+	Token string `json:"Authorization"`
 }
 
 // Credentials for logging in
@@ -26,6 +32,7 @@ type TokenParameter struct {
 type AuthParameters struct {
 	// Credentials for logging in
 	//
+	// required: true
 	// in:body
 	Body Credentials
 }
