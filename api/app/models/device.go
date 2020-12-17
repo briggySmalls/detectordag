@@ -31,7 +31,7 @@ type DeviceState struct {
 type DeviceConnection struct {
 	// Connection status of the device
 	// required: true
-	Status string `json:"staus"`
+	Status string `json:"status"`
 	// When the status was last updated
 	// required: true
 	Updated time.Time `json:"updated"`
