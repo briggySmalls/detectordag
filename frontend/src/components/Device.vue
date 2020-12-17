@@ -15,10 +15,16 @@
     </b-card-body>
     <b-list-group flush>
       <b-list-group-item v-if="powerState === powerStateEnum.Off">
-        Turned off at: {{ device.state.updated.toLocaleString() }}
+        Lost power
+        <span class="time" :datetime="device.state.updated">
+          {{ device.state.updated }}
+        </span>
       </b-list-group-item>
       <b-list-group-item v-if="connectionState === connectedStateEnum.Disconnected">
-        Last seen at: {{ device.connection.updated.toLocaleString() }}
+        Lost connection
+        <span class="time" :datetime="device.connection.updated">
+          {{ device.connection.updated }}
+        </span>
       </b-list-group-item>
     </b-list-group>
   </b-card>
@@ -26,6 +32,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import { render } from 'timeago.js';
 import { Device as DeviceModel } from '../../lib/client';
 
 enum DeviceState {
@@ -67,6 +74,11 @@ export default class Device extends Vue {
     [DeviceState.WasOn]: { class: 'was-on', text: 'Was On' },
     [DeviceState.WasOff]: { class: 'was-off', text: 'Was Off' },
   };
+
+  private mounted() {
+    // Render times nicely
+    render(this.$el.querySelectorAll('.time'));
+  }
 
   private get deviceStatus(): string {
     switch (this.state) {
