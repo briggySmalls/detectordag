@@ -70,7 +70,7 @@ export default class Review extends Vue {
     }
     // Get the devices
     this.$logger.debug('Requesting account\'s devices');
-    this.$clients.accounts.getDevices(`Bearer ${authBundle.token}`, authBundle.accountId, this.handleDevices);
+    this.$clients.accounts.getDevices(authBundle.accountId, `Bearer ${authBundle.token}`, this.handleDevices);
   }
 
   private handleDevices(error: Error, data: Device[], response: any): any {

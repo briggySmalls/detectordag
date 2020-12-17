@@ -31,7 +31,7 @@ function handleAccountResponseFactory(router: VueRouter): handleAccountResponse 
 // Request account
 function requestAccount(router: VueRouter, auth: AuthBundle) {
   logger.debug('Requesting account details');
-  clients.accounts.getAccount(`Bearer ${auth.token}`, auth.accountId, handleAccountResponseFactory(router));
+  clients.accounts.getAccount(auth.accountId, `Bearer ${auth.token}`, handleAccountResponseFactory(router));
 }
 
 export {

@@ -29,7 +29,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { Credentials, Token } from '../../lib/client';
+import { Token } from '../../lib/client';
 import { storage, AuthBundle } from '../utils';
 import Splash from '../layouts/Splash.vue';
 
@@ -55,7 +55,10 @@ export default class Login extends Vue {
     // Request authentication
     this.isRequesting = true;
     this.error = null;
-    this.$clients.authentication.auth(new Credentials(this.email, this.password), this.handleLogin);
+    this.$clients.authentication.auth(
+      { username: this.email, password: this.password },
+      this.handleLogin,
+    );
     // Do not actually perform a post action
     event.preventDefault();
   }
@@ -73,6 +76,7 @@ export default class Login extends Vue {
     }
     // Record the token and account in local storage
     this.$logger.debug('Auth response received');
+
     const bundle = new AuthBundle(data.accountId, data.token);
     storage.save(bundle);
     // Redirect to review

@@ -22,7 +22,6 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import Topbar from '../layouts/Topbar.vue';
-import { Emails } from '../../lib/client';
 import { storage } from '../utils';
 import { handleAccountResponseFactory } from '../utils/clientHelpers';
 
@@ -74,7 +73,7 @@ export default class AccountView extends Vue {
       return;
     }
     this.$clients.accounts.updateAccount(
-      new Emails(this.emails), `Bearer ${auth.token}`, auth.accountId, handleAccountResponseFactory(this.$router),
+      auth.accountId, { emails: this.emails }, `Bearer ${auth.token}`, handleAccountResponseFactory(this.$router),
     );
     // Indicate that our emails are updating
     this.emails = null;
