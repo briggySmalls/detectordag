@@ -57,7 +57,7 @@ enum PowerState {
   Off,
 }
 
-enum ConnectedState {
+enum ConnectionState {
   Connected = 1,
   Disconnected,
 }
@@ -107,7 +107,7 @@ export default class Device extends Vue {
   }
 
   private get deviceState(): DeviceState {
-    if (this.connectionState === ConnectedState.Connected) {
+    if (this.connectionState === ConnectionState.Connected) {
       return (this.powerState === PowerState.On) ? DeviceState.On : DeviceState.Off;
     }
     return (this.powerState === PowerState.On) ? DeviceState.WasOn : DeviceState.WasOff;
@@ -121,12 +121,12 @@ export default class Device extends Vue {
     return this.deviceStateInfo[this.deviceState].title;
   }
 
-  private get connectionState(): ConnectedState {
+  private get connectionState(): ConnectionState {
     switch (this.device.connection.status) {
       case 'connected':
-        return ConnectedState.Connected;
+        return ConnectionState.Connected;
       case 'disconnected':
-        return ConnectedState.Disconnected;
+        return ConnectionState.Disconnected;
       default:
         throw new Error(`Unexpected connection state: "${this.device.connection.status}"`);
     }
