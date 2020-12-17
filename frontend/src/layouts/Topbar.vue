@@ -4,7 +4,7 @@
     <NavbarComponent />
     <b-container id= "content-container" fluid="sm">
       <!-- Title -->
-      <h1>{{ title }}</h1>
+      <h1 class="mt-5">{{ title }}</h1>
       <!-- Content -->
       <slot />
       <!-- Error -->
