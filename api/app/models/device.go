@@ -14,15 +14,27 @@ type Device struct {
 	// State of the device
 	// required: true
 	State *DeviceState `json:"state"`
-	// When the state was last updated
+	// Connection status of the device
 	// required: true
-	Updated time.Time `json:"updated"`
+	Connection *DeviceConnection `json:"connection"`
 }
 
 type DeviceState struct {
 	// Power status of the device
 	// required: true
 	Power string `json:"power"`
+	// When the state was last updated
+	// required: true
+	Updated time.Time `json:"updated"`
+}
+
+type DeviceConnection struct {
+	// Connection status of the device
+	// required: true
+	Status string `json:"staus"`
+	// When the status was last updated
+	// required: true
+	Updated time.Time `json:"updated"`
 }
 
 type MutableDevice struct {
