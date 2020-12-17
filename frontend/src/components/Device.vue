@@ -4,7 +4,7 @@
       Status: {{ powerStatus }}
     </b-card-text>
     <template v-slot:footer>
-      Updated: {{ device.updated.toLocaleString() }}
+      Updated: {{ device.state.updated.toLocaleString() }}
     </template>
   </b-card>
 </template>
