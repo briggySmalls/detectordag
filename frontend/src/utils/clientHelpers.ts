@@ -20,7 +20,7 @@ function requestAccount(router: VueRouter, auth: AuthBundle) {
       store.commit('setAccount', response.data);
     })
     .catch((error) => {
-      logger.debug(`Account request error: ${error.text}`);
+      logger.debug(`Account request error: ${error.response}`);
       // Clear the token (we're assuming that's why we failed)
       storage.clear();
       // Get the user to reauthenticate

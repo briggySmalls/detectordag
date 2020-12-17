@@ -67,7 +67,7 @@ export default class Login extends Vue {
       .catch((error) => {
         // Log the real response
         // See https://github.com/swagger-api/swagger-codegen/issues/2602
-        this.$logger.debug(error.text);
+        this.$logger.debug(error.response);
         // Assign the error
         this.error = error;
       })
