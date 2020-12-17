@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
-	"time"
 )
 
 func TestGetDevicesSuccess(t *testing.T) {
@@ -18,38 +17,63 @@ func TestGetDevicesSuccess(t *testing.T) {
 		accountID = "35581BF4-32C8-4908-8377-2E6A021D3D2B"
 		token     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiIzNTU4MUJGNC0zMkM4LTQ5MDgtODM3Ny0yRTZBMDIxRDNEMkIiLCJleHAiOjkyMjMzNzIwMzY4NTQ3NzU4MDcsImlzcyI6ImRldGVjdG9yZGFnIn0.CzyaCEIXlq1E0F89HR2Z9wbUn5gBDyQKTOCxTsX6iiQ"
 	)
-	deviceInputs := []struct {
-		name    string
-		ID      string
-		state   string
-		updated time.Time
-	}{
-		{name: "one", ID: "63eda5eb-7f56-417f-88ed-44a9eb9e5f67", state: "on", updated: createTime(t, "2020/03/22 01:27:00")},
-		{name: "two", ID: "4e9a7d26-d4de-4ea9-a0be-ec1b8264e35b", state: "off", updated: createTime(t, "2020/03/22 01:20:00")},
+	// Create the results we expect
+	devices := []models.Device{
+		{
+			Name:     "one",
+			DeviceId: "63eda5eb-7f56-417f-88ed-44a9eb9e5f67",
+			State:    &models.DeviceState{
+				Power: "on",
+				Updated:  createTime(t, "2020/03/22 01:27:00"),
+			},
+			Connection: &models.DeviceConnection{
+				Status: "connected",
+				Updated: createTime(t, "2020/03/22 01:27:01"),
+			},
+		},
+		{
+			Name:     "two",
+			DeviceId: "4e9a7d26-d4de-4ea9-a0be-ec1b8264e35b",
+			State:    &models.DeviceState{
+				Power: "off",
+				Updated:  createTime(t, "2020/03/22 01:20:00"),
+			},
+			Connection: &models.DeviceConnection{
+				Status: "connected",
+				Updated: createTime(t, "2020/03/22 01:20:01"),
+			},
+		},
 	}
 	// Create a client
 	_, shdw, _, iotClient, tokens, router := createRealRouter(t)
 	// Configure the tokens to expect a call to validate a token
 	tokens.EXPECT().Validate(token).Return(accountID, nil)
 	// Configure the IoT client to expect a request for devices
-	devices := []*iot.Device{
-		{Name: deviceInputs[0].name, AccountId: accountID, DeviceId: deviceInputs[0].ID},
-		{Name: deviceInputs[1].name, AccountId: accountID, DeviceId: deviceInputs[1].ID},
-	}
-	iotClient.EXPECT().GetThingsByAccount(accountID).Return(devices, nil)
+	iotClient.EXPECT().GetThingsByAccount(accountID).Return([]*iot.Device{
+		{Name: devices[0].Name, AccountId: accountID, DeviceId: devices[0].DeviceId},
+		{Name: devices[1].Name, AccountId: accountID, DeviceId: devices[1].DeviceId},
+	}, nil)
 	// Configure the mock shadow client to expect calls for each device
-	shdw.EXPECT().Get(deviceInputs[0].ID).Return(&shadow.Shadow{
+	shdw.EXPECT().Get(devices[0].DeviceId).Return(&shadow.Shadow{
 		Time: createTime(t, "2020/03/22 00:27:00"),
 		Power: shadow.StringShadowField{
-			Value:   deviceInputs[0].state,
-			Updated: deviceInputs[0].updated,
+			Value:   devices[0].State.Power,
+			Updated: devices[0].State.Updated,
+		},
+		Connection: shadow.StringShadowField{
+			Value:   devices[0].Connection.Status,
+			Updated: devices[0].Connection.Updated,
 		},
 	}, nil)
-	shdw.EXPECT().Get(deviceInputs[1].ID).Return(&shadow.Shadow{
+	shdw.EXPECT().Get(devices[1].DeviceId).Return(&shadow.Shadow{
 		Time: createTime(t, "2020/03/22 00:27:00"),
 		Power: shadow.StringShadowField{
-			Value:   deviceInputs[1].state,
-			Updated: deviceInputs[1].updated,
+			Value:   devices[1].State.Power,
+			Updated: devices[1].State.Updated,
+		},
+		Connection: shadow.StringShadowField{
+			Value:   devices[1].Connection.Status,
+			Updated: devices[1].Connection.Updated,
 		},
 	}, nil)
 	// Create a request for devices
@@ -63,20 +87,7 @@ func TestGetDevicesSuccess(t *testing.T) {
 	var resp []models.Device
 	err := json.Unmarshal(rr.Body.Bytes(), &resp)
 	assert.NoError(t, err)
-	assert.Equal(t, []models.Device{
-		{
-			Name:     deviceInputs[0].name,
-			DeviceId: deviceInputs[0].ID,
-			State:    &models.DeviceState{Power: deviceInputs[0].state},
-			Updated:  deviceInputs[0].updated,
-		},
-		{
-			Name:     deviceInputs[1].name,
-			DeviceId: deviceInputs[1].ID,
-			State:    &models.DeviceState{Power: deviceInputs[1].state},
-			Updated:  deviceInputs[1].updated,
-		},
-	}, resp)
+	assert.Equal(t, devices, resp)
 }
 
 func TestRegisterDevice(t *testing.T) {

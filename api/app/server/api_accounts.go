@@ -59,8 +59,14 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 		payload[i] = models.Device{
 			Name:     device.Name,
 			DeviceId: device.DeviceId,
-			Updated:  shdw.Power.Updated,
-			State:    &models.DeviceState{Power: shdw.Power.Value},
+			State:    &models.DeviceState{
+				Power: shdw.Power.Value,
+				Updated:  shdw.Power.Updated,
+			},
+			Connection: &models.DeviceConnection{
+				Status: shdw.Connection.Value,
+				Updated: shdw.Connection.Updated,
+			},
 		}
 	}
 	// Prepare the JSON response
