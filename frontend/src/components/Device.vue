@@ -1,26 +1,30 @@
 <template>
-  <b-card :title="device.name">
-    <div class="status-graphic d-inline-block">
-      <div class="power-icon-container" v-bind:class="[deviceStateClass]">
-        <img v-if="powerState === powerStateEnum.Off"
-          alt="Power off" src="../assets/power-off.svg" class="power-icon">
-        <img v-else-if="powerState === powerStateEnum.On"
-          alt="Power on" src="../assets/power-on.svg" class="power-icon">
-      </div>
-      <img v-if="connectionState === connectedStateEnum.Disconnected"
-        alt="Disconnected" src="../assets/no-signal.svg" class="connection-icon">
-    </div>
+  <b-card no-body>
     <b-card-body>
-      <b-card-sub-title class="mb-2">{{ deviceStateText }}</b-card-sub-title>
+      <b-card-title>{{ device.name }}</b-card-title>
+      <div class="status-graphic d-inline-block">
+        <div class="power-icon-container" v-bind:class="[deviceStateClass]">
+          <img v-if="powerState === powerStateEnum.Off"
+            alt="Power off" src="../assets/power-off.svg" class="power-icon">
+          <img v-else-if="powerState === powerStateEnum.On"
+            alt="Power on" src="../assets/power-on.svg" class="power-icon">
+        </div>
+        <img v-if="connectionState === connectedStateEnum.Disconnected"
+          alt="Disconnected" src="../assets/no-signal.svg" class="connection-icon">
+      </div>
+      <b-card-title>{{ deviceStateInfo[deviceState].title }}</b-card-title>
+      <b-card-text>{{ deviceStateInfo[deviceState].description }}</b-card-text>
     </b-card-body>
     <b-list-group flush>
       <b-list-group-item v-if="powerState === powerStateEnum.Off">
+        <!-- Add further detail about losing power -->
         Lost power
         <span class="time" :datetime="device.state.updated">
           {{ device.state.updated }}
         </span>
       </b-list-group-item>
       <b-list-group-item v-if="connectionState === connectedStateEnum.Disconnected">
+        <!-- Add further detail about the dag losing connection -->
         Lost connection
         <span class="time" :datetime="device.connection.updated">
           {{ device.connection.updated }}
@@ -54,7 +58,8 @@ enum ConnectedState {
 
 interface StateData {
   class: string;
-  text: string;
+  title: string;
+  description: string;
 }
 
 @Component
@@ -69,10 +74,10 @@ export default class Device extends Vue {
   @Prop() private device!: DeviceModel;
 
   private const deviceStateInfo: Record<DeviceState, StateData> = {
-    [DeviceState.On]: { class: 'on', text: 'On' },
-    [DeviceState.Off]: { class: 'off', text: 'Off' },
-    [DeviceState.WasOn]: { class: 'was-on', text: 'Was On' },
-    [DeviceState.WasOff]: { class: 'was-off', text: 'Was Off' },
+    [DeviceState.On]: { class: 'on', title: 'On', description: 'All good here!' },
+    [DeviceState.Off]: { class: 'off', title: 'Off', description: 'Your dag has noticed the power has dropped' },
+    [DeviceState.WasOn]: { class: 'was-on', title: 'Was On', description: 'We\'ve lost contact with your dag. The power was on the last we heard...' },
+    [DeviceState.WasOff]: { class: 'was-off', title: 'Was Off', description: 'Your dag noticed the power go, and then we lost contact. It may have run out of battery.' },
   };
 
   private mounted() {
@@ -107,7 +112,7 @@ export default class Device extends Vue {
   }
 
   private get deviceStateText(): string {
-    return this.deviceStateInfo[this.deviceState].text;
+    return this.deviceStateInfo[this.deviceState].title;
   }
 
   private get connectionState(): ConnectedState {
