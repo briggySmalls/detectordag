@@ -1,5 +1,5 @@
 <template>
-  <b-card no-body>
+  <b-card no-body border-variant="dark" header-border-variant="dark">
     <template #header>
       <h4 class="mb-0">{{ device.name }}</h4>
     </template>
