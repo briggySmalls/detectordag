@@ -1,6 +1,6 @@
 import router from './router';
 import { storage, logger } from '../utils';
-import { requestAccount } from '../utils/clientHelpers';
+import requestAccount from '../utils/clientHelpers';
 import store from '../store';
 
 // Add guards to ensure we are logged in

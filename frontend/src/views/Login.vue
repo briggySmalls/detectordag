@@ -29,7 +29,6 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { Token } from '../../lib/client';
 import { storage, AuthBundle } from '../utils';
 import Splash from '../layouts/Splash.vue';
 
@@ -55,32 +54,29 @@ export default class Login extends Vue {
     // Request authentication
     this.isRequesting = true;
     this.error = null;
-    this.$clients.authentication.auth(
-      { username: this.email, password: this.password },
-      this.handleLogin,
-    );
+    this.$clients.authentication.auth({ username: this.email, password: this.password })
+      .then((response) => {
+        // Record the token and account in local storage
+        this.$logger.debug('Auth response received');
+        // Build and save the authorization data into a handy bundle
+        const bundle = new AuthBundle(response.data.accountId, response.data.token);
+        storage.save(bundle);
+        // Redirect to review
+        this.$router.push('review');
+      })
+      .catch((error) => {
+        // Log the real response
+        // See https://github.com/swagger-api/swagger-codegen/issues/2602
+        this.$logger.debug(error.text);
+        // Assign the error
+        this.error = error;
+      })
+      .then(() => {
+        // Indicate we've finished-up
+        this.isRequesting = false;
+      });
     // Do not actually perform a post action
     event.preventDefault();
-  }
-
-  private handleLogin(error: Error, data: Token, response: any) {
-    // Handle any errors
-    this.isRequesting = false;
-    if (error) {
-      // Log the real response
-      // See https://github.com/swagger-api/swagger-codegen/issues/2602
-      this.$logger.debug(response.text);
-      // Assign the error
-      this.error = error;
-      return;
-    }
-    // Record the token and account in local storage
-    this.$logger.debug('Auth response received');
-
-    const bundle = new AuthBundle(data.accountId, data.token);
-    storage.save(bundle);
-    // Redirect to review
-    this.$router.push('review');
   }
 }
 </script>
