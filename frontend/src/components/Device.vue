@@ -1,7 +1,10 @@
 <template>
   <b-card no-body>
+    <template #header>
+      <h4 class="mb-0">{{ device.name }}</h4>
+    </template>
+
     <b-card-body>
-      <b-card-title>{{ device.name }}</b-card-title>
       <div class="status-graphic d-inline-block">
         <div class="power-icon-container" v-bind:class="[deviceStateClass]">
           <img v-if="powerState === powerStateEnum.Off"
@@ -15,6 +18,7 @@
       <b-card-title>{{ deviceStateInfo[deviceState].title }}</b-card-title>
       <b-card-text>{{ deviceStateInfo[deviceState].description }}</b-card-text>
     </b-card-body>
+
     <b-list-group flush>
       <b-list-group-item v-if="powerState === powerStateEnum.Off">
         <!-- Add further detail about losing power -->
