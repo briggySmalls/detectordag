@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import AuthBundle from './AuthBundle';
 
 // Helper class for managing local storage
@@ -22,5 +23,18 @@ class Storage {
   }
 }
 
+// Create a singleton storage instance
+const storage = new Storage();
+
+// Add the clients to Vue
+Vue.prototype.$storage = storage;
+
+// Update the type hinting for all Vue instances
+declare module 'vue/types/vue' {
+  interface Vue {
+    $storage: Storage;
+  }
+}
+
 // Export our storage instance
-export default new Storage();
+export default storage;

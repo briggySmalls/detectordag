@@ -1,17 +1,17 @@
 <template>
   <div id="app">
-    <b-container>
-      <router-view/>
-    </b-container>
+    <router-view/>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { BootstrapVue } from 'bootstrap-vue';
+import { BootstrapVue, BIcon, BIconXCircleFill } from 'bootstrap-vue';
 
 // Install BootstrapVue
 Vue.use(BootstrapVue);
+Vue.component('BIcon', BIcon);
+Vue.component('BIconXCircleFill', BIconXCircleFill);
 
 @Component
 export default class App extends Vue {}

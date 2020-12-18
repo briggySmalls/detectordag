@@ -1,7 +1,5 @@
 import router from './router';
 import { storage, logger } from '../utils';
-import requestAccount from '../utils/clientHelpers';
-import store from '../store';
 
 // Add guards to ensure we are logged in
 router.beforeEach((to, from, next) => {
@@ -24,14 +22,7 @@ router.beforeEach((to, from, next) => {
     next('/login');
     return;
   }
-  // Check if we have account details
-  if (store.state.account !== null) {
-    // We've got everything we need
-    next();
-    return;
-  }
-  // Request account details
-  requestAccount(router, authBundle);
+  // Proceed with the original plan
   next();
 });
 

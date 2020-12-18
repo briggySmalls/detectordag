@@ -5,6 +5,7 @@
     </template>
 
     <b-card-body>
+      {{/* Define a graphic to illustrate the status */}}
       <div class="status-graphic d-inline-block">
         <div class="power-icon-container" v-bind:class="[deviceStateClass]">
           <img v-if="powerState === powerStateEnum.Off"
@@ -15,7 +16,8 @@
         <img v-if="connectionState === connectedStateEnum.Disconnected"
           alt="Disconnected" src="../assets/no-signal.svg" class="connection-icon">
       </div>
-      <b-card-title>{{ deviceStateInfo[deviceState].title }}</b-card-title>
+      {{/* Add textual descriptions of the status */}}
+      <b-card-title class="mt-4">{{ deviceStateInfo[deviceState].title }}</b-card-title>
       <b-card-text>{{ deviceStateInfo[deviceState].description }}</b-card-text>
     </b-card-body>
 
@@ -69,15 +71,15 @@ interface StateData {
 @Component
 export default class Device extends Vue {
   // Declare some enums so we can use them in the template
-  private const deviceStateEnum: typeof DeviceState = DeviceState
+  private readonly deviceStateEnum: typeof DeviceState = DeviceState
 
-  private const powerStateEnum: typeof PowerState = PowerState
+  private readonly powerStateEnum: typeof PowerState = PowerState
 
-  private const connectedStateEnum: typeof ConnectedState = ConnectedState
+  private readonly connectedStateEnum: typeof ConnectedState = ConnectedState
 
   @Prop() private device!: DeviceModel;
 
-  private const deviceStateInfo: Record<DeviceState, StateData> = {
+  private readonly deviceStateInfo: Record<DeviceState, StateData> = {
     [DeviceState.On]: { class: 'on', title: 'On', description: 'All good here!' },
     [DeviceState.Off]: { class: 'off', title: 'Off', description: 'Your dag has noticed the power has dropped' },
     [DeviceState.WasOn]: { class: 'was-on', title: 'Was On', description: 'We\'ve lost contact with your dag. The power was on the last we heard...' },
@@ -90,7 +92,7 @@ export default class Device extends Vue {
   }
 
   private get deviceStatus(): string {
-    switch (this.state) {
+    switch (this.deviceState) {
       case DeviceState.On:
         return 'On';
       case DeviceState.Off:
@@ -100,12 +102,12 @@ export default class Device extends Vue {
       case DeviceState.WasOff:
         return 'Was Off';
       default:
-        throw new Error(`Unexpected state: ${this.state}`);
+        throw new Error(`Unexpected state: ${this.deviceState}`);
     }
   }
 
   private get deviceState(): DeviceState {
-    if (this.connectionStatue === ConnectedState.Connected) {
+    if (this.connectionState === ConnectedState.Connected) {
       return (this.powerState === PowerState.On) ? DeviceState.On : DeviceState.Off;
     }
     return (this.powerState === PowerState.On) ? DeviceState.WasOn : DeviceState.WasOff;
@@ -149,7 +151,7 @@ export default class Device extends Vue {
 
 .status-graphic {
   position: relative;
-  padding: 1em;
+  padding: 0em;
 
   .power-icon-container {
     border-radius: 50%;

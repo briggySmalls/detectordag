@@ -1,31 +1,21 @@
 <template>
-  <b-navbar toggleable="lg">
+  <b-navbar sticky="true" toggleable="lg" type="dark" variant="info">
     <!-- Logo -->
-    <b-navbar-brand href="#">
+    <b-navbar-brand to="/review" href="#" :active="$route.name === 'Review'">
       <img
-        id="logo" alt="DetectorDag logo" src="../assets/logo.svg"
+        id="logo" alt="detector dag logo" src="../assets/logo.svg"
         class="d-inline-block">
-        DetectorDag
+        detector dag
     </b-navbar-brand>
     <!-- Navbar -->
     <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
     <b-collapse id="nav-collapse" is-nav>
       <b-navbar-nav>
-        <b-nav-item to="/review">Review</b-nav-item>
-        <b-nav-item to="/account">Account</b-nav-item>
+        <b-nav-item to="/review" :active="$route.name ==='Review'">review</b-nav-item>
+        <b-nav-item to="/account" :active="$route.name ==='Account'">settings</b-nav-item>
       </b-navbar-nav>
       <b-navbar-nav class="ml-auto">
-        <!-- Logged in navbar content -->
-        <template v-if="$store.state.account">
-          <b-nav-text>{{ username }}</b-nav-text>
-          <b-nav-item>
-            <b-button size="sm" v-on:click="logout">Logout</b-button>
-          </b-nav-item>
-        </template>
-        <!-- Loading -->
-        <template v-else>
-          <b-spinner></b-spinner>
-        </template>
+        <b-nav-item v-on:click="logout">Sign out</b-nav-item>
       </b-navbar-nav>
     </b-collapse>
   </b-navbar>
@@ -33,7 +23,6 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { storage } from '../utils';
 
 @Component
 export default class Navbar extends Vue {
@@ -46,7 +35,7 @@ export default class Navbar extends Vue {
   // Log the user out
   private logout() {
     // Clear the token and account
-    storage.clear();
+    this.$storage.clear();
     this.$store.commit('clearAccount');
     // Redirect to the login page
     this.$router.push('/login');
@@ -56,7 +45,15 @@ export default class Navbar extends Vue {
 
 <style lang="scss" scoped>
 #logo {
-  width: 5em;
-  height: 5em;
+  width: 3em;
+  height: 3em;
+}
+nav {
+  font-weight: 800;
+
+  .nav-icon {
+    width: 3em;
+    height: 3em;
+  }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <Topbar :title="title" :error="error" >
+  <Topbar title="Your Dags" :error="error" >
     <b-button
       class="mt-2 mb-2 d-inline-block"
       v-on:click="request"
@@ -23,7 +23,6 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { Device } from '../../lib/client';
-import { storage } from '../utils';
 import DeviceComponent from '../components/Device.vue';
 import Topbar from '../layouts/Topbar.vue';
 
@@ -34,9 +33,6 @@ import Topbar from '../layouts/Topbar.vue';
   },
 })
 export default class Review extends Vue {
-  // The page title
-  private readonly title = 'Review Dags';
-
   // Errors in API requests
   private error: Error | null = null;
 
@@ -61,7 +57,7 @@ export default class Review extends Vue {
     this.$store.commit('clearDevices');
     this.error = null;
     // Fetch the token/accountId
-    const authBundle = storage.bundle;
+    const authBundle = this.$storage.bundle;
     // Redirect to login if these are not present
     if (authBundle == null) {
       this.$logger.debug('Token not available');

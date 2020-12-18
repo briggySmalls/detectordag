@@ -1,5 +1,5 @@
 <template>
-  <Splash id="login" :title="title" :error="error">
+  <Splash id="login" title="detector dag" :error="error">
     <b-form v-if="!isRequesting" @submit="submit">
       <b-form-group
         id="email"
@@ -29,7 +29,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { storage, AuthBundle } from '../utils';
+import { AuthBundle } from '../utils';
 import Splash from '../layouts/Splash.vue';
 
 @Component({
@@ -38,9 +38,6 @@ import Splash from '../layouts/Splash.vue';
   },
 })
 export default class Login extends Vue {
-  // Page title
-  private readonly title = 'DetectorDag'
-
   private email = '';
 
   private password = '';
@@ -60,7 +57,7 @@ export default class Login extends Vue {
         this.$logger.debug('Auth response received');
         // Build and save the authorization data into a handy bundle
         const bundle = new AuthBundle(response.data.accountId, response.data.token);
-        storage.save(bundle);
+        this.$storage.save(bundle);
         // Redirect to review
         this.$router.push('review');
       })
