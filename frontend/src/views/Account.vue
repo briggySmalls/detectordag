@@ -45,7 +45,6 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import Topbar from '../layouts/Topbar.vue';
-import requestAccount from '../utils/clientHelpers';
 
 @Component({
   components: {
