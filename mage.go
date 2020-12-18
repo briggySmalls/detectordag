@@ -47,10 +47,10 @@ func (Generate) Lib() error {
 // Generates documentation from the OpenAPI specification
 func (Generate) Docs() error {
 	// Remove any existing content
-	const libDir = "build/docs"
-	err := sh.Run("rm", "-rf", libDir)
+	const docsDir = "build/docs"
+	err := sh.Run("rm", "-rf", docsDir)
 	if err != nil {
 		return err
 	}
-	return sh.Run("docker", "run", "--rm", "-v", fmt.Sprintf("%s:/local", path), "openapitools/openapi-generator-cli", "generate", "-i", "/local/api.yml", "-g", "typescript-axios", "-o", fmt.Sprintf("/local/%s", libDir))
+	return sh.Run("docker", "run", "--rm", "-v", fmt.Sprintf("%s:/local", path), "openapitools/openapi-generator-cli", "generate", "-i", "/local/api.yml", "-g", "dynamic-html", "-o", fmt.Sprintf("/local/%s", docsDir))
 }
