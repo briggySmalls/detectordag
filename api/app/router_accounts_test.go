@@ -22,24 +22,24 @@ func TestGetDevicesSuccess(t *testing.T) {
 		{
 			Name:     "one",
 			DeviceId: "63eda5eb-7f56-417f-88ed-44a9eb9e5f67",
-			State:    &models.DeviceState{
-				Power: "on",
-				Updated:  createTime(t, "2020/03/22 01:27:00"),
+			State: &models.DeviceState{
+				Power:   "on",
+				Updated: createTime(t, "2020/03/22 01:27:00"),
 			},
 			Connection: &models.DeviceConnection{
-				Status: "connected",
+				Status:  "connected",
 				Updated: createTime(t, "2020/03/22 01:27:01"),
 			},
 		},
 		{
 			Name:     "two",
 			DeviceId: "4e9a7d26-d4de-4ea9-a0be-ec1b8264e35b",
-			State:    &models.DeviceState{
-				Power: "off",
-				Updated:  createTime(t, "2020/03/22 01:20:00"),
+			State: &models.DeviceState{
+				Power:   "off",
+				Updated: createTime(t, "2020/03/22 01:20:00"),
 			},
 			Connection: &models.DeviceConnection{
-				Status: "connected",
+				Status:  "connected",
 				Updated: createTime(t, "2020/03/22 01:20:01"),
 			},
 		},

@@ -59,12 +59,12 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 		payload[i] = models.Device{
 			Name:     device.Name,
 			DeviceId: device.DeviceId,
-			State:    &models.DeviceState{
-				Power: shdw.Power.Value,
-				Updated:  shdw.Power.Updated,
+			State: &models.DeviceState{
+				Power:   shdw.Power.Value,
+				Updated: shdw.Power.Updated,
 			},
 			Connection: &models.DeviceConnection{
-				Status: shdw.Connection.Value,
+				Status:  shdw.Connection.Value,
 				Updated: shdw.Connection.Updated,
 			},
 		}
