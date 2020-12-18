@@ -35,7 +35,33 @@ export default class AccountView extends Vue {
   private emails: string[] | null = null;
 
   public created() {
-    this.emails = this.storedEmails;
+    // Check if we already have the account info
+    if (this.storedEmails !== null) {
+      // Just copy them over then
+      this.emails = this.storedEmails;
+      return;
+    }
+    // Check we have a valid login
+    const auth = storage.bundle;
+    if (auth == null) {
+      this.$logger.debug('Token not available');
+      this.$router.push('/login');
+      return;
+    }
+    // Request the accounts to render them
+    this.$clients.accounts.getAccount(auth.accountId, `Bearer ${auth.token}`)
+      .then((response) => {
+      // Save the account details to the store
+        this.$logger.debug('Saving account details');
+        this.$store.commit('setAccount', response.data);
+      })
+      .catch((error) => {
+        this.$logger.debug(`Account request error: ${error.response}`);
+        // Clear the token (we're assuming that's why we failed)
+        storage.clear();
+        // Get the user to reauthenticate
+        this.$router.push('/login');
+      });
   }
 
   // The emails from the store
@@ -70,7 +96,7 @@ export default class AccountView extends Vue {
       return;
     }
     // Request the account
-    requestAccount(this.$router, auth);
+    this.$clients.accounts.updateAccount(auth.accountId, `Bearer ${auth.token}`, this.emails);
     // Indicate that our emails are updating
     this.emails = null;
   }

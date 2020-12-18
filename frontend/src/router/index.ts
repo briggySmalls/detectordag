@@ -24,14 +24,7 @@ router.beforeEach((to, from, next) => {
     next('/login');
     return;
   }
-  // Check if we have account details
-  if (store.state.account !== null) {
-    // We've got everything we need
-    next();
-    return;
-  }
-  // Request account details
-  requestAccount(router, authBundle);
+  // Proceed with the original plan
   next();
 });
 
