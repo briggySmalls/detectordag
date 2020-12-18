@@ -1,11 +1,16 @@
 <template>
   <Topbar title="Your Dags" :error="error" >
-    <b-button
-      class="mt-2 mb-2 d-inline-block"
-      v-on:click="request"
-      :disabled="loading">
-      Refresh
-    </b-button>
+    <template #header>
+      <h1 class="my-5">
+        Your Dags
+        <b-button
+          class="ml-2"
+          v-on:click="request"
+          :disabled="loading">
+          Refresh
+        </b-button>
+      </h1>
+    </template>
     <div>
       <!-- Device list -->
       <b-card-group v-if="devices" deck>
