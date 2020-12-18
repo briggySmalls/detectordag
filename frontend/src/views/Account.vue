@@ -38,7 +38,7 @@
       <b-button type="submit">Save</b-button>
     </b-form>
     <!-- Loading -->
-    <b-spinner v-else></b-spinner>
+    <b-spinner v-else-if="loading"></b-spinner>
   </Topbar>
 </template>
 
@@ -55,6 +55,9 @@ import requestAccount from '../utils/clientHelpers';
 export default class AccountView extends Vue {
   // Emails to display in the form
   private emails: string[] | null = null;
+
+  // Errors in API requests
+  private error: Error | null = null;
 
   public created() {
     // Check if we already have the account info
@@ -101,6 +104,11 @@ export default class AccountView extends Vue {
     this.emails = value;
   }
 
+  // Says if wer are loading device content
+  private get loading() {
+    return (this.emails === null) && (this.error === null);
+  }
+
   // Submit update to API
   private submit(_: Event) { // eslint-disable-line @typescript-eslint/no-unused-vars
     this.$logger.debug('Emails submitted');
@@ -119,7 +127,17 @@ export default class AccountView extends Vue {
       return;
     }
     // Request the account
-    this.$clients.accounts.updateAccount(auth.accountId, `Bearer ${auth.token}`, this.emails);
+    this.$clients.accounts.updateAccount(auth.accountId, `Bearer ${auth.token}`, { emails: this.emails })
+      .then((response) => {
+      // Save the account details to the store
+        this.$logger.debug('Saving account details');
+        this.$store.commit('setAccount', response.data);
+      })
+      .catch((error) => {
+        this.$logger.debug(`Account update error: ${error.response}`);
+        // Set the error
+        this.error = error;
+      });
     // Indicate that our emails are updating
     this.emails = null;
   }
