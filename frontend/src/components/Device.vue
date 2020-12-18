@@ -80,10 +80,10 @@ export default class Device extends Vue {
   @Prop() private device!: DeviceModel;
 
   private readonly deviceStateInfo: Record<DeviceState, StateData> = {
-    [DeviceState.On]: { class: 'on', title: 'On', description: 'All good here!' },
-    [DeviceState.Off]: { class: 'off', title: 'Off', description: 'Your dag has noticed the power has dropped' },
-    [DeviceState.WasOn]: { class: 'was-on', title: 'Was On', description: 'We\'ve lost contact with your dag. The power was on the last we heard...' },
-    [DeviceState.WasOff]: { class: 'was-off', title: 'Was Off', description: 'Your dag noticed the power go, and then we lost contact. It may have run out of battery.' },
+    [DeviceState.On]: { class: 'on', title: 'On', description: 'The power is on and your dag is online 💪' },
+    [DeviceState.Off]: { class: 'off', title: 'Off', description: 'Your dag has noticed the power has dropped 😰' },
+    [DeviceState.WasOn]: { class: 'was-on', title: 'Was On', description: 'We\'ve lost contact with your dag. The power was on the last we heard. Bit embarrassing... 🙈' },
+    [DeviceState.WasOff]: { class: 'was-off', title: 'Was Off', description: 'Your dag noticed the power go, and then we lost contact. It may have run out of battery. 😭' },
   };
 
   private mounted() {
