@@ -28,7 +28,7 @@
                   variant="link"
                   size="sm"
                   :aria-controls="`my-custom-tags-tag_${tag.replace(/\s/g, '_')}_`"
-                >remove</b-button>
+                ><b-icon-x-circle-fill></b-icon-x-circle-fill></b-button>
               </b-list-group-item>
             </b-list-group>
           </template>
