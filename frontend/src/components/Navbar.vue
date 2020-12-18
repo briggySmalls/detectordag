@@ -10,18 +10,12 @@
     <!-- Navbar -->
     <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
     <b-collapse id="nav-collapse" is-nav>
+      <b-navbar-nav>
+        <b-nav-item to="/review">review</b-nav-item>
+        <b-nav-item to="/account">settings</b-nav-item>
+      </b-navbar-nav>
       <b-navbar-nav class="ml-auto">
-        <!-- Logged in navbar content -->
-        <template v-if="$store.state.account">
-          <b-nav-item-dropdown :text="username" right>
-            <b-dropdown-item to="/account" href="#">Settings</b-dropdown-item>
-            <b-dropdown-item v-on:click="logout" href="#">Sign out</b-dropdown-item>
-          </b-nav-item-dropdown>
-        </template>
-        <!-- Loading -->
-        <template v-else>
-          <b-spinner></b-spinner>
-        </template>
+        <b-nav-item v-on:click="logout">Sign out</b-nav-item>
       </b-navbar-nav>
     </b-collapse>
   </b-navbar>
@@ -57,5 +51,10 @@ export default class Navbar extends Vue {
 }
 nav {
   font-weight: 800;
+
+  .nav-icon {
+    width: 3em;
+    height: 3em;
+  }
 }
 </style>
