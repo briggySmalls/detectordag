@@ -5,6 +5,7 @@
     </template>
 
     <b-card-body>
+      {{/* Define a graphic to illustrate the status */}}
       <div class="status-graphic d-inline-block">
         <div class="power-icon-container" v-bind:class="[deviceStateClass]">
           <img v-if="powerState === powerStateEnum.Off"
@@ -15,7 +16,8 @@
         <img v-if="connectionState === connectedStateEnum.Disconnected"
           alt="Disconnected" src="../assets/no-signal.svg" class="connection-icon">
       </div>
-      <b-card-title>{{ deviceStateInfo[deviceState].title }}</b-card-title>
+      {{/* Add textual descriptions of the status */}}
+      <b-card-title class="mt-4">{{ deviceStateInfo[deviceState].title }}</b-card-title>
       <b-card-text>{{ deviceStateInfo[deviceState].description }}</b-card-text>
     </b-card-body>
 
@@ -149,7 +151,7 @@ export default class Device extends Vue {
 
 .status-graphic {
   position: relative;
-  padding: 1em;
+  padding: 0em;
 
   .power-icon-container {
     border-radius: 50%;
