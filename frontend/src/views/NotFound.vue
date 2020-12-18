@@ -1,5 +1,5 @@
 <template>
-  <Splash :title='title' :error='error' />
+  <Splash title='Page not found!' :error='error' />
 </template>
 
 <script lang="ts">
@@ -12,8 +12,6 @@ import Splash from '../layouts/Splash.vue';
   },
 })
 export default class NotFound extends Vue {
-  private readonly title = 'Page not found!';
-
   private readonly error = null;
 }
 </script>

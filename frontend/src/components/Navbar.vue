@@ -3,9 +3,9 @@
     <!-- Logo -->
     <b-navbar-brand href="#">
       <img
-        id="logo" alt="DetectorDag logo" src="../assets/logo.svg"
+        id="logo" alt="detector dag logo" src="../assets/logo.svg"
         class="d-inline-block">
-        DetectorDag
+        detector dag
     </b-navbar-brand>
     <!-- Navbar -->
     <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
@@ -15,7 +15,7 @@
         <template v-if="$store.state.account">
           <b-nav-item-dropdown :text="username" right>
             <b-dropdown-item to="/account" href="#">Settings</b-dropdown-item>
-            <b-dropdown-item v-on:click="logout" href="#">Logout</b-dropdown-item>
+            <b-dropdown-item v-on:click="logout" href="#">Sign out</b-dropdown-item>
           </b-nav-item-dropdown>
         </template>
         <!-- Loading -->

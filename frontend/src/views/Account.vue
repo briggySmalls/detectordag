@@ -1,5 +1,5 @@
 <template>
-  <Topbar :error="error" :title="title">
+  <Topbar :error="error" title="Settings">
     <!-- Email list -->
     <b-form v-if="emails" @submit.prevent="submit">
       <b-form-group>
@@ -33,9 +33,6 @@ import requestAccount from '../utils/clientHelpers';
 export default class AccountView extends Vue {
   // Emails to display in the form
   private emails: string[] | null = null;
-
-  // The page title
-  private readonly title = 'Account Details';
 
   public created() {
     this.emails = this.storedEmails;

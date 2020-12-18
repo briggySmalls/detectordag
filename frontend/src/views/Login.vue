@@ -1,5 +1,5 @@
 <template>
-  <Splash id="login" :title="title" :error="error">
+  <Splash id="login" title="detector dag" :error="error">
     <b-form v-if="!isRequesting" @submit="submit">
       <b-form-group
         id="email"
@@ -38,9 +38,6 @@ import Splash from '../layouts/Splash.vue';
   },
 })
 export default class Login extends Vue {
-  // Page title
-  private readonly title = 'DetectorDag'
-
   private email = '';
 
   private password = '';
