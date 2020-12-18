@@ -22,7 +22,6 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import Topbar from '../layouts/Topbar.vue';
-import { storage } from '../utils';
 import requestAccount from '../utils/clientHelpers';
 
 @Component({
@@ -42,7 +41,7 @@ export default class AccountView extends Vue {
       return;
     }
     // Check we have a valid login
-    const auth = storage.bundle;
+    const auth = this.$storage.bundle;
     if (auth == null) {
       this.$logger.debug('Token not available');
       this.$router.push('/login');
@@ -58,7 +57,7 @@ export default class AccountView extends Vue {
       .catch((error) => {
         this.$logger.debug(`Account request error: ${error.response}`);
         // Clear the token (we're assuming that's why we failed)
-        storage.clear();
+        this.$storage.clear();
         // Get the user to reauthenticate
         this.$router.push('/login');
       });
@@ -82,7 +81,7 @@ export default class AccountView extends Vue {
   private submit(_: Event) { // eslint-disable-line @typescript-eslint/no-unused-vars
     this.$logger.debug('Emails submitted');
     // Get auth token
-    const auth = storage.bundle;
+    const auth = this.$storage.bundle;
     // Redirect to login if these are not present
     if (auth == null) {
       this.$logger.debug('Token not available');

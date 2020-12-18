@@ -23,7 +23,6 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { storage } from '../utils';
 
 @Component
 export default class Navbar extends Vue {
@@ -36,7 +35,7 @@ export default class Navbar extends Vue {
   // Log the user out
   private logout() {
     // Clear the token and account
-    storage.clear();
+    this.$storage.clear();
     this.$store.commit('clearAccount');
     // Redirect to the login page
     this.$router.push('/login');

@@ -23,7 +23,6 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { Device } from '../../lib/client';
-import { storage } from '../utils';
 import DeviceComponent from '../components/Device.vue';
 import Topbar from '../layouts/Topbar.vue';
 
@@ -58,7 +57,7 @@ export default class Review extends Vue {
     this.$store.commit('clearDevices');
     this.error = null;
     // Fetch the token/accountId
-    const authBundle = storage.bundle;
+    const authBundle = this.$storage.bundle;
     // Redirect to login if these are not present
     if (authBundle == null) {
       this.$logger.debug('Token not available');

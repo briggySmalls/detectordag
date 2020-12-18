@@ -29,7 +29,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { storage, AuthBundle } from '../utils';
+import { AuthBundle } from '../utils';
 import Splash from '../layouts/Splash.vue';
 
 @Component({
@@ -57,7 +57,7 @@ export default class Login extends Vue {
         this.$logger.debug('Auth response received');
         // Build and save the authorization data into a handy bundle
         const bundle = new AuthBundle(response.data.accountId, response.data.token);
-        storage.save(bundle);
+        this.$storage.save(bundle);
         // Redirect to review
         this.$router.push('review');
       })
