@@ -69,7 +69,6 @@ type DeviceParameter struct {
 	//
 	// required: true
 	// in: path
-	// example: e4e73fa2-a0fa-4c9a-a0f3-e027a8e99a0b
 	DeviceID string `json:"deviceId"`
 }
 

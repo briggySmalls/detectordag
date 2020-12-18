@@ -28,7 +28,6 @@ type TokenParameter struct {
 	//
 	// required: true
 	// in: header
-	// example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiJhYWM0NWQwMi1jOTdkLTQ0MmMtODQzMS0zMzZkNTc4ZmRjZjciLCJleHAiOjE2MDgzMTkyMjYsImlzcyI6ImRldGVjdG9yZGFnIn0.mEhDnsQJCGbxL-D997N8XrOYU7gbxkeAsS6KVsxxIl8
 	Token string `json:"Authorization"`
 }
 
