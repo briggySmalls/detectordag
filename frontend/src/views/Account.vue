@@ -35,7 +35,7 @@
           </template>
         </b-form-tags>
       </b-form-group>
-      <b-button type="submit">Submit</b-button>
+      <b-button type="submit">Save</b-button>
     </b-form>
     <!-- Loading -->
     <b-spinner v-else></b-spinner>
