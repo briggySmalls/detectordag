@@ -1,7 +1,7 @@
 <template>
   <b-navbar sticky="true" toggleable="lg" type="dark" variant="info">
     <!-- Logo -->
-    <b-navbar-brand to="/review" href="#">
+    <b-navbar-brand to="/review" href="#" :active="$route.name === 'Review'">
       <img
         id="logo" alt="detector dag logo" src="../assets/logo.svg"
         class="d-inline-block">
@@ -11,8 +11,8 @@
     <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
     <b-collapse id="nav-collapse" is-nav>
       <b-navbar-nav>
-        <b-nav-item to="/review">review</b-nav-item>
-        <b-nav-item to="/account">settings</b-nav-item>
+        <b-nav-item to="/review" :active="$route.name ==='Review'">review</b-nav-item>
+        <b-nav-item to="/account" :active="$route.name ==='Account'">settings</b-nav-item>
       </b-navbar-nav>
       <b-navbar-nav class="ml-auto">
         <b-nav-item v-on:click="logout">Sign out</b-nav-item>
