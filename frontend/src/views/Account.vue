@@ -1,12 +1,17 @@
 <template>
   <Topbar :error="error" title="Settings">
-    <!-- Email list -->
-    <b-form v-if="emails" @submit.prevent="submit">
+    {{/* If we are loading, just show a spinner */}}
+    <b-spinner v-if="loading"></b-spinner>
+    <b-form v-else @submit.prevent="submit">
+      {{/* Display the settings */}}
+      <strong>{{ $store.state.account.username }}</strong>
       <b-form-group
+        class="mt-5"
         description="These are the emails we'll use to notify you when you dag spots a change.">
         <label for="emails">Notification emails:</label>
         <b-form-tags v-model="emails" :tag-validator="emailValidator" no-outer-focus class="mb-2">
           <template v-slot="{ tags, inputAttrs, inputHandlers, addTag, removeTag }">
+            {{/* Define a custom input */}}
             <b-input-group aria-controls="my-custom-emails-list">
               <input
                 v-bind="inputAttrs"
@@ -17,6 +22,7 @@
                 <b-button @click="addTag()" variant="primary">Add</b-button>
               </b-input-group-append>
             </b-input-group>
+            {{/* Define a custom visualisation of the current list */}}
             <b-list-group>
               <b-list-group-item
                 v-for="email in tags"
@@ -37,8 +43,6 @@
       </b-form-group>
       <b-button type="submit">Save</b-button>
     </b-form>
-    <!-- Loading -->
-    <b-spinner v-else-if="loading"></b-spinner>
   </Topbar>
 </template>
 
@@ -61,7 +65,7 @@ export default class AccountView extends Vue {
   public created() {
     // Check if we already have the account info
     this.emails = null;
-    if (this.storedEmails !== null) {
+    if (this.$store.state.account !== null) {
       // Just copy them over then
       this.emails = this.storedEmails;
       return;
