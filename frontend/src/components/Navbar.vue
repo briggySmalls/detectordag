@@ -1,5 +1,5 @@
 <template>
-  <b-navbar toggleable="lg" type="dark" variant="info">
+  <b-navbar sticky="true" toggleable="lg" type="dark" variant="info">
     <!-- Logo -->
     <b-navbar-brand href="#">
       <img
@@ -10,17 +10,13 @@
     <!-- Navbar -->
     <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
     <b-collapse id="nav-collapse" is-nav>
-      <b-navbar-nav>
-        <b-nav-item to="/review">Review</b-nav-item>
-        <b-nav-item to="/account">Account</b-nav-item>
-      </b-navbar-nav>
       <b-navbar-nav class="ml-auto">
         <!-- Logged in navbar content -->
         <template v-if="$store.state.account">
-          <b-nav-text>{{ username }}</b-nav-text>
-          <b-nav-item>
-            <b-button size="sm" v-on:click="logout">Logout</b-button>
-          </b-nav-item>
+          <b-nav-item-dropdown :text="username" right>
+            <b-dropdown-item to="/account" href="#">Settings</b-dropdown-item>
+            <b-dropdown-item v-on:click="logout" href="#">Logout</b-dropdown-item>
+          </b-nav-item-dropdown>
         </template>
         <!-- Loading -->
         <template v-else>
@@ -56,7 +52,10 @@ export default class Navbar extends Vue {
 
 <style lang="scss" scoped>
 #logo {
-  width: 5em;
-  height: 5em;
+  width: 3em;
+  height: 3em;
+}
+nav {
+  font-weight: 800;
 }
 </style>
