@@ -1,7 +1,7 @@
 <template>
   <b-navbar sticky="true" toggleable="lg" type="dark" variant="info">
     <!-- Logo -->
-    <b-navbar-brand href="#">
+    <b-navbar-brand to="/review" href="#">
       <img
         id="logo" alt="detector dag logo" src="../assets/logo.svg"
         class="d-inline-block">
