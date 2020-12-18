@@ -21,6 +21,7 @@
               <b-list-group-item
                 v-for="tag in tags"
                 :key="tag"
+                class="d-flex justify-content-between align-items-center"
               >
                 {{ tag }}
                 <b-button
