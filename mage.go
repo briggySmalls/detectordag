@@ -52,5 +52,5 @@ func (Generate) Docs() error {
 	if err != nil {
 		return err
 	}
-	return sh.Run("docker", "run", "--rm", "-v", fmt.Sprintf("%s:/local", path), "openapitools/openapi-generator-cli", "generate", "-i", "/local/api.yml", "-g", "dynamic-html", "-o", fmt.Sprintf("/local/%s", docsDir))
+	return sh.Run("docker", "run", "--rm", "-v", fmt.Sprintf("%s:/local", path), "broothie/redoc-cli", "bundle", "/local/api.yml", "-o", fmt.Sprintf("/local/%s/index.html", docsDir))
 }
