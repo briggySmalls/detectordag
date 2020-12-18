@@ -6,29 +6,29 @@
         description="These are the emails we'll use to notify you when you dag spots a change.">
         <label for="emails">Notification emails:</label>
         <b-form-tags v-model="emails" :tag-validator="emailValidator" no-outer-focus class="mb-2">
-          <template v-slot="{ tags, inputAttrs, inputHandlers, addTag, removeTag }">
-            <b-input-group aria-controls="my-custom-tags-list">
+          <template v-slot="{ emails, inputAttrs, inputHandlers, addEmail, removeEmail }">
+            <b-input-group aria-controls="my-custom-emails-list">
               <input
                 v-bind="inputAttrs"
                 v-on="inputHandlers"
-                placeholder="New tag - Press enter to add"
+                placeholder="New email - Press enter to add"
                 class="form-control">
               <b-input-group-append>
-                <b-button @click="addTag()" variant="primary">Add</b-button>
+                <b-button @click="addEmail()" variant="primary">Add</b-button>
               </b-input-group-append>
             </b-input-group>
             <b-list-group>
               <b-list-group-item
-                v-for="tag in tags"
-                :key="tag"
+                v-for="email in emails"
+                :key="email"
                 class="d-flex justify-content-between align-items-center"
               >
-                {{ tag }}
+                {{ email }}
                 <b-button
-                  @click="removeTag(tag)"
-                  variant="link"
+                  @click="removeEmail(email)"
+                  variant="secondary"
                   size="sm"
-                  :aria-controls="`my-custom-tags-tag_${tag.replace(/\s/g, '_')}_`"
+                  :aria-controls="`my-custom-emails-email_${email.replace(/\s/g, '_')}_`"
                 ><b-icon-x-circle-fill></b-icon-x-circle-fill></b-button>
               </b-list-group-item>
             </b-list-group>
