@@ -5,7 +5,7 @@
       <b-form-group
         description="These are the emails we'll use to notify you when you dag spots a change.">
         <label for="emails">Notification emails:</label>
-        <b-form-tags v-model="emails" no-outer-focus class="mb-2">
+        <b-form-tags v-model="emails" :tag-validator="emailValidator" no-outer-focus class="mb-2">
           <template v-slot="{ tags, inputAttrs, inputHandlers, addTag, removeTag }">
             <b-input-group aria-controls="my-custom-tags-list">
               <input
@@ -139,6 +139,11 @@ export default class AccountView extends Vue {
       });
     // Indicate that our emails are updating
     this.emails = null;
+  }
+
+  public emailValidator(email: string) { // eslint-disable-line class-methods-use-this
+    const re = /\S+@\S+\.\S+/;
+    return re.test(email);
   }
 }
 </script>
