@@ -3,18 +3,22 @@ package models
 type Credentials struct {
 	// Username for the user's account
 	// required: true
+	// example: user@example.com
 	Username string `json:"username"`
 	// Password for the user's account
 	// required: true
+	// example: password
 	Password string `json:"password"`
 }
 
 type Token struct {
 	// Token that grants access
 	// required: true
+	// example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50SWQiOiJhYWM0NWQwMi1jOTdkLTQ0MmMtODQzMS0zMzZkNTc4ZmRjZjciLCJleHAiOjE2MDgzMTkyMjYsImlzcyI6ImRldGVjdG9yZGFnIn0.mEhDnsQJCGbxL-D997N8XrOYU7gbxkeAsS6KVsxxIl8
 	Token string `json:"token"`
 	// Identifier for user's account
 	// required: true
+	// example: 7ea472c0-bb92-4989-9471-6a4560ac7a31
 	AccountId string `json:"accountId"`
 }
 

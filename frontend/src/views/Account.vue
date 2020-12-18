@@ -14,7 +14,7 @@
                 placeholder="New email - Press enter to add"
                 class="form-control">
               <b-input-group-append>
-                <b-button @click="addTag()" variant="primary">Add</b-button>
+                <b-button @click="addEmail()" variant="primary">Add</b-button>
               </b-input-group-append>
             </b-input-group>
             <b-list-group>

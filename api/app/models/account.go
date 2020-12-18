@@ -3,12 +3,14 @@ package models
 type Emails struct {
 	// The emails associated with the account
 	// required: true
+	// example: ["jane@example.com", "john@example.com"]
 	Emails []string `json:"emails"`
 }
 
 type Account struct {
 	// The username of the account
 	// required: true
+	// example: user@example.com
 	Username string `json:"username"`
 	Emails
 }
