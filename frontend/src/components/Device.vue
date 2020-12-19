@@ -1,7 +1,8 @@
 <template>
   <b-card no-body border-variant="dark" header-border-variant="dark">
     <template #header>
-      <EditableText @edited="updateDeviceName">
+      <b-spinner v-if="isLoading" />
+      <EditableText v-else @edited="updateDeviceName">
         <h4 class="mb-0">{{ device.name }}</h4>
       </EditableText>
     </template>
@@ -86,6 +87,8 @@ export default class Device extends Vue {
 
   @Prop() private device!: DeviceModel;
 
+  private isLoading = false;
+
   private readonly deviceStateInfo: Record<DeviceState, StateData> = {
     [DeviceState.On]: { class: 'on', title: 'On', description: 'The power is on and your dag is online 💪' },
     [DeviceState.Off]: { class: 'off', title: 'Off', description: 'Your dag has noticed the power has dropped 😰' },
@@ -100,6 +103,10 @@ export default class Device extends Vue {
 
   private updateDeviceName(name: string) {
     this.$logger.debug(`need to update to ${name}`);
+    this.isLoading = true;
+    setTimeout(() => {
+      this.isLoading = false;
+    }, 2000);
   }
 
   private get deviceStatus(): string {
