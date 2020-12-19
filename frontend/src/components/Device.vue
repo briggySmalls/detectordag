@@ -1,7 +1,9 @@
 <template>
   <b-card no-body border-variant="dark" header-border-variant="dark">
     <template #header>
-      <h4 class="mb-0">{{ device.name }}</h4>
+      <EditableText @edited="updateDeviceName">
+        <h4 class="mb-0">{{ device.name }}</h4>
+      </EditableText>
     </template>
 
     <b-card-body>
@@ -44,6 +46,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { render } from 'timeago.js';
 import { Device as DeviceModel } from '../../lib/client';
+import EditableText from './EditableText.vue';
 
 enum DeviceState {
   On = 1,
@@ -68,7 +71,11 @@ interface StateData {
   description: string;
 }
 
-@Component
+@Component({
+  components: {
+    EditableText,
+  },
+})
 export default class Device extends Vue {
   // Declare some enums so we can use them in the template
   private readonly deviceStateEnum: typeof DeviceState = DeviceState
@@ -89,6 +96,10 @@ export default class Device extends Vue {
   private mounted() {
     // Render times nicely
     render(this.$el.querySelectorAll('.time'));
+  }
+
+  private updateDeviceName(name: string) {
+    this.$logger.debug(`need to update to ${name}`);
   }
 
   private get deviceStatus(): string {
