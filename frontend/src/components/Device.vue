@@ -111,9 +111,10 @@ export default class Device extends Vue {
       this.$router.push('/login');
       return;
     }
-    this.$clients.devices.updateDevice(auth.token, this.device.deviceId, { name })
-      .then(() => {
+    this.$clients.devices.updateDevice(`Bearer ${auth.token}`, this.device.deviceId, { name })
+      .then((response) => {
         // Submit the new device info to the store
+        this.$store.commit('setDevice', response.data);
         // We've bound to this so it will update automatically!
         this.isLoading = false;
       })
