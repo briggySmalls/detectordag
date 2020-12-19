@@ -103,10 +103,25 @@ export default class Device extends Vue {
 
   private updateDeviceName(name: string) {
     this.$logger.debug(`need to update to ${name}`);
+    // Submit a request to set the device name
+    const auth = this.$storage.bundle;
+    // Redirect to login if these are not present
+    if (auth == null) {
+      this.$logger.debug('Token not available');
+      this.$router.push('/login');
+      return;
+    }
+    this.$clients.devices.updateDevice(auth.token, this.device.deviceId, { name })
+      .then(() => {
+        // Submit the new device info to the store
+        // We've bound to this so it will update automatically!
+        this.isLoading = false;
+      })
+      .catch((error) => {
+        this.$logger.debug(`Ah bugger: ${error}`);
+      });
+    // Indicate we are saving the name
     this.isLoading = true;
-    setTimeout(() => {
-      this.isLoading = false;
-    }, 2000);
   }
 
   private get deviceStatus(): string {

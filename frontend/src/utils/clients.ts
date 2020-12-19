@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { AccountsApi, AuthenticationApi } from '../../lib/client';
+import { AccountsApi, AuthenticationApi, DevicesApi } from '../../lib/client';
 
 // Define a wrapper for the different clients
 class ClientWrapper {
@@ -7,10 +7,13 @@ class ClientWrapper {
 
   public readonly authentication: AuthenticationApi;
 
+  public readonly devices: DevicesApi;
+
   public constructor() {
     const bPath = process.env.VUE_APP_API_BASEPATH || `${process.env.BASE_URL}/api/v1`;
     this.accounts = new AccountsApi(undefined, bPath);
     this.authentication = new AuthenticationApi(undefined, bPath);
+    this.devices = new DevicesApi(undefined, bPath);
   }
 }
 
