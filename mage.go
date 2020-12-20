@@ -92,6 +92,11 @@ func ConfigureImg() error {
 	return sh.Run("balena", "os", "configure", "--application", applicationName, "--config", imgConfigFile, imageFile)
 }
 
+// Preload the BalenaOS image with the detectordag software
+func PreloadImg() error {
+	return sh.Run("balena", "preload", imageFile, "--app", applicationName, "--commit", "latest")
+}
+
 // Write the BalenaOS image to an external drive
 func WriteImage() error {
 	// Assume caller has set drive
