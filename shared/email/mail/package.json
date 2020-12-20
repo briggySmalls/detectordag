@@ -1,0 +1,12 @@
+{
+  "name": "mail",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "mjml status-update.mjml --output update.html"
+  },
+  "dependencies": {
+    "mjml": "^4.7.1"
+  }
+}

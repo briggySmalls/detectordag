@@ -1,0 +1,55 @@
+<mjml>
+  <mj-body>
+    <!-- Logo -->
+    <mj-section background-url="https://detectordag.tk/android-chrome-512x512.png" background-size="cover" background-repeat="no-repeat">
+      <mj-column width="600px">
+        <mj-text align="center" color="#fff" font-size="40px" font-family="Helvetica Neue">Slogan here</mj-text>
+        <mj-button background-color="#F63A4D" href="#">
+          Promotion
+        </mj-button>
+      </mj-column>
+    </mj-section>
+    <!-- Company header -->
+    <mj-section>
+      <mj-column>
+        <mj-text font-style="italic" font-size="20px" color="#626262">
+          detector dag
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <!-- Intro text -->
+    <mj-section background-color="#fafafa">
+      <mj-column width="400px">
+        <mj-text font-style="italic" font-size="20px" font-family="Helvetica Neue" color="#626262">My Awesome Text</mj-text>
+        <mj-text color="#525252">
+          We've noticed a change in your dag {{ .DeviceName }} at {{ .Time.Format "15:04 02-Jan-2006" }}
+        </mj-text>
+        <mj-button background-color="#F45E43" href="#">Learn more</mj-button>
+      </mj-column>
+    </mj-section>
+    <!-- Transition text -->
+    <mj-section background-color="#fafafa">
+      <mj-column>
+        <mj-text color="#525252">
+          {{ .TransitionText }}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <!-- Title -->
+    <mj-section background-color="#fafafa">
+      <mj-column>
+        <mj-text color="#626262">
+          {{ .Title }}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <!-- Description -->
+    <mj-section background-color="#fafafa">
+      <mj-column>
+        <mj-text color="#525252">
+          {{ .Description }}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

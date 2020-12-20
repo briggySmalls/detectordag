@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
 	"html/template"
 	"time"
+	"log"
 )
 
 const (
@@ -134,6 +135,7 @@ func (e *emailer) SendEmail(recipients []string, sender, subject string, context
 	for i, recipient := range recipients {
 		toAddresses[i] = aws.String(recipient)
 	}
+	log.Print(htmlBody)
 	// Assemble the email.
 	input := &ses.SendEmailInput{
 		Destination: &ses.Destination{
