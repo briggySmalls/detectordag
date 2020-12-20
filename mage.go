@@ -8,6 +8,7 @@ import (
 	"github.com/magefile/mage/mg"
 	"log"
 	"os"
+	"errors"
 	// mage:import
 	_ "github.com/briggysmalls/detectordag/shared/mage"
 )
@@ -89,4 +90,14 @@ func ConfigureImg() error {
 	mg.Deps(DownloadImg)
 	// Apply the application configuration to it
 	return sh.Run("balena", "os", "configure", "--application", applicationName, "--config", imgConfigFile, imageFile)
+}
+
+// Write the BalenaOS image to an external drive
+func WriteImage() error {
+	// Assume caller has set drive
+	drv := os.Getenv("DDAG_DRIVE")
+	if drv == "" {
+		return errors.New("DDAG_DRIVE not set")
+	}
+	return sh.Run("balena", "os", "initialize", imageFile, "--type", deviceType, "--drive", drv, "--yes")
 }
