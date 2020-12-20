@@ -12,6 +12,16 @@ import (
 	_ "github.com/briggysmalls/detectordag/shared/mage"
 )
 
+const (
+	// Directory for build outputs
+	buildDir = "./build"
+	applicationName = "detectordag-edge"
+	imgConfigFile = "./provisioning/detectordag-edge.json"
+	balenaVersion = "v2.54.2+rev1"
+)
+
+var imageFile = fmt.Sprintf("%s/detectordag-edge.img", buildDir)
+
 type Generate mg.Namespace
 
 var path string
@@ -22,6 +32,11 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func createBuildDir() error {
+	// Create a new one
+	return sh.Run("mkdir", "-p", buildDir)
 }
 
 // Generates the OpenAPI specification from the api
@@ -57,4 +72,18 @@ func (Generate) Docs() error {
 
 func MockApi() error {
 	return sh.Run("docker", "run", "--init", "--rm", "-v", fmt.Sprintf("%s:/local", path), "-p", "3000:4010", "stoplight/prism:4", "mock", "-h", "0.0.0.0", "/local/api.yml")
+}
+
+func DownloadOs() error {
+	// Ensure we have a build directory
+	mg.Deps(createBuildDir)
+	// Download the OS image
+	return sh.Run("balena", "os", "download", "raspberrypi", "--version", balenaVersion, "--output", imageFile)
+}
+
+func ModifyOs() error {
+	// Download the image
+	mg.Deps(DownloadOs)
+	// Apply the application configuration to it
+	return sh.Run("balena", "os", "configure", "--application", applicationName, "--config", imgConfigFile, imageFile)
 }
