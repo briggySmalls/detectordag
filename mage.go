@@ -18,6 +18,7 @@ const (
 	applicationName = "detectordag-edge"
 	imgConfigFile = "./provisioning/detectordag-edge.json"
 	balenaVersion = "v2.54.2+rev1"
+	deviceType = "raspberrypi"
 )
 
 var imageFile = fmt.Sprintf("%s/detectordag-edge.img", buildDir)
@@ -74,16 +75,18 @@ func MockApi() error {
 	return sh.Run("docker", "run", "--init", "--rm", "-v", fmt.Sprintf("%s:/local", path), "-p", "3000:4010", "stoplight/prism:4", "mock", "-h", "0.0.0.0", "/local/api.yml")
 }
 
-func DownloadOs() error {
+// Download the BalenaOS image for an edge device
+func DownloadImg() error {
 	// Ensure we have a build directory
 	mg.Deps(createBuildDir)
 	// Download the OS image
-	return sh.Run("balena", "os", "download", "raspberrypi", "--version", balenaVersion, "--output", imageFile)
+	return sh.Run("balena", "os", "download", deviceType, "--version", balenaVersion, "--output", imageFile)
 }
 
-func ModifyOs() error {
+// Configure the BalenaOS image for use in the detectordag application
+func ConfigureImg() error {
 	// Download the image
-	mg.Deps(DownloadOs)
+	mg.Deps(DownloadImg)
 	// Apply the application configuration to it
 	return sh.Run("balena", "os", "configure", "--application", applicationName, "--config", imgConfigFile, imageFile)
 }
