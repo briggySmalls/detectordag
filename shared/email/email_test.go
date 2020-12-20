@@ -28,12 +28,14 @@ func TestPowerOffEmail(t *testing.T) {
 		sender,
 		`<h1>Visibility status update</h1>`,
 		`Visibility status update.`,
-	))
+	)).Return(nil, nil)
+	// Execute the call
 	context := ContextData {
 		DeviceName: "Alderney",
 		Time: createTime(t, "2020/12/29 23:48:00"),
 	}
-	emailer.SendUpdate(to, StateTypeOff, TransitionTypeOff, context)
+	err := emailer.SendUpdate(to, StateTypeOff, TransitionTypeOff, context)
+	assert.Nil(t, err)
 }
 
 func createExpectedEmailInput(recipients []string, sender, htmlBody, textBody string) *ses.SendEmailInput {
@@ -58,7 +60,7 @@ func createExpectedEmailInput(recipients []string, sender, htmlBody, textBody st
 					Data:    &htmlBody,
 				},
 				Text: &ses.Content{
-					Charset: &charSet,
+					Charset: &charSet, // Always use the same charset
 					Data:    &textBody,
 				},
 			},
