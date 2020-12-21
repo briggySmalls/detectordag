@@ -4,11 +4,13 @@ package main
 
 import (
 	"fmt"
+	b64 "encoding/base64"
 	"github.com/magefile/mage/sh"
 	"github.com/magefile/mage/mg"
 	"github.com/aws/aws-sdk-go/aws"
 	"log"
 	"os"
+	"io/ioutil"
 	"github.com/briggysmalls/detectordag/shared"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"time"
@@ -140,10 +142,7 @@ func ConfigureImg() error {
 		return err
 	}
 	// Apply the application configuration to it
-	err = sh.Run("balena", "os", "configure", "--config-network", "ethernet", "--config", configFile, "--device", deviceID, getDeviceImageFile(deviceID))
-	if err != nil {
-		return err
-	}
+	return sh.Run("balena", "os", "configure", "--config-network", "ethernet", "--config", configFile, "--device", deviceID, getDeviceImageFile(deviceID))
 }
 
 // Register a new 'thing' on AWS
@@ -197,19 +196,39 @@ func RegisterBalena() error {
 	return nil
 }
 
-// func SetEnvVars() error {
-// 	mg.Deps(
-// 		RegisterAWS, // We need the certificates
-// 	)
-// 	// Set certificate environment variables
-// 	envVars := map[string]string {
-// 		"AWS_THING_CERT": ,
-// 		"AWS_THING_KEY": ,
-// 		"AWS_THING_NAME": ,
-// 	}
-// 	sh.Run("balena", "env", "add", )
-// 	return nil
-// }
+func SetEnvVars() error {
+	mg.Deps(
+		RegisterBalena, // We need the device to exist
+		RegisterAWS, // We need the certificates
+	)
+	// We'll need the device ID
+	deviceID, err := getEnvVar(deviceIDEnvVar)
+	if err != nil {
+		return err
+	}
+	certFileText, err := readCertFile(deviceID, certFile)
+	if err != nil {
+		return err
+	}
+	keyFileText, err := readCertFile(deviceID, keyFile)
+	if err != nil {
+		return err
+	}
+	// Set certificate environment variables
+	envVars := map[string]string {
+		"AWS_THING_CERT": certFileText,
+		"AWS_THING_KEY": keyFileText,
+		"AWS_THING_NAME": deviceID,
+	}
+	for key, value := range envVars {
+		// Add the environment variable
+		err = sh.Run("balena", "env", "add", "--device", deviceID, key, value)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 // Provision a device on Balena, AWS, and create an image to burn
 func ProvisionDevice() error {
@@ -217,6 +236,7 @@ func ProvisionDevice() error {
 		RegisterBalena, // Create the balena device
 		ConfigureImg, // Configure an image using the device
 		RegisterAWS, // Register an AWS device with the same name
+		SetEnvVars, // Set the environment variables of the device
 	)
 	return nil
 }
@@ -245,6 +265,18 @@ func GenerateDeviceID() error {
 
 func getDeviceBuildDir(deviceID string) string {
 	return fmt.Sprintf("%s/%s", buildDir, deviceID)
+}
+
+func readCertFile(deviceID, file string) (string, error) {
+	// Build the filename
+	fileName := fmt.Sprintf("%s/%s", getDeviceBuildDir(deviceID), file)
+	// Read the file
+	dat, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return "", err
+	}
+	// Convert to base64
+	return string(b64.StdEncoding.EncodeToString(dat)), nil
 }
 
 func getDeviceImageFile(deviceID string) string {
