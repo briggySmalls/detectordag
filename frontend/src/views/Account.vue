@@ -80,14 +80,11 @@ export default class AccountView extends Vue {
         this.$logger.debug('Saving account details');
         this.$store.commit('setAccount', response.data);
       })
-      .catch((error) => {
-        if (this.$unauthorised(error)) {
-          // Bail
-        }
+      .catch((err) => this.$checkUnauthorised(err, (error) => {
         // Record the error
         this.error = error;
         this.$logger.debug(`Account request error: ${error.response}`);
-      });
+      }));
   }
 
   // The emails from the store
