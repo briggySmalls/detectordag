@@ -35,9 +35,12 @@ class EdgeApp:
         self._client = CloudClient(client_config)
 
     def __enter__(self) -> "EdgeApp":
+        # Connect the MQTT client
         self._client.__enter__()
         # Configure the device
         self.configure()
+        # Send the current status
+        self._publish_update(self._device)
         # Return this instance
         return self
 
