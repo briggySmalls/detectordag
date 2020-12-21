@@ -1,5 +1,5 @@
 <template>
-  <b-navbar sticky="true" toggleable="lg" type="dark" variant="info">
+  <b-navbar :sticky="true" toggleable="lg" type="dark" variant="info">
     <!-- Logo -->
     <b-navbar-brand to="/review" href="#" :active="$route.name === 'Review'">
       <img
