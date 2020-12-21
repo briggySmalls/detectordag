@@ -4,14 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
+	"net/http"
+
 	"github.com/briggysmalls/detectordag/api/app/models"
 	"github.com/briggysmalls/detectordag/api/app/tokens"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
-	"log"
-	"net/http"
 )
 
 var (
@@ -35,7 +36,6 @@ type Server interface {
 	GetDevices(w http.ResponseWriter, r *http.Request)
 	UpdateAccount(w http.ResponseWriter, r *http.Request)
 	UpdateDevice(w http.ResponseWriter, r *http.Request)
-	RegisterDevice(w http.ResponseWriter, r *http.Request)
 }
 
 func New(db database.Client, shadow shadow.Client, email email.Verifier, iot iot.Client, tokens tokens.Tokens) Server {
