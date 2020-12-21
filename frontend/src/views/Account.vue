@@ -76,17 +76,15 @@ export default class AccountView extends Vue {
     // Request the accounts to render them
     this.$clients.accounts.getAccount(auth.accountId, `Bearer ${auth.token}`)
       .then((response) => {
-      // Save the account details to the store
+        // Save the account details to the store
         this.$logger.debug('Saving account details');
         this.$store.commit('setAccount', response.data);
       })
-      .catch((error) => {
+      .catch((err) => this.$checkUnauthorised(err, (error) => {
+        // Record the error
+        this.error = error;
         this.$logger.debug(`Account request error: ${error.response}`);
-        // Clear the token (we're assuming that's why we failed)
-        this.$storage.clear();
-        // Get the user to reauthenticate
-        this.$router.push('/login');
-      });
+      }));
   }
 
   // The emails from the store
