@@ -144,8 +144,6 @@ func ConfigureImg() error {
 	if err != nil {
 		return err
 	}
-	// Preload our application into the image
-	return sh.Run("balena", "preload", getDeviceImageFile(deviceID), "--app", applicationName, "--commit", "latest")
 }
 
 // Register a new 'thing' on AWS
