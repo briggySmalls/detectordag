@@ -113,23 +113,6 @@ func NewRouter(iot iot.Client, server server.Server, tokens tokens.Tokens) *mux.
 			fmt.Sprintf("/{accountId:%s}", uuidRegex),
 			server.UpdateAccount,
 		},
-		// swagger:route PUT /accounts/{accountId}/devices/{deviceId} accounts registerDevice
-		//
-		// Register a new device
-		//
-		// Register a new device to the account
-		//
-		//     Responses:
-		//       200: deviceRegisteredResponse
-		//       400: accountNotFoundResponse
-		//       401: unauthenticatedResponse
-		//       403: unauthorizedResponse
-		Route{
-			"RegisterDevice",
-			http.MethodPut,
-			fmt.Sprintf("/{accountId:%s}/devices/{deviceId:%s}", uuidRegex, uuidRegex),
-			server.RegisterDevice,
-		},
 	})
 
 	// Create subrouter for devices

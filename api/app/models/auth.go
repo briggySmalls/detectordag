@@ -22,7 +22,7 @@ type Token struct {
 	AccountId string `json:"accountId"`
 }
 
-// swagger:parameters getAccount updateAccount getDevices registerDevice updateDevice
+// swagger:parameters getAccount updateAccount getDevices updateDevice
 type TokenParameter struct {
 	// A token obtained through authentication
 	//
