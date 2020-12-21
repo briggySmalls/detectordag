@@ -77,12 +77,13 @@ export default class Review extends Vue {
         this.$store.commit('setDevices', request.data);
       })
       .catch((error) => {
+        if (this.$unauthorised(error)) {
+          // unauthorised function handles transitions
+          return;
+        }
         // Assign the error
         this.error = error;
-        // Also log it
-        this.$logger.debug(error.response);
-        // If we have authorization issues, redirect to login
-        this.$router.push('/login');
+        this.$logger.debug(`Devices request error: ${error.response}`);
       });
   }
 }
