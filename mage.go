@@ -3,17 +3,19 @@
 package main
 
 import (
-	"fmt"
 	b64 "encoding/base64"
-	"github.com/magefile/mage/sh"
-	"github.com/magefile/mage/mg"
-	"github.com/aws/aws-sdk-go/aws"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
-	"io/ioutil"
+	"time"
+
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/briggysmalls/detectordag/shared"
 	"github.com/briggysmalls/detectordag/shared/iot"
-	"time"
+	"github.com/magefile/mage/mg"
+	"github.com/magefile/mage/sh"
+
 	// mage:import
 	_ "github.com/briggysmalls/detectordag/shared/mage"
 )
@@ -21,15 +23,15 @@ import (
 // Build constants
 const (
 	// Directory for build outputs
-	buildDir = "./build"
-	applicationName = "detectordag-edge"
-	awsProvisioningTemplate = "./provisioning/thing.json"
-	balenaVersion = "v2.54.2+rev1"
-	deviceType = "raspberrypi"
-	certFile = "thing.cert.pem"
-	keyFile = "thing.private.key"
-	deviceIDEnvVar = "DDAG_DEVICE_ID"
-	imageFile = "detectordag-edge.img"
+	buildDir                = "./build"
+	applicationName         = "detectordag-edge"
+	awsProvisioningTemplate = "./config/thing.json"
+	balenaVersion           = "v2.54.2+rev1"
+	deviceType              = "raspberrypi"
+	certFile                = "thing.cert.pem"
+	keyFile                 = "thing.private.key"
+	deviceIDEnvVar          = "DDAG_DEVICE_ID"
+	imageFile               = "detectordag-edge.img"
 )
 
 // Build nearly-constants (derived from constants)
@@ -199,7 +201,7 @@ func RegisterBalena() error {
 func SetEnvVars() error {
 	mg.Deps(
 		RegisterBalena, // We need the device to exist
-		RegisterAWS, // We need the certificates
+		RegisterAWS,    // We need the certificates
 	)
 	// We'll need the device ID
 	deviceID, err := getEnvVar(deviceIDEnvVar)
@@ -215,9 +217,9 @@ func SetEnvVars() error {
 		return err
 	}
 	// Set certificate environment variables
-	envVars := map[string]string {
+	envVars := map[string]string{
 		"AWS_THING_CERT": certFileText,
-		"AWS_THING_KEY": keyFileText,
+		"AWS_THING_KEY":  keyFileText,
 		"AWS_THING_NAME": deviceID,
 	}
 	for key, value := range envVars {
@@ -234,9 +236,9 @@ func SetEnvVars() error {
 func ProvisionDevice() error {
 	mg.Deps(
 		RegisterBalena, // Create the balena device
-		ConfigureImg, // Configure an image using the device
-		RegisterAWS, // Register an AWS device with the same name
-		SetEnvVars, // Set the environment variables of the device
+		ConfigureImg,   // Configure an image using the device
+		RegisterAWS,    // Register an AWS device with the same name
+		SetEnvVars,     // Set the environment variables of the device
 	)
 	return nil
 }
@@ -286,14 +288,14 @@ func getDeviceImageFile(deviceID string) string {
 func writeFile(file, content string) error {
 	// Create a new file
 	f, err := os.Create(file)
-    if err != nil {
-        return err
-    }
-    defer f.Close()
+	if err != nil {
+		return err
+	}
+	defer f.Close()
 	// Write all the content to it
-    _, err2 := f.WriteString(content)
-    if err2 != nil {
-        return err
+	_, err2 := f.WriteString(content)
+	if err2 != nil {
+		return err
 	}
 	return nil
 }
