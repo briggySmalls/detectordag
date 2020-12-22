@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "mkdir -p dist && mjml status-update.mjml --output dist/update.html",
+    "watch": "mkdir -p dist && mjml -w status-update.mjml --output dist/update.html"
   },
   "dependencies": {
     "mjml": "^4.7.1"
