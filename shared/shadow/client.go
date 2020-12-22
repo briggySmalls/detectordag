@@ -74,16 +74,21 @@ func (c *client) UpdateConnectionStatus(deviceID string, status string) (*Shadow
 	}
 	// Make the request
 	log.Print(string(payload))
-	resp, err := c.dp.UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
+	_, err = c.dp.UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
 		ThingName: aws.String(deviceID),
 		Payload:   payload,
 	})
 	if err != nil {
 		return nil, err
 	}
+	// Request the shadow
+	shdw, err := c.getShadow(deviceID)
+	if err != nil {
+		return nil, err
+	}
 	// Parse the response
 	var shadowSchema DeviceShadowSchema
-	return shadowSchema.Extract([]byte(resp.Payload))
+	return shadowSchema.Extract([]byte(shdw))
 }
 
 func (c *client) getShadow(deviceID string) ([]byte, error) {
