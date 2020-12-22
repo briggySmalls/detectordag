@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
+	"github.com/briggysmalls/detectordag/shared/shadow"
 )
 
 const (
@@ -36,6 +37,18 @@ const (
 	TransitionTypeConnected    TransitionType = iota
 	TransitionTypeDisconnected TransitionType = iota
 )
+
+// Helper map for looking up state
+var stateLookup = map[string]map[string]StateType{
+	shadow.CONNECTION_STATUS_CONNECTED: map[string]StateType{
+		shadow.POWER_STATUS_ON:  StateTypeOn,
+		shadow.POWER_STATUS_OFF: StateTypeOff,
+	},
+	shadow.CONNECTION_STATUS_DISCONNECTED: map[string]StateType{
+		shadow.POWER_STATUS_ON:  StateTypeWasOn,
+		shadow.POWER_STATUS_OFF: StateTypeWasOff,
+	},
+}
 
 const (
 	emailStatusUpdate = "There's been a change in your dag's status"
@@ -100,6 +113,21 @@ var transitionDataLookup = map[TransitionType]transitionData{
 	TransitionTypeOff:          {TransitionText: "You've lost power!"},
 	TransitionTypeConnected:    {TransitionText: "We've lost contact with your dag"},
 	TransitionTypeDisconnected: {TransitionText: "You're dag is back"},
+}
+
+// ToStateType allows external packages to lookup email state
+func ToStateType(connection string, power string) (StateType, error) {
+	// First use connection
+	subMap, ok := stateLookup[connection]
+	if !ok {
+		return 0, fmt.Errorf("Bad connection value: '%s'", connection)
+	}
+	// Then the power
+	state, ok := subMap[power]
+	if !ok {
+		return 0, fmt.Errorf("Bad power value: '%s'", power)
+	}
+	return state, nil
 }
 
 // NewEmailer gets a new Emailer
