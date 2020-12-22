@@ -3,18 +3,19 @@ package shadow
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iot"
 	"github.com/aws/aws-sdk-go/service/iotdataplane"
 	"github.com/aws/aws-sdk-go/service/iotdataplane/iotdataplaneiface"
-	"log"
 )
 
 // Client represents a client to the device shadow service
 type Client interface {
 	Get(deviceId string) (*Shadow, error)
-	UpdateConnectionStatus(deviceID string, status string) error
+	UpdateConnectionStatus(deviceID string, status string) (*Shadow, error)
 }
 
 type client struct {
@@ -62,22 +63,27 @@ func (c *client) Get(deviceId string) (*Shadow, error) {
 	return shadowSchema.Extract([]byte(payload))
 }
 
-func (c *client) UpdateConnectionStatus(deviceID string, status string) error {
+func (c *client) UpdateConnectionStatus(deviceID string, status string) (*Shadow, error) {
 	// Create new reported state
 	updatePayload := ConnectionUpdatePayload{}
 	updatePayload.State.Reported.Connection = status
 	// Bundle up the request
 	payload, err := updatePayload.Dump()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	// Form the request
+	// Make the request
 	log.Print(string(payload))
-	c.dp.UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
+	resp, err := c.dp.UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
 		ThingName: aws.String(deviceID),
 		Payload:   payload,
 	})
-	return nil
+	if err != nil {
+		return nil, err
+	}
+	// Parse the response
+	var shadowSchema DeviceShadowSchema
+	return shadowSchema.Extract([]byte(resp.Payload))
 }
 
 func (c *client) getShadow(deviceID string) ([]byte, error) {
