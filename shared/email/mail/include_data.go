@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -29,14 +30,21 @@ func main() {
 	// Scan the directory
 	fs, _ := ioutil.ReadDir(dir)
 	for _, f := range fs {
-		log.Print(f.Name())
 		if strings.HasSuffix(f.Name(), suffixOfInterest) {
 			// File is an html file
+			log.Print(f.Name())
+			var err error
 			// Add a variable with the same name as the file
-			out.Write([]byte(strings.TrimSuffix(f.Name(), suffixOfInterest) + " = `"))
+			_, err = out.Write([]byte(strings.TrimSuffix(f.Name(), suffixOfInterest) + " = `"))
 			// Read the file, and copy it into our output
-			f, _ := os.Open(f.Name())
-			io.Copy(out, f)
+			f, err := os.Open(filepath.Join(dir, f.Name()))
+			if err != nil {
+				log.Fatal(err)
+			}
+			_, err = io.Copy(out, f)
+			if err != nil {
+				log.Fatal(err)
+			}
 			f.Close()
 			// Terminate the line
 			out.Write([]byte("`\n"))
