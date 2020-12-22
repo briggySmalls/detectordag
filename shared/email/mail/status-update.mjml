@@ -1,4 +1,11 @@
 <mjml>
+  <mj-head>
+    <mj-preview>
+      Your dag <b>{{ .DeviceName }}</b> changed status
+      at
+      {{ .Time.Format "15:04 02-Jan-2006" }}
+    </mj-preview>
+  </mj-head>
   <mj-body>
     <!-- Logo -->
     <mj-section background-color="#17a2b8" padding="0">
