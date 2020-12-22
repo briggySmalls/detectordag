@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -12,6 +13,7 @@ import (
 const (
 	suffixOfInterest = ".html"
 	outputName       = "html_data.go"
+	packageName      = "email"
 )
 
 // Reads all .txt files in the current folder
@@ -26,7 +28,7 @@ func main() {
 	// Create the file we'll dump out results into
 	out, _ := os.Create(outputName)
 	defer out.Close()
-	out.Write([]byte("package email \n\nconst (\n"))
+	out.Write([]byte(fmt.Sprintf("package %s \n\nconst (\n", packageName)))
 	// Scan the directory
 	fs, _ := ioutil.ReadDir(dir)
 	for _, f := range fs {
