@@ -2,39 +2,37 @@ package app
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"log"
+	"os"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/briggysmalls/detectordag/shared"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
 	iotp "github.com/briggysmalls/detectordag/shared/iot"
-	"log"
-	"time"
+	"github.com/briggysmalls/detectordag/shared/shadow"
 )
 
-type state struct {
-	Status bool
-}
-
-type timestamp struct {
-	Timestamp int64
-}
-
-type updated struct {
-	Status timestamp
-}
+const (
+	senderEnvVar = "SENDER_EMAIL"
+)
 
 type StatusUpdatedEvent struct {
-	DeviceId  string  `json:""`
-	Timestamp int     `json:""`
-	State     state   `json:""`
-	Updated   updated `json:""`
-}
-
-type PowerStatusChangedEmailConfig struct {
-	DeviceName string
-	Timestamp  time.Time
-	Status     bool
+	DeviceId  string
+	Timestamp int
+	State     struct {
+		Status string `validate:"required,eq=on|eq=off"`
+	}
+	Updated struct {
+		Status struct {
+			Timestamp int64 `validate:"required"`
+		}
+	}
 }
 
 var db database.Client
@@ -60,19 +58,28 @@ func init() {
 	if err != nil {
 		shared.LogErrorAndExit(err)
 	}
+	// Get the email sender
+	sender := os.Getenv(senderEnvVar)
+	if sender == "" {
+		shared.LogErrorAndReturn(fmt.Errorf("Env var '%s' unset", senderEnvVar))
+	}
 	// Create a new session just for emailing (there is no emailing service in eu-west-2)
 	sesh = shared.CreateSession(aws.Config{Region: aws.String("eu-west-1")})
 	// Create a new email client
-	emailClient, err = email.NewEmailer(sesh, htmlTemplateSource, textTemplateSource)
+	emailClient, err = email.NewEmailer(ses.New(sesh), sender)
 	if err != nil {
 		shared.LogErrorAndExit(err)
 	}
 }
 
 // HandleRequest handles a lambda call
-func HandleRequest(ctx context.Context, event StatusUpdatedEvent) {
+func HandleRequest(ctx context.Context, event StatusUpdatedEvent) error {
 	// Print the event
 	log.Printf("%v\n", event)
+	// Validate the event
+	if err := shared.Validate.Struct(event); err != nil {
+		return err
+	}
 	// Get the device
 	device, err := iot.GetThing(event.DeviceId)
 	if err != nil {
@@ -85,16 +92,30 @@ func HandleRequest(ctx context.Context, event StatusUpdatedEvent) {
 	if err != nil {
 		shared.LogErrorAndExit(err)
 	}
+	// Determine parameters for the email
+	stateType, transitionType, err := powerStatusToEnums(event.State.Status)
+	if err != nil {
+		return err
+	}
 	// Construct an event to pass to the emailer
-	update := PowerStatusChangedEmailConfig{
+	update := email.ContextData{
 		DeviceName: device.Name,
-		Timestamp:  time.Unix(event.Updated.Status.Timestamp, 0),
-		Status:     event.State.Status,
+		Time:       time.Unix(event.Updated.Status.Timestamp, 0),
 	}
 	// Send 'power status updated' emails
 	log.Printf("Send emails to: %s", account.Emails)
-	err = emailClient.SendEmail(account.Emails, Sender, Subject, update)
+	err = emailClient.SendUpdate(account.Emails, stateType, transitionType, update)
 	if err != nil {
 		shared.LogErrorAndExit(err)
 	}
+	return nil
+}
+
+func powerStatusToEnums(status string) (email.StateType, email.TransitionType, error) {
+	if status == shadow.POWER_STATUS_ON {
+		return email.StateTypeOn, email.TransitionTypeOn, nil
+	} else if status == shadow.POWER_STATUS_OFF {
+		return email.StateTypeOn, email.TransitionTypeOff, nil
+	}
+	return 0, 0, errors.New("Unexpected power status")
 }
