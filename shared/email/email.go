@@ -40,19 +40,15 @@ const (
 
 // Helper map for looking up state
 var stateLookup = map[string]map[string]StateType{
-	shadow.CONNECTION_STATUS_CONNECTED: map[string]StateType{
+	shadow.CONNECTION_STATUS_CONNECTED: {
 		shadow.POWER_STATUS_ON:  StateTypeOn,
 		shadow.POWER_STATUS_OFF: StateTypeOff,
 	},
-	shadow.CONNECTION_STATUS_DISCONNECTED: map[string]StateType{
+	shadow.CONNECTION_STATUS_DISCONNECTED: {
 		shadow.POWER_STATUS_ON:  StateTypeWasOn,
 		shadow.POWER_STATUS_OFF: StateTypeWasOff,
 	},
 }
-
-const (
-	emailStatusUpdate = "There's been a change in your dag's status"
-)
 
 type emailer struct {
 	ses          sesiface.SESAPI
@@ -92,7 +88,8 @@ var stateDataLookup = map[StateType]stateData{
 		Description: "The power is on!",
 		ImageSrc:    "https://detectordag.tk/android-chrome-192x192.png",
 	},
-	StateTypeOff: {Title: "Off",
+	StateTypeOff: {
+		Title:       "Off",
 		Description: "Your dag says that the power is off",
 		ImageSrc:    "https://detectordag.tk/android-chrome-192x192.png",
 	},
@@ -112,7 +109,7 @@ var transitionDataLookup = map[TransitionType]transitionData{
 	TransitionTypeOn:           {TransitionText: "Your power's back!"},
 	TransitionTypeOff:          {TransitionText: "You've lost power!"},
 	TransitionTypeConnected:    {TransitionText: "We've lost contact with your dag"},
-	TransitionTypeDisconnected: {TransitionText: "You're dag is back"},
+	TransitionTypeDisconnected: {TransitionText: "Your dag is back"},
 }
 
 // ToStateType allows external packages to lookup email state
@@ -158,7 +155,7 @@ func (e *emailer) SendUpdate(toAddresses []string, state StateType, transition T
 		stateData:      stateDataLookup[state],
 	}
 	// Send mail
-	return e.SendEmail(toAddresses, e.sender, emailStatusUpdate, c)
+	return e.SendEmail(toAddresses, e.sender, c.TransitionText, c)
 }
 
 func (e *emailer) SendEmail(recipients []string, sender, subject string, context interface{}) error {
