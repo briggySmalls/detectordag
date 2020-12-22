@@ -107,8 +107,8 @@ var stateDataLookup = map[StateType]stateData{
 var transitionDataLookup = map[TransitionType]transitionData{
 	TransitionTypeOn:           {TransitionText: "Your power's back!"},
 	TransitionTypeOff:          {TransitionText: "You've lost power!"},
-	TransitionTypeConnected:    {TransitionText: "We've lost contact with your dag"},
-	TransitionTypeDisconnected: {TransitionText: "Your dag is back"},
+	TransitionTypeConnected:    {TransitionText: "Your dag is back!"},
+	TransitionTypeDisconnected: {TransitionText: "We've lost contact with your dag!"},
 }
 
 // ToStateType allows external packages to lookup email state
