@@ -112,6 +112,7 @@ func HandleRequest(ctx context.Context, event StatusUpdatedEvent) error {
 }
 
 func powerStatusToEnums(status string) (email.StateType, email.TransitionType, error) {
+	// We assume we are connected if we've been given a status update
 	if status == shadow.POWER_STATUS_ON {
 		return email.StateTypeOn, email.TransitionTypeOn, nil
 	} else if status == shadow.POWER_STATUS_OFF {

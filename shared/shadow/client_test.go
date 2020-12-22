@@ -126,10 +126,12 @@ func TestSetVisibilityStatus(t *testing.T) {
 		mock.EXPECT().UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
 			ThingName: aws.String(params.deviceID),
 			Payload:   []byte(params.payload),
-		}).Return(params.returnPayload, nil)
+		}).Return(&iotdataplane.UpdateThingShadowOutput{
+			Payload: []byte(params.returnPayload),
+		}, nil)
 		// Run the test
 		shadow, err := client.UpdateConnectionStatus(params.deviceID, params.status)
 		assert.Nil(t, err)
-		assert.Equal(t, params.shadow, shadow)
+		assert.Equal(t, params.shadow, *shadow)
 	}
 }
