@@ -99,12 +99,12 @@ export default class Device extends Vue {
     [DeviceState.On]: {
       class: 'on',
       title: 'On',
-      description: 'All good here!',
+      description: 'The power is on!',
     },
     [DeviceState.Off]: {
       class: 'off',
       title: 'Off',
-      description: 'Your dag has noticed the power has dropped',
+      description: 'Your dag says that the power is off',
     },
     [DeviceState.WasOn]: {
       class: 'was-on',

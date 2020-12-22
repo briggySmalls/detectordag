@@ -1,14 +1,17 @@
 package connection
 
 import (
+	"errors"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/briggysmalls/detectordag/shared/database"
 	"github.com/briggysmalls/detectordag/shared/email"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
-	"log"
-	"time"
 )
 
 type connectionUpdater struct {
@@ -21,9 +24,9 @@ type ConnectionUpdater interface {
 	UpdateConnectionStatus(device *iot.Device, timestamp time.Time, status string) error
 }
 
-func NewConnectionUpdater(sesh *session.Session, db database.Client, shadow shadow.Client) (ConnectionUpdater, error) {
+func NewConnectionUpdater(sesh *session.Session, db database.Client, shadow shadow.Client, sender string) (ConnectionUpdater, error) {
 	// Create a new email client
-	email, err := email.NewEmailer(sesh, htmlTemplateSource, textTemplateSource)
+	email, err := email.NewEmailer(ses.New(sesh), sender)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +36,8 @@ func NewConnectionUpdater(sesh *session.Session, db database.Client, shadow shad
 func (e *connectionUpdater) UpdateConnectionStatus(device *iot.Device, timestamp time.Time, status string) error {
 	log.Printf("Sending visibility email for device: %s with state '%s'", DeviceString(device), status)
 	// Update the internal record of connection status
-	if err := e.shadow.UpdateConnectionStatus(device.DeviceId, status); err != nil {
+	shdw, err := e.shadow.UpdateConnectionStatus(device.DeviceId, status)
+	if err != nil {
 		return err
 	}
 	// Get the account
@@ -42,26 +46,37 @@ func (e *connectionUpdater) UpdateConnectionStatus(device *iot.Device, timestamp
 		return err
 	}
 	// Assemble the visibility status context
-	context := struct {
-		DeviceName string
-		Timestamp  time.Time
-		Status     bool
-	}{
+	context := email.ContextData{
 		DeviceName: device.Name,
-		Timestamp:  timestamp,
-		Status:     status == shadow.CONNECTION_STATUS_CONNECTED,
+		Time:       timestamp,
 	}
-	// Determine the subject
-	var subject string
-	if context.Status {
-		subject = "👋 We've found your dag again!"
-	} else {
-		subject = "💨 You're dag's gone missing!"
+	state, transition, err := connectionStatusToEnums(shdw)
+	if err != nil {
+		return err
 	}
 	// Send the email.
-	return e.email.SendEmail(account.Emails, Sender, subject, context)
+	return e.email.SendUpdate(account.Emails, state, transition, context)
 }
 
 func DeviceString(device *iot.Device) string {
 	return fmt.Sprintf("Device '%s' ('%s')", device.DeviceId, device.Name)
+}
+
+func connectionStatusToEnums(shdw *shadow.Shadow) (email.StateType, email.TransitionType, error) {
+	connection := shdw.Connection.Value
+	power := shdw.Power.Value
+	// Lookup the state
+	state, err := email.ToStateType(connection, power)
+	if err != nil {
+		return 0, 0, err
+	}
+	// Set the transition type
+	switch connection {
+	case shadow.CONNECTION_STATUS_CONNECTED:
+		return state, email.TransitionTypeConnected, nil
+	case shadow.CONNECTION_STATUS_DISCONNECTED:
+		return state, email.TransitionTypeDisconnected, nil
+	default:
+		return 0, 0, errors.New("Unexpected power status")
+	}
 }

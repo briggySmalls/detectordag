@@ -3,12 +3,13 @@ package app
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/briggysmalls/detectordag/connection"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/shared/sqs"
-	"log"
-	"time"
 )
 
 type app struct {
