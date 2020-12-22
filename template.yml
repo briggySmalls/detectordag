@@ -166,12 +166,10 @@ Resources:
       Environment:
         Variables:
           SENDER_EMAIL: detectordag@sambriggs.dev
+          DELAY_QUEUE_URL: !Ref ConnectionStatusQueue
       Handler: main
       Runtime: go1.x
       Timeout: 5
-      Environment:
-        Variables:
-          DELAY_QUEUE_URL: !Ref ConnectionStatusQueue
       Policies:
         - Version: '2012-10-17'
           Statement:
