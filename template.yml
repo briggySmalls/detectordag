@@ -121,6 +121,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./consumer
+      Environment:
+        Variables:
+          SENDER_EMAIL: detectordag@sambriggs.dev
       Handler: main
       Runtime: go1.x
       Policies:
@@ -160,6 +163,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./connection/listener
+      Environment:
+        Variables:
+          SENDER_EMAIL: detectordag@sambriggs.dev
       Handler: main
       Runtime: go1.x
       Timeout: 5
@@ -207,6 +213,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./connection/disconnected
+      Environment:
+        Variables:
+          SENDER_EMAIL: detectordag@sambriggs.dev
       Handler: main
       Runtime: go1.x
       Timeout: 5
