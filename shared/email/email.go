@@ -3,12 +3,13 @@ package email
 import (
 	"bytes"
 	"fmt"
+	"html/template"
+	"log"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
-	"html/template"
-	"time"
-	"log"
 )
 
 const (
@@ -20,9 +21,9 @@ const (
 type StateType int
 
 const (
-	StateTypeOn StateType = iota
-	StateTypeOff StateType = iota
-	StateTypeWasOn StateType = iota
+	StateTypeOn     StateType = iota
+	StateTypeOff    StateType = iota
+	StateTypeWasOn  StateType = iota
 	StateTypeWasOff StateType = iota
 )
 
@@ -30,9 +31,9 @@ const (
 type TransitionType int
 
 const (
-	TransitionTypeOn TransitionType = iota
-	TransitionTypeOff TransitionType = iota
-	TransitionTypeConnected TransitionType = iota
+	TransitionTypeOn           TransitionType = iota
+	TransitionTypeOff          TransitionType = iota
+	TransitionTypeConnected    TransitionType = iota
 	TransitionTypeDisconnected TransitionType = iota
 )
 
@@ -44,7 +45,7 @@ type emailer struct {
 	ses          sesiface.SESAPI
 	htmlTemplate *template.Template
 	textTemplate *template.Template
-	sender string
+	sender       string
 }
 
 type Emailer interface {
@@ -53,12 +54,12 @@ type Emailer interface {
 
 type ContextData struct {
 	DeviceName string
-	Time time.Time
+	Time       time.Time
 }
 
 type stateData struct {
-	Graphic []byte
-	Title string
+	ImageSrc    string
+	Title       string
 	Description string
 }
 
@@ -72,24 +73,39 @@ type updateData struct {
 	ContextData
 }
 
-var stateDataLookup = map[StateType]stateData {
-	StateTypeOn: {Title: "On", Description: "All good here!"},
-	StateTypeOff: {Title: "Off", Description: "Power is gone :("},
-	StateTypeWasOn: {Title: "Was On", Description: "We've lost it...but things were OK last we heard"},
-	StateTypeWasOff: {Title: "Was Off", Description: "It's dead. We've lost it"},
+var stateDataLookup = map[StateType]stateData{
+	StateTypeOn: {
+		Title:       "On",
+		Description: "The power is on!",
+		ImageSrc:    "https://detectordag.tk/android-chrome-192x192.png"
+	},
+	StateTypeOff: {Title: "Off",
+		Description: "Your dag says that the power is off",
+		ImageSrc:    "https://detectordag.tk/android-chrome-192x192.png"
+	},
+	StateTypeWasOn: {
+		Title:       "Was On",
+		Description: "We've lost contact with your dag. The power was on the last we heard...",
+		ImageSrc:    "https://detectordag.tk/android-chrome-192x192.png"
+	},
+	StateTypeWasOff: {
+		Title:       "Was Off",
+		Description: "Your dag noticed the power go, and then we lost contact. It may have run out of battery.",
+		ImageSrc:    "https://detectordag.tk/android-chrome-192x192.png"
+	},
 }
 
-var transitionDataLookup = map[TransitionType]transitionData {
-	TransitionTypeOn: {TransitionText: "Power's back!"},
-	TransitionTypeOff: {TransitionText: "You've lost power!"},
-	TransitionTypeConnected: {TransitionText: "We've lost contact with your dag"},
+var transitionDataLookup = map[TransitionType]transitionData{
+	TransitionTypeOn:           {TransitionText: "Your power's back!"},
+	TransitionTypeOff:          {TransitionText: "You've lost power!"},
+	TransitionTypeConnected:    {TransitionText: "We've lost contact with your dag"},
 	TransitionTypeDisconnected: {TransitionText: "You're dag is back"},
 }
 
 // NewEmailer gets a new Emailer
 func NewEmailer(ses sesiface.SESAPI, sender string) (Emailer, error) {
 	// Create templates
-	htmlTemplate, err := template.New("htmlTemplate").Parse(htmlTemplateSource)
+	htmlTemplate, err := template.New("htmlTemplate").Parse(updateHtmlTemplateSource)
 	if err != nil {
 		return nil, err
 	}
@@ -99,19 +115,19 @@ func NewEmailer(ses sesiface.SESAPI, sender string) (Emailer, error) {
 	}
 	// Create our client wrapper
 	return &emailer{
-		ses: ses,
+		ses:          ses,
 		htmlTemplate: htmlTemplate,
 		textTemplate: textTemplate,
-		sender: sender,
+		sender:       sender,
 	}, nil
 }
 
 func (e *emailer) SendUpdate(toAddresses []string, state StateType, transition TransitionType, context ContextData) error {
 	// Get context
 	c := updateData{
-		ContextData: context,
+		ContextData:    context,
 		transitionData: transitionDataLookup[transition],
-		stateData: stateDataLookup[state],
+		stateData:      stateDataLookup[state],
 	}
 	// Send mail
 	return e.SendEmail(toAddresses, e.sender, emailStatusUpdate, c)

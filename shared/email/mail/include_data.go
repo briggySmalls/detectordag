@@ -37,7 +37,12 @@ func main() {
 			log.Print(f.Name())
 			var err error
 			// Add a variable with the same name as the file
-			_, err = out.Write([]byte(strings.TrimSuffix(f.Name(), suffixOfInterest) + " = `"))
+			_, err = out.Write([]byte(
+				fmt.Sprintf(
+					"%sHtmlTemplateSource = `",
+					strings.TrimSuffix(f.Name(), suffixOfInterest),
+				),
+			))
 			// Read the file, and copy it into our output
 			f, err := os.Open(filepath.Join(dir, f.Name()))
 			if err != nil {
