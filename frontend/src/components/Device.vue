@@ -57,9 +57,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
-import { render } from "timeago.js";
-import { Device as DeviceModel } from "../../lib/client";
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import { render } from 'timeago.js';
+import { Device as DeviceModel } from '../../lib/client';
 
 enum DeviceState {
   On = 1,
@@ -97,44 +97,44 @@ export default class Device extends Vue {
 
   private readonly deviceStateInfo: Record<DeviceState, StateData> = {
     [DeviceState.On]: {
-      class: "on",
-      title: "On",
-      description: "The power is on!",
+      class: 'on',
+      title: 'On',
+      description: 'The power is on!',
     },
     [DeviceState.Off]: {
-      class: "off",
-      title: "Off",
-      description: "Your dag says that the power is off",
+      class: 'off',
+      title: 'Off',
+      description: 'Your dag says that the power is off',
     },
     [DeviceState.WasOn]: {
-      class: "was-on",
-      title: "Was On",
+      class: 'was-on',
+      title: 'Was On',
       description:
         "We've lost contact with your dag. The power was on the last we heard...",
     },
     [DeviceState.WasOff]: {
-      class: "was-off",
-      title: "Was Off",
+      class: 'was-off',
+      title: 'Was Off',
       description:
-        "Your dag noticed the power go, and then we lost contact. It may have run out of battery.",
+        'Your dag noticed the power go, and then we lost contact. It may have run out of battery.',
     },
   };
 
   private mounted() {
     // Render times nicely
-    render(this.$el.querySelectorAll(".time"));
+    render(this.$el.querySelectorAll('.time'));
   }
 
   private get deviceStatus(): string {
     switch (this.deviceState) {
       case DeviceState.On:
-        return "On";
+        return 'On';
       case DeviceState.Off:
-        return "Off";
+        return 'Off';
       case DeviceState.WasOn:
-        return "Was On";
+        return 'Was On';
       case DeviceState.WasOff:
-        return "Was Off";
+        return 'Was Off';
       default:
         throw new Error(`Unexpected state: ${this.deviceState}`);
     }
@@ -161,26 +161,26 @@ export default class Device extends Vue {
 
   private get connectionState(): ConnectionState {
     switch (this.device.connection.status) {
-      case "connected":
+      case 'connected':
         return ConnectionState.Connected;
-      case "disconnected":
+      case 'disconnected':
         return ConnectionState.Disconnected;
       default:
         throw new Error(
-          `Unexpected connection state: "${this.device.connection.status}"`
+          `Unexpected connection state: "${this.device.connection.status}"`,
         );
     }
   }
 
   private get powerState(): PowerState {
     switch (this.device.state.power) {
-      case "on":
+      case 'on':
         return PowerState.On;
-      case "off":
+      case 'off':
         return PowerState.Off;
       default:
         throw new Error(
-          `Unexpected device power: "${this.device.state.power}"`
+          `Unexpected device power: "${this.device.state.power}"`,
         );
     }
   }
