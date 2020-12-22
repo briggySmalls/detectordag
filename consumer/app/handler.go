@@ -116,7 +116,7 @@ func powerStatusToEnums(status string) (email.StateType, email.TransitionType, e
 	if status == shadow.POWER_STATUS_ON {
 		return email.StateTypeOn, email.TransitionTypeOn, nil
 	} else if status == shadow.POWER_STATUS_OFF {
-		return email.StateTypeOn, email.TransitionTypeOff, nil
+		return email.StateTypeOff, email.TransitionTypeOff, nil
 	}
 	return 0, 0, errors.New("Unexpected power status")
 }
