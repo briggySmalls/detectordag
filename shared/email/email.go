@@ -77,21 +77,21 @@ var stateDataLookup = map[StateType]stateData{
 	StateTypeOn: {
 		Title:       "On",
 		Description: "The power is on!",
-		ImageSrc:    "https://detectordag.tk/android-chrome-192x192.png"
+		ImageSrc:    "https://detectordag.tk/android-chrome-192x192.png",
 	},
 	StateTypeOff: {Title: "Off",
 		Description: "Your dag says that the power is off",
-		ImageSrc:    "https://detectordag.tk/android-chrome-192x192.png"
+		ImageSrc:    "https://detectordag.tk/android-chrome-192x192.png",
 	},
 	StateTypeWasOn: {
 		Title:       "Was On",
 		Description: "We've lost contact with your dag. The power was on the last we heard...",
-		ImageSrc:    "https://detectordag.tk/android-chrome-192x192.png"
+		ImageSrc:    "https://detectordag.tk/android-chrome-192x192.png",
 	},
 	StateTypeWasOff: {
 		Title:       "Was Off",
 		Description: "Your dag noticed the power go, and then we lost contact. It may have run out of battery.",
-		ImageSrc:    "https://detectordag.tk/android-chrome-192x192.png"
+		ImageSrc:    "https://detectordag.tk/android-chrome-192x192.png",
 	},
 }
 
