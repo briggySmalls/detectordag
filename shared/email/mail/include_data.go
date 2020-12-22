@@ -12,7 +12,7 @@ import (
 
 const (
 	suffixOfInterest = ".html"
-	outputName       = "html_data.go"
+	outputName       = "html_data_gen.go"
 	packageName      = "email"
 )
 
