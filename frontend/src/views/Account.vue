@@ -3,18 +3,27 @@
     <!-- Email list -->
     <b-form v-if="emails" @submit.prevent="submit">
       <b-form-group
-        description="These are the emails we'll use to notify you when you dag spots a change.">
+        description="These are the emails we'll use to notify you when you dag spots a change."
+      >
         <label for="emails">Notification emails:</label>
-        <b-form-tags v-model="emails" :tag-validator="emailValidator" no-outer-focus class="mb-2">
-          <template v-slot="{ tags, inputAttrs, inputHandlers, addTag, removeTag }">
+        <b-form-tags
+          v-model="emails"
+          :tag-validator="emailValidator"
+          no-outer-focus
+          class="mb-2"
+        >
+          <template
+            v-slot="{ tags, inputAttrs, inputHandlers, addTag, removeTag }"
+          >
             <b-input-group aria-controls="my-custom-emails-list">
               <input
                 v-bind="inputAttrs"
                 v-on="inputHandlers"
                 placeholder="New email - Press enter to add"
-                class="form-control">
+                class="form-control"
+              />
               <b-input-group-append>
-                <b-button @click="addEmail()" variant="primary">Add</b-button>
+                <b-button @click="addTag()" variant="primary">Add</b-button>
               </b-input-group-append>
             </b-input-group>
             <b-list-group>
@@ -28,8 +37,12 @@
                   @click="removeTag(email)"
                   variant="secondary"
                   size="sm"
-                  :aria-controls="`my-custom-emails-email_${email.replace(/\s/g, '_')}_`"
-                ><b-icon-x-circle-fill></b-icon-x-circle-fill></b-button>
+                  :aria-controls="`my-custom-emails-email_${email.replace(
+                    /\s/g,
+                    '_'
+                  )}_`"
+                  ><b-icon-x-circle-fill></b-icon-x-circle-fill
+                ></b-button>
               </b-list-group-item>
             </b-list-group>
           </template>
@@ -74,7 +87,8 @@ export default class AccountView extends Vue {
       return;
     }
     // Request the accounts to render them
-    this.$clients.accounts.getAccount(auth.accountId, `Bearer ${auth.token}`)
+    this.$clients.accounts
+      .getAccount(auth.accountId, `Bearer ${auth.token}`)
       .then((response) => {
         // Save the account details to the store
         this.$logger.debug('Saving account details');
@@ -90,24 +104,26 @@ export default class AccountView extends Vue {
   // The emails from the store
   private get storedEmails() {
     const { account } = this.$store.state;
-    return (account !== null) ? account.emails : null;
+    return account !== null ? account.emails : null;
   }
 
   // Assign emails from the store (when changed)
   @Watch('storedEmails')
   private onPropertyChanged(
-    value: string[], _: string[], // eslint-disable-line @typescript-eslint/no-unused-vars
+    value: string[],
+    _: string[], // eslint-disable-line @typescript-eslint/no-unused-vars
   ) {
     this.emails = value;
   }
 
   // Says if wer are loading device content
   private get loading() {
-    return (this.emails === null) && (this.error === null);
+    return this.emails === null && this.error === null;
   }
 
   // Submit update to API
-  private submit(_: Event) { // eslint-disable-line @typescript-eslint/no-unused-vars
+  private submit(_: Event) {
+    // eslint-disable-line @typescript-eslint/no-unused-vars
     this.$logger.debug('Emails submitted');
     // Get auth token
     const auth = this.$storage.bundle;
@@ -124,9 +140,12 @@ export default class AccountView extends Vue {
       return;
     }
     // Request the account
-    this.$clients.accounts.updateAccount(auth.accountId, `Bearer ${auth.token}`, { emails: this.emails })
+    this.$clients.accounts
+      .updateAccount(auth.accountId, `Bearer ${auth.token}`, {
+        emails: this.emails,
+      })
       .then((response) => {
-      // Save the account details to the store
+        // Save the account details to the store
         this.$logger.debug('Saving account details');
         this.$store.commit('setAccount', response.data);
       })
@@ -139,7 +158,8 @@ export default class AccountView extends Vue {
     this.emails = null;
   }
 
-  public emailValidator(email: string) { // eslint-disable-line class-methods-use-this
+  public emailValidator(email: string) {
+    // eslint-disable-line class-methods-use-this
     const re = /\S+@\S+\.\S+/;
     return re.test(email);
   }
