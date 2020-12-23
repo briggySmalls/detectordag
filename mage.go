@@ -135,7 +135,7 @@ func ConfigureImg() error {
 	configFile := fmt.Sprintf("%s/config.json", getDeviceBuildDir(deviceID))
 	err = sh.Run("balena", "config", "generate",
 		"--version", balenaVersion,
-		"--device", deviceID,
+		"--device", toBalenaUUID(deviceID),
 		"--network", "ethernet",
 		"--appUpdatePollInterval", "10",
 		"--output", configFile,
@@ -190,7 +190,7 @@ func RegisterBalena() error {
 	if err != nil {
 		return err
 	}
-	if err := sh.Run("balena", "device", "register", applicationName, "--uuid", deviceID); err != nil {
+	if err := sh.Run("balena", "device", "register", applicationName, "--uuid", toBalenaUUID(deviceID)); err != nil {
 		return err
 	}
 	// Sleep a bit to make sure the device is available
@@ -224,7 +224,7 @@ func SetEnvVars() error {
 	}
 	for key, value := range envVars {
 		// Add the environment variable
-		err = sh.Run("balena", "env", "add", "--device", deviceID, key, value)
+		err = sh.Run("balena", "env", "add", "--device", toBalenaUUID(deviceID), key, value)
 		if err != nil {
 			return err
 		}
