@@ -54,6 +54,7 @@ type emailer struct {
 	htmlTemplate *template.Template
 	textTemplate *template.Template
 	sender       string
+	verifier     Verifier
 }
 
 type Emailer interface {
@@ -143,10 +144,23 @@ func NewEmailer(ses sesiface.SESAPI, sender string) (Emailer, error) {
 		htmlTemplate: htmlTemplate,
 		textTemplate: textTemplate,
 		sender:       sender,
+		verifier:     &verifier{ses: ses},
 	}, nil
 }
 
 func (e *emailer) SendUpdate(toAddresses []string, state StateType, transition TransitionType, context ContextData) error {
+	// Filter the emails to those that are verified
+	// (otherwise the operation will be rejected)
+	statuses, err := e.verifier.GetVerificationStatuses(toAddresses)
+	if err != nil {
+		return err
+	}
+	var recipients []string
+	for address, status := range statuses {
+		if status == VerificationStatusSuccess {
+			recipients = append(recipients, address)
+		}
+	}
 	// Get context
 	c := updateData{
 		ContextData:    context,
@@ -154,7 +168,7 @@ func (e *emailer) SendUpdate(toAddresses []string, state StateType, transition T
 		stateData:      stateDataLookup[state],
 	}
 	// Send mail
-	return e.SendEmail(toAddresses, e.sender, c.TransitionText, c)
+	return e.SendEmail(recipients, e.sender, c.TransitionText, c)
 }
 
 func (e *emailer) SendEmail(recipients []string, sender, subject string, context interface{}) error {
