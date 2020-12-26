@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -126,6 +127,7 @@ func ConfigureImg() error {
 	if err != nil {
 		return err
 	}
+	balenaDeviceID := toBalenaUUID(deviceID)
 	// Copy it in preparation for a new device
 	err = sh.Copy(getDeviceImageFile(deviceID), vanillaImageFile)
 	if err != nil {
@@ -135,7 +137,7 @@ func ConfigureImg() error {
 	configFile := fmt.Sprintf("%s/config.json", getDeviceBuildDir(deviceID))
 	err = sh.Run("balena", "config", "generate",
 		"--version", balenaVersion,
-		"--device", toBalenaUUID(deviceID),
+		"--device", balenaDeviceID,
 		"--network", "ethernet",
 		"--appUpdatePollInterval", "10",
 		"--output", configFile,
@@ -144,7 +146,11 @@ func ConfigureImg() error {
 		return err
 	}
 	// Apply the application configuration to it
-	return sh.Run("balena", "os", "configure", "--config-network", "ethernet", "--config", configFile, "--device", deviceID, getDeviceImageFile(deviceID))
+	return sh.Run("balena", "os", "configure",
+		"--config-network", "ethernet",
+		"--config", configFile,
+		"--device", balenaDeviceID,
+		getDeviceImageFile(deviceID))
 }
 
 // Register a new 'thing' on AWS
@@ -186,6 +192,9 @@ func RegisterAWS() error {
 
 // Register a device on BalenaCloud
 func RegisterBalena() error {
+	mg.Deps(
+		RegisterAWS, // We need the certificates
+	)
 	deviceID, err := getEnvVar(deviceIDEnvVar)
 	if err != nil {
 		return err
@@ -195,19 +204,7 @@ func RegisterBalena() error {
 	}
 	// Sleep a bit to make sure the device is available
 	time.Sleep(100 * time.Millisecond)
-	return nil
-}
-
-func SetEnvVars() error {
-	mg.Deps(
-		RegisterBalena, // We need the device to exist
-		RegisterAWS,    // We need the certificates
-	)
-	// We'll need the device ID
-	deviceID, err := getEnvVar(deviceIDEnvVar)
-	if err != nil {
-		return err
-	}
+	// Read in the certificates
 	certFileText, err := readCertFile(deviceID, certFile)
 	if err != nil {
 		return err
@@ -238,7 +235,6 @@ func ProvisionDevice() error {
 		RegisterBalena, // Create the balena device
 		ConfigureImg,   // Configure an image using the device
 		RegisterAWS,    // Register an AWS device with the same name
-		SetEnvVars,     // Set the environment variables of the device
 	)
 	return nil
 }
@@ -298,4 +294,8 @@ func writeFile(file, content string) error {
 		return err
 	}
 	return nil
+}
+
+func toBalenaUUID(uuid string) string {
+	return strings.ReplaceAll(uuid, "-", "")
 }
