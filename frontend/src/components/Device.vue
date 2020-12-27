@@ -39,7 +39,7 @@
       <b-list-group-item v-if="powerState === powerStateEnum.Off">
         <!-- Add further detail about losing power -->
         Lost power
-        <span class="time" :datetime="device.state.updated">
+        <span ref="stateUpdatedTime" :datetime="device.state.updated">
           {{ device.state.updated }}
         </span>
       </b-list-group-item>
@@ -48,7 +48,7 @@
       >
         <!-- Add further detail about the dag losing connection -->
         Lost connection
-        <span class="time" :datetime="device.connection.updated">
+        <span ref="connectionUpdatedTime" :datetime="device.connection.updated">
           {{ device.connection.updated }}
         </span>
       </b-list-group-item>
@@ -121,8 +121,16 @@ export default class Device extends Vue {
   };
 
   private mounted() {
-    // Render times nicely
-    render(this.$el.querySelectorAll('.time'));
+    // Gether together the time elements
+    // Note: some may be hidden (e.g. on and connected device)
+    const els = [
+      this.$refs.stateUpdatedTime as HTMLElement,
+      this.$refs.powerUpdatedTime as HTMLElement,
+    ].filter((x) => x !== undefined);
+    // Render them
+    if (els.length) {
+      render(els);
+    }
   }
 
   private get deviceStatus(): string {
