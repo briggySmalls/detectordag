@@ -189,7 +189,8 @@ export default class Device extends Vue {
 
 
 <style lang="scss" scoped>
-@import "node_modules/bootstrap/scss/bootstrap";
+@import "~bootstrap/scss/_functions.scss";
+@import "~bootstrap/scss/_variables.scss";
 
 .status-graphic {
   position: relative;
