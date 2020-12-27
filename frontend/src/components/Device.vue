@@ -195,7 +195,6 @@ export default class Device extends Vue {
 }
 </script>
 
-
 <style lang="scss" scoped>
 @import "~bootstrap/scss/_functions.scss";
 @import "~bootstrap/scss/_variables.scss";
