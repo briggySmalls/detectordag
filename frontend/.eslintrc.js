@@ -4,7 +4,8 @@ module.exports = {
     node: true,
   },
   extends: [
-    'plugin:vue/essential',
+    'plugin:vue/recommended',
+    '@vue/prettier',
     '@vue/airbnb',
     '@vue/typescript/recommended',
   ],
@@ -15,15 +16,10 @@ module.exports = {
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
   },
-  ignorePatterns: [
-    './lib/client',
-  ],
+  ignorePatterns: ['./lib/client'],
   overrides: [
     {
-      files: [
-        '**/__tests__/*.{j,t}s?(x)',
-        '**/tests/unit/**/*.spec.{j,t}s?(x)',
-      ],
+      files: ['**/__tests__/*.{j,t}s?(x)', '**/tests/unit/**/*.spec.{j,t}s?(x)'],
       env: {
         mocha: true,
       },
