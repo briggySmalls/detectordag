@@ -12,9 +12,7 @@
       <!-- Error -->
       <ErrorComponent :error="error" />
     </b-container>
-    <footer id="footer">
-      Made with ❤ by <a href="https://sambriggs.dev">sam briggs</a>
-    </footer>
+    <footer id="footer">Made with ❤ by <a href="https://sambriggs.dev">sam briggs</a></footer>
   </div>
 </template>
 
@@ -37,7 +35,7 @@ export default class Topbar extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import "../app.scss";
+@import '../app.scss';
 
 $footer-padding: 100px;
 
@@ -53,7 +51,7 @@ $footer-padding: 100px;
     // Make the footer sit at the bottom of the page
     margin-top: 5em;
     position: absolute;
-    width:100%;
+    width: 100%;
     bottom: 0;
   }
 }

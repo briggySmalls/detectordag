@@ -5,8 +5,5 @@ import clients from './clients';
 import './unauthorised';
 
 export {
-  AuthBundle,
-  storage,
-  logger,
-  clients,
+ AuthBundle, storage, logger, clients 
 };
