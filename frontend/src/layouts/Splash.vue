@@ -1,9 +1,20 @@
 <template>
-  <b-container id="splash" class="mt-5" fluid="sm">
+  <b-container
+    id="splash"
+    class="mt-5"
+    fluid="sm"
+  >
     <!-- Logo -->
-    <img id="logo" class="my-1" alt="detector dag logo" src="../assets/logo.svg" />
+    <img
+      id="logo"
+      class="my-1"
+      alt="detector dag logo"
+      src="../assets/logo.svg"
+    >
     <!-- Title -->
-    <h1 class="my-2">{{ title }}</h1>
+    <h1 class="my-2">
+      {{ title }}
+    </h1>
     <!-- Content -->
     <slot />
     <!-- Error -->

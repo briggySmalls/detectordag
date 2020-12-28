@@ -1,35 +1,46 @@
 <template>
-  <b-card no-body border-variant="dark" header-border-variant="dark">
+  <b-card
+    no-body
+    border-variant="dark"
+    header-border-variant="dark"
+  >
     <template #header>
-      <h4 class="mb-0">{{ device.name }}</h4>
+      <h4 class="mb-0">
+        {{ device.name }}
+      </h4>
     </template>
 
     <b-card-body>
       {{/* Define a graphic to illustrate the status */}}
       <div class="status-graphic d-inline-block">
-        <div class="power-icon-container" :class="[deviceStateClass]">
+        <div
+          class="power-icon-container"
+          :class="[deviceStateClass]"
+        >
           <img
             v-if="powerState === powerStateEnum.Off"
             alt="Power off"
             src="../assets/power-off.svg"
             class="power-icon"
-          />
+          >
           <img
             v-else-if="powerState === powerStateEnum.On"
             alt="Power on"
             src="../assets/power-on.svg"
             class="power-icon"
-          />
+          >
         </div>
         <img
           v-if="connectionState === connectionStateEnum.Disconnected"
           alt="Disconnected"
           src="../assets/no-signal.svg"
           class="connection-icon"
-        />
+        >
       </div>
       {{/* Add textual descriptions of the status */}}
-      <b-card-title class="mt-4">{{ deviceStateInfo[deviceState].title }}</b-card-title>
+      <b-card-title class="mt-4">
+        {{ deviceStateInfo[deviceState].title }}
+      </b-card-title>
       <b-card-text>{{ deviceStateInfo[deviceState].description }}</b-card-text>
     </b-card-body>
 
@@ -37,14 +48,20 @@
       <b-list-group-item v-if="powerState === powerStateEnum.Off">
         <!-- Add further detail about losing power -->
         Lost power
-        <span ref="stateUpdatedTime" :datetime="device.state.updated">
+        <span
+          ref="stateUpdatedTime"
+          :datetime="device.state.updated"
+        >
           {{ device.state.updated }}
         </span>
       </b-list-group-item>
       <b-list-group-item v-if="connectionState === connectionStateEnum.Disconnected">
         <!-- Add further detail about the dag losing connection -->
         Lost connection
-        <span ref="connectionUpdatedTime" :datetime="device.connection.updated">
+        <span
+          ref="connectionUpdatedTime"
+          :datetime="device.connection.updated"
+        >
           {{ device.connection.updated }}
         </span>
       </b-list-group-item>

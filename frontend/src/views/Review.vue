@@ -1,18 +1,34 @@
 <template>
-  <Topbar title="Your Dags" :error="error">
+  <Topbar
+    title="Your Dags"
+    :error="error"
+  >
     <template #header>
       <h1 class="my-5">
         Your Dags
-        <b-button class="ml-2" :disabled="loading" @click="request"> Refresh </b-button>
+        <b-button
+          class="ml-2"
+          :disabled="loading"
+          @click="request"
+        >
+          Refresh
+        </b-button>
       </h1>
     </template>
     <div>
       <!-- Device list -->
-      <b-card-group v-if="devices" deck>
-        <DeviceComponent v-for="device in devices" :key="device.deviceId" :device="device" />
+      <b-card-group
+        v-if="devices"
+        deck
+      >
+        <DeviceComponent
+          v-for="device in devices"
+          :key="device.deviceId"
+          :device="device"
+        />
       </b-card-group>
       <!-- Loading -->
-      <b-spinner v-if="loading"></b-spinner>
+      <b-spinner v-if="loading" />
     </div>
   </Topbar>
 </template>
@@ -70,11 +86,10 @@ export default class Review extends Vue {
         this.$store.commit('setDevices', request.data);
       })
       .catch((err) => this.$checkUnauthorised(err, (error) => {
-          // Assign the error
-          this.error = error;
-          this.$logger.debug(`Devices request error: ${error.response}`);
-        }),
-      );
+        // Assign the error
+        this.error = error;
+        this.$logger.debug(`Devices request error: ${error.response}`);
+      }));
   }
 }
 </script>

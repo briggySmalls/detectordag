@@ -1,11 +1,32 @@
 <template>
-  <Splash id="login" title="detector dag" :error="error">
-    <b-form v-if="!isRequesting" @submit="submit">
-      <b-form-group id="email" label="Email:" label-for="email">
-        <b-form-input id="email" v-model="email" type="email" name="email" trim required>
-        </b-form-input>
+  <Splash
+    id="login"
+    title="detector dag"
+    :error="error"
+  >
+    <b-form
+      v-if="!isRequesting"
+      @submit="submit"
+    >
+      <b-form-group
+        id="email"
+        label="Email:"
+        label-for="email"
+      >
+        <b-form-input
+          id="email"
+          v-model="email"
+          type="email"
+          name="email"
+          trim
+          required
+        />
       </b-form-group>
-      <b-form-group id="password" label="Password:" label-for="password">
+      <b-form-group
+        id="password"
+        label="Password:"
+        label-for="password"
+      >
         <b-form-input
           id="password"
           v-model="password"
@@ -13,12 +34,16 @@
           name="password"
           trim
           required
-        >
-        </b-form-input>
+        />
       </b-form-group>
-      <b-button type="submit">Submit</b-button>
+      <b-button type="submit">
+        Submit
+      </b-button>
     </b-form>
-    <b-spinner v-else label="Spinning"></b-spinner>
+    <b-spinner
+      v-else
+      label="Spinning"
+    />
   </Splash>
 </template>
 

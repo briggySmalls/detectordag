@@ -2,17 +2,24 @@
   <div id="topbar">
     <!-- Display a navbar when logged in -->
     <NavbarComponent />
-    <b-container id="content-container" fluid="sm">
+    <b-container
+      id="content-container"
+      fluid="sm"
+    >
       <!-- Title -->
       <slot name="header">
-        <h1 class="mt-5">{{ title }}</h1>
+        <h1 class="mt-5">
+          {{ title }}
+        </h1>
       </slot>
       <!-- Content -->
       <slot />
       <!-- Error -->
       <ErrorComponent :error="error" />
     </b-container>
-    <footer id="footer">Made with ❤ by <a href="https://sambriggs.dev">sam briggs</a></footer>
+    <footer id="footer">
+      Made with ❤ by <a href="https://sambriggs.dev">sam briggs</a>
+    </footer>
   </div>
 </template>
 

@@ -1,12 +1,23 @@
 <template>
-  <Topbar :error="error" title="Settings">
+  <Topbar
+    :error="error"
+    title="Settings"
+  >
     <!-- Email list -->
-    <b-form v-if="emails" @submit.prevent="submit">
+    <b-form
+      v-if="emails"
+      @submit.prevent="submit"
+    >
       <b-form-group
         description="These are the emails we'll use to notify you when you dag spots a change."
       >
         <label for="emails">Notification emails:</label>
-        <b-form-tags v-model="emails" :tag-validator="emailValidator" no-outer-focus class="mb-2">
+        <b-form-tags
+          v-model="emails"
+          :tag-validator="emailValidator"
+          no-outer-focus
+          class="mb-2"
+        >
           <template v-slot="{ tags, inputAttrs, inputHandlers, addTag, removeTag }">
             <b-input-group aria-controls="my-custom-emails-list">
               <input
@@ -14,9 +25,14 @@
                 placeholder="New email - Press enter to add"
                 class="form-control"
                 v-on="inputHandlers"
-              />
+              >
               <b-input-group-append>
-                <b-button variant="primary" @click="addTag()">Add</b-button>
+                <b-button
+                  variant="primary"
+                  @click="addTag()"
+                >
+                  Add
+                </b-button>
               </b-input-group-append>
             </b-input-group>
             <b-list-group>
@@ -31,17 +47,20 @@
                   size="sm"
                   :aria-controls="`my-custom-emails-email_${email.replace(/\s/g, '_')}_`"
                   @click="removeTag(email)"
-                  ><b-icon-x-circle-fill></b-icon-x-circle-fill
-                ></b-button>
+                >
+                  <b-icon-x-circle-fill />
+                </b-button>
               </b-list-group-item>
             </b-list-group>
           </template>
         </b-form-tags>
       </b-form-group>
-      <b-button type="submit">Save</b-button>
+      <b-button type="submit">
+        Save
+      </b-button>
     </b-form>
     <!-- Loading -->
-    <b-spinner v-else-if="loading"></b-spinner>
+    <b-spinner v-else-if="loading" />
   </Topbar>
 </template>
 
@@ -84,13 +103,11 @@ export default class AccountView extends Vue {
         this.$logger.debug('Saving account details');
         this.$store.commit('setAccount', response.data);
       })
-      .catch((err) =>
-        this.$checkUnauthorised(err, (error) => {
+      .catch((err) => this.$checkUnauthorised(err, (error) => {
         // Record the error
         this.error = error;
         this.$logger.debug(`Account request error: ${error.response}`);
-      })
-      );
+      }));
   }
 
   // The emails from the store
@@ -103,7 +120,6 @@ export default class AccountView extends Vue {
   @Watch('storedEmails')
   private onPropertyChanged(
     value: string[],
-    _: string[] // eslint-disable-line @typescript-eslint/no-unused-vars
   ) {
     this.emails = value;
   }
@@ -114,7 +130,7 @@ export default class AccountView extends Vue {
   }
 
   // Submit update to API
-  private submit(_: Event) {
+  private submit() {
     // eslint-disable-line @typescript-eslint/no-unused-vars
     this.$logger.debug('Emails submitted');
     // Get auth token
@@ -141,19 +157,16 @@ export default class AccountView extends Vue {
         this.$logger.debug('Saving account details');
         this.$store.commit('setAccount', response.data);
       })
-      .catch((err) =>
-        this.$checkUnauthorised(err, (error) => {
+      .catch((err) => this.$checkUnauthorised(err, (error) => {
         this.$logger.debug(`Account update error: ${error.response}`);
         // Set the error
         this.error = error;
-      })
-      );
+      }));
     // Indicate that our emails are updating
     this.emails = null;
   }
 
-  public emailValidator(email: string) {
-    // eslint-disable-line class-methods-use-this
+  public emailValidator(email: string) { // eslint-disable-line class-methods-use-this
     const re = /\S+@\S+\.\S+/;
     return re.test(email);
   }
