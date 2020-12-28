@@ -1,37 +1,46 @@
 <template>
-  <b-card no-body border-variant="dark" header-border-variant="dark">
+  <b-card
+    no-body
+    border-variant="dark"
+    header-border-variant="dark"
+  >
     <template #header>
-      <h4 class="mb-0">{{ device.name }}</h4>
+      <h4 class="mb-0">
+        {{ device.name }}
+      </h4>
     </template>
 
     <b-card-body>
       {{/* Define a graphic to illustrate the status */}}
       <div class="status-graphic d-inline-block">
-        <div class="power-icon-container" v-bind:class="[deviceStateClass]">
+        <div
+          class="power-icon-container"
+          :class="[deviceStateClass]"
+        >
           <img
             v-if="powerState === powerStateEnum.Off"
             alt="Power off"
             src="../assets/power-off.svg"
             class="power-icon"
-          />
+          >
           <img
             v-else-if="powerState === powerStateEnum.On"
             alt="Power on"
             src="../assets/power-on.svg"
             class="power-icon"
-          />
+          >
         </div>
         <img
           v-if="connectionState === connectionStateEnum.Disconnected"
           alt="Disconnected"
           src="../assets/no-signal.svg"
           class="connection-icon"
-        />
+        >
       </div>
       {{/* Add textual descriptions of the status */}}
-      <b-card-title class="mt-4">{{
-        deviceStateInfo[deviceState].title
-      }}</b-card-title>
+      <b-card-title class="mt-4">
+        {{ deviceStateInfo[deviceState].title }}
+      </b-card-title>
       <b-card-text>{{ deviceStateInfo[deviceState].description }}</b-card-text>
     </b-card-body>
 
@@ -39,16 +48,20 @@
       <b-list-group-item v-if="powerState === powerStateEnum.Off">
         <!-- Add further detail about losing power -->
         Lost power
-        <span ref="stateUpdatedTime" :datetime="device.state.updated">
+        <span
+          ref="stateUpdatedTime"
+          :datetime="device.state.updated"
+        >
           {{ device.state.updated }}
         </span>
       </b-list-group-item>
-      <b-list-group-item
-        v-if="connectionState === connectionStateEnum.Disconnected"
-      >
+      <b-list-group-item v-if="connectionState === connectionStateEnum.Disconnected">
         <!-- Add further detail about the dag losing connection -->
         Lost connection
-        <span ref="connectionUpdatedTime" :datetime="device.connection.updated">
+        <span
+          ref="connectionUpdatedTime"
+          :datetime="device.connection.updated"
+        >
           {{ device.connection.updated }}
         </span>
       </b-list-group-item>
@@ -109,8 +122,7 @@ export default class Device extends Vue {
     [DeviceState.WasOn]: {
       class: 'was-on',
       title: 'Was On',
-      description:
-        "We've lost contact with your dag. The power was on the last we heard...",
+      description: "We've lost contact with your dag. The power was on the last we heard...",
     },
     [DeviceState.WasOff]: {
       class: 'was-off',
@@ -150,13 +162,9 @@ export default class Device extends Vue {
 
   private get deviceState(): DeviceState {
     if (this.connectionState === ConnectionState.Connected) {
-      return this.powerState === PowerState.On
-        ? DeviceState.On
-        : DeviceState.Off;
+      return this.powerState === PowerState.On ? DeviceState.On : DeviceState.Off;
     }
-    return this.powerState === PowerState.On
-      ? DeviceState.WasOn
-      : DeviceState.WasOff;
+    return this.powerState === PowerState.On ? DeviceState.WasOn : DeviceState.WasOff;
   }
 
   private get deviceStateClass(): string {
@@ -174,9 +182,7 @@ export default class Device extends Vue {
       case 'disconnected':
         return ConnectionState.Disconnected;
       default:
-        throw new Error(
-          `Unexpected connection state: "${this.device.connection.status}"`,
-        );
+        throw new Error(`Unexpected connection state: "${this.device.connection.status}"`);
     }
   }
 
@@ -187,17 +193,15 @@ export default class Device extends Vue {
       case 'off':
         return PowerState.Off;
       default:
-        throw new Error(
-          `Unexpected device power: "${this.device.state.power}"`,
-        );
+        throw new Error(`Unexpected device power: "${this.device.state.power}"`);
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-@import "~bootstrap/scss/_functions.scss";
-@import "~bootstrap/scss/_variables.scss";
+@import '~bootstrap/scss/_functions.scss';
+@import '~bootstrap/scss/_variables.scss';
 
 .status-graphic {
   position: relative;
@@ -210,11 +214,11 @@ export default class Device extends Vue {
 
     &.on,
     &.was-on {
-      background-color: theme-color("success");
+      background-color: theme-color('success');
     }
     &.off,
     &.was-off {
-      background-color: theme-color("danger");
+      background-color: theme-color('danger');
     }
   }
 
@@ -231,7 +235,7 @@ export default class Device extends Vue {
     padding: 0.8em;
     width: 3em;
     height: 3em;
-    background-color: theme-color("warning");
+    background-color: theme-color('warning');
     border-radius: 1em;
   }
 }

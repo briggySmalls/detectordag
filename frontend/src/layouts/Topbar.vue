@@ -2,10 +2,15 @@
   <div id="topbar">
     <!-- Display a navbar when logged in -->
     <NavbarComponent />
-    <b-container id="content-container" fluid="sm">
+    <b-container
+      id="content-container"
+      fluid="sm"
+    >
       <!-- Title -->
       <slot name="header">
-        <h1 class="mt-5">{{ title }}</h1>
+        <h1 class="mt-5">
+          {{ title }}
+        </h1>
       </slot>
       <!-- Content -->
       <slot />
@@ -37,7 +42,7 @@ export default class Topbar extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import "../app.scss";
+@import '../app.scss';
 
 $footer-padding: 100px;
 
@@ -53,7 +58,7 @@ $footer-padding: 100px;
     // Make the footer sit at the bottom of the page
     margin-top: 5em;
     position: absolute;
-    width:100%;
+    width: 100%;
     bottom: 0;
   }
 }

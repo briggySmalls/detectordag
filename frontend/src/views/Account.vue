@@ -1,7 +1,13 @@
 <template>
-  <Topbar :error="error" title="Settings">
+  <Topbar
+    :error="error"
+    title="Settings"
+  >
     <!-- Email list -->
-    <b-form v-if="emails" @submit.prevent="submit">
+    <b-form
+      v-if="emails"
+      @submit.prevent="submit"
+    >
       <b-form-group
         description="These are the emails we'll use to notify you when you dag spots a change."
       >
@@ -12,18 +18,21 @@
           no-outer-focus
           class="mb-2"
         >
-          <template
-            v-slot="{ tags, inputAttrs, inputHandlers, addTag, removeTag }"
-          >
+          <template v-slot="{ tags, inputAttrs, inputHandlers, addTag, removeTag }">
             <b-input-group aria-controls="my-custom-emails-list">
               <input
                 v-bind="inputAttrs"
-                v-on="inputHandlers"
                 placeholder="New email - Press enter to add"
                 class="form-control"
-              />
+                v-on="inputHandlers"
+              >
               <b-input-group-append>
-                <b-button @click="addTag()" variant="primary">Add</b-button>
+                <b-button
+                  variant="primary"
+                  @click="addTag()"
+                >
+                  Add
+                </b-button>
               </b-input-group-append>
             </b-input-group>
             <b-list-group>
@@ -34,24 +43,24 @@
               >
                 {{ email }}
                 <b-button
-                  @click="removeTag(email)"
                   variant="secondary"
                   size="sm"
-                  :aria-controls="`my-custom-emails-email_${email.replace(
-                    /\s/g,
-                    '_'
-                  )}_`"
-                  ><b-icon-x-circle-fill></b-icon-x-circle-fill
-                ></b-button>
+                  :aria-controls="`my-custom-emails-email_${email.replace(/\s/g, '_')}_`"
+                  @click="removeTag(email)"
+                >
+                  <b-icon-x-circle-fill />
+                </b-button>
               </b-list-group-item>
             </b-list-group>
           </template>
         </b-form-tags>
       </b-form-group>
-      <b-button type="submit">Save</b-button>
+      <b-button type="submit">
+        Save
+      </b-button>
     </b-form>
     <!-- Loading -->
-    <b-spinner v-else-if="loading"></b-spinner>
+    <b-spinner v-else-if="loading" />
   </Topbar>
 </template>
 
@@ -111,7 +120,6 @@ export default class AccountView extends Vue {
   @Watch('storedEmails')
   private onPropertyChanged(
     value: string[],
-    _: string[], // eslint-disable-line @typescript-eslint/no-unused-vars
   ) {
     this.emails = value;
   }
@@ -122,7 +130,7 @@ export default class AccountView extends Vue {
   }
 
   // Submit update to API
-  private submit(_: Event) {
+  private submit() {
     // eslint-disable-line @typescript-eslint/no-unused-vars
     this.$logger.debug('Emails submitted');
     // Get auth token
@@ -158,8 +166,7 @@ export default class AccountView extends Vue {
     this.emails = null;
   }
 
-  public emailValidator(email: string) {
-    // eslint-disable-line class-methods-use-this
+  public emailValidator(email: string) { // eslint-disable-line class-methods-use-this
     const re = /\S+@\S+\.\S+/;
     return re.test(email);
   }

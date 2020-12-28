@@ -22,8 +22,6 @@ export default new Vuex.Store({
       state.devices = null;
     },
   },
-  actions: {
-  },
-  modules: {
-  },
+  actions: {},
+  modules: {},
 });
