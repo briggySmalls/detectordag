@@ -137,7 +137,7 @@ export default class Device extends Vue {
     // Note: some may be hidden (e.g. on and connected device)
     const els = [
       this.$refs.stateUpdatedTime as HTMLElement,
-      this.$refs.powerUpdatedTime as HTMLElement,
+      this.$refs.connectionUpdatedTime as HTMLElement,
     ].filter((x) => x !== undefined);
     // Render them
     if (els.length) {
