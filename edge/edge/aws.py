@@ -6,6 +6,7 @@ from types import TracebackType
 from typing import Optional, Type
 
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
+from AWSIoTPythonSDK.exception.AWSIoTExceptions import connectTimeoutException
 
 from edge.data import DeviceShadowState, PowerStatus
 
@@ -63,7 +64,12 @@ class CloudClient:
 
     def __enter__(self) -> "CloudClient":
         # Connect
-        self.client.connect()
+        try:
+            success = self.client.connect()
+            if not success:
+                raise ConnectionError()
+        except connectTimeoutException as exc:
+            raise ConnectionError() from exc
         # Return this
         return self
 

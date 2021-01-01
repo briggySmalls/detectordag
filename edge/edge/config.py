@@ -34,6 +34,8 @@ class AppConfig:
         "aws_endpoint": ConfigMapper("AWS_ENDPOINT", "str"),
         "aws_port": ConfigMapper("AWS_PORT", "int", default=8883),
         "certs_dir": ConfigMapper("CERT_DIR", "path", "~/.detectordag/certs"),
+        "supervisor_address": ConfigMapper("BALENA_SUPERVISOR_ADDRESS", "str"),
+        "supervisor_key": ConfigMapper("BALENA_SUPERVISOR_API_KEY", "str"),
     }
     _certs = {
         "aws_root_cert": "root-CA.crt",
@@ -48,6 +50,8 @@ class AppConfig:
     aws_endpoint: str
     aws_port: int
     certs_dir: Path
+    supervisor_address: str
+    supervisor_key: str
 
     @classmethod
     def from_env(cls, dotenv: bool = True) -> "AppConfig":

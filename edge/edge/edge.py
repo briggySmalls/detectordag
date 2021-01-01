@@ -3,6 +3,8 @@ import logging
 from types import TracebackType
 from typing import Optional, Type
 
+import requests
+
 from edge.aws import ClientConfig, CloudClient
 from edge.config import AppConfig
 
@@ -14,6 +16,9 @@ except ImportError:
     )
 
 _LOGGER = logging.getLogger(__name__)
+
+# Number of times to retry connections
+_RETRY_COUNT = 5
 
 
 class EdgeApp:
@@ -36,19 +41,20 @@ class EdgeApp:
 
     def __enter__(self) -> "EdgeApp":
         # Connect the MQTT client
-        self._client.__enter__()
         # Configure the device
         self.configure()
-        # Send the current status
-        self._publish_update(self._device)
         # Return this instance
         return self
 
     def configure(self) -> None:
         """Configure the app"""
+        # Connect the client
+        self._connect()
         # Send messages when power status changes
         self._device.when_activated = self._publish_update
         self._device.when_deactivated = self._publish_update
+        # Send the current status
+        self._publish_update(self._device)
 
     def __exit__(
         self,
@@ -64,3 +70,28 @@ class EdgeApp:
         status = bool(device.value)
         # Publish
         self._client.power_status_changed(status)
+
+    def _connect(self) -> None:
+        for i in range(_RETRY_COUNT):
+            try:
+                # Try to connect
+                self._client.__enter__()
+                # We connected successfully, so bail!
+                return
+            except ConnectionError:
+                if i == _RETRY_COUNT:
+                    # Assume we can't connect because the modem is f*kd
+                    _LOGGER.error("")
+                    self._reboot()
+                # Indicate we hit a snag
+                _LOGGER.warn("Failed to connect, retrying...")
+
+    def _reboot(self) -> None:
+        # Instruct the supervisor to restart
+        requests.post(
+            f"{self.config.supervisor_address}/v1/reboot"
+            "?apikey={self.config.supervisor_key}",
+            headers={"Content-type": "application/json"},
+        )
+        # Bail hard
+        raise RuntimeError("Rebooting")
