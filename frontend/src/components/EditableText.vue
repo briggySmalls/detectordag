@@ -3,6 +3,7 @@
     <b-form
       v-if="isEditing"
       inline
+      class="justify-content-center"
     >
       <b-input-group>
         <label
@@ -27,8 +28,8 @@
       </b-input-group>
     </b-form>
     <template v-else>
-      <slot />
-      <b-icon-x-circle-fill @click="edit()" />
+      <div class="d-inline-block"><slot /></div>
+      <div class="d-inline-block"><b-icon-pencil-square class="edit-icon" @click="edit()" /></div>
     </template>
   </div>
 </template>
@@ -57,3 +58,10 @@ export default class EditableText extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.edit-icon {
+  margin-left: 1em;
+  cursor: pointer;
+}
+</style>
