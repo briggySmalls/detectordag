@@ -63,7 +63,7 @@ type DeviceRegistered struct {
 	Certificate *DeviceRegisteredCertificate `json:"certificate"`
 }
 
-// swagger:parameters updateDevice registerDevice
+// swagger:parameters updateDevice
 type DeviceParameter struct {
 	// ID of device
 	//
@@ -72,7 +72,7 @@ type DeviceParameter struct {
 	DeviceID string `json:"deviceId"`
 }
 
-// swagger:parameters updateDevice registerDevice
+// swagger:parameters updateDevice
 type MutableDeviceParameter struct {
 	// Properties to update about the device
 	//

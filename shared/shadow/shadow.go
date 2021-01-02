@@ -2,9 +2,10 @@ package shadow
 
 import (
 	"encoding/json"
-	"github.com/briggysmalls/detectordag/shared"
 	"strconv"
 	"time"
+
+	"github.com/briggysmalls/detectordag/shared"
 )
 
 const (

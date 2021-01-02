@@ -1,12 +1,11 @@
 module.exports = {
   // Set the title
   chainWebpack: (config) => {
-    config
-      .plugin('html')
-      .tap((args) => {
-        args[0].title = 'Detector Dag';
-        return args;
-      });
+    config.plugin('html').tap((args) => {
+      const copy = args;
+      copy[0].title = 'Detector Dag';
+      return copy;
+    });
   },
 
   configureWebpack: {

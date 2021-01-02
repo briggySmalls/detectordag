@@ -3,12 +3,13 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/briggysmalls/detectordag/api/app/models"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"testing"
 )
 
 func TestGetDevicesSuccess(t *testing.T) {
@@ -88,38 +89,4 @@ func TestGetDevicesSuccess(t *testing.T) {
 	err := json.Unmarshal(rr.Body.Bytes(), &resp)
 	assert.NoError(t, err)
 	assert.Equal(t, devices, resp)
-}
-
-func TestRegisterDevice(t *testing.T) {
-	// Define some test constants
-	const (
-		accountID   = "35581BF4-32C8-4908-8377-2E6A021D3D2B"
-		deviceID    = "63eda5eb-7f56-417f-88ed-44a9eb9e5f67"
-		token       = "my-crazy-token"
-		desiredName = "device-name"
-		publicCert  = "impublic"
-		privateCert = "imprivate"
-		cert        = "imcert"
-	)
-	// Create a client
-	_, _, _, iotClient, tokens, router := createRealRouter(t)
-	// Configure the tokens to expect a call to validate a token
-	tokens.EXPECT().Validate(token).Return(accountID, nil)
-	// Configure the IoT client to expect a request to register a new device
-	device := iot.Device{Name: desiredName, AccountId: accountID, DeviceId: deviceID}
-	certs := iot.Certificates{Public: publicCert, Private: privateCert, Certificate: cert}
-	iotClient.EXPECT().RegisterThing(accountID, deviceID, desiredName).Return(&device, &certs, nil)
-	// Create a request for devices
-	req := createRequest(t, "PUT",
-		fmt.Sprintf("/v1/accounts/%s/devices/%s", accountID, deviceID),
-		[]byte(fmt.Sprintf(`{"name": "%s"}`, desiredName)),
-	)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
-	// Execute the handler
-	rr := runHandler(router, req)
-	// Assert status ok
-	assert.Equal(t, http.StatusOK, rr.Code)
-	// Inspect the body of the response
-	const expectedBody = `{"name":"%s","deviceId":"%s","certificate":{"certificate":"%s","publicKey":"%s","privateKey":"%s"}}`
-	assert.Equal(t, fmt.Sprintf(expectedBody, desiredName, deviceID, cert, publicCert, privateCert), string(rr.Body.Bytes()))
 }

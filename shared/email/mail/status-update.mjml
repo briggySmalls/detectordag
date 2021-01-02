@@ -1,0 +1,77 @@
+<mjml>
+  <mj-head>
+    <mj-preview>
+      Your dag <b>{{ .DeviceName }}</b> changed status
+      at
+      {{ .Time.Format "15:04 02-Jan-2006" }}
+    </mj-preview>
+  </mj-head>
+  <mj-body>
+    <!-- Logo -->
+    <mj-section background-color="#17a2b8" padding="0">
+      <mj-group>
+        <mj-column vertical-align="middle">
+          <mj-image align="right" width="100px" src="https://detectordag.tk/android-chrome-512x512.png"></mj-image>
+        </mj-column>
+        <mj-column vertical-align="middle">
+          <mj-text align="left" color="#fff" font-size="20px" font-family="Avenir, Helvetica, Arial, sans-serif">
+            detector dag
+          </mj-text>
+        </mj-column>
+      </mj-group>
+    </mj-section>
+    <!-- Title -->
+    <mj-section padding-bottom="5px">
+      <mj-column>
+        <mj-text align="center" font-size="40px" font-family="Helvetica Neue">
+          {{ .TransitionText }}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <!-- Intro text -->
+    <mj-section padding-top="0">
+      <mj-column>
+        <mj-text color="#525252" font-size="15px">
+          Your dag <b>{{ .DeviceName }}</b> changed status
+          at
+          {{ .Time.Format "15:04 02-Jan-2006" }}
+          to:
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <!-- Status card -->
+    <mj-section text-align="center">
+      <mj-column width="70%" background-color="#fafafa" border="1px solid #000">
+        <mj-text align="center" color="#626262" font-size="20px">
+          <b>{{ .DeviceName }}</b>
+        </mj-text>
+        <mj-image width="200px" src="{{ .ImageSrc }}"></mj-image>
+        <mj-text align="center" color="#626262" font-size="15px">
+          {{ .Title }}
+        </mj-text>
+        <mj-text align="center" color="#626262">
+          {{ .Description }}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <!-- Follow up -->
+    <mj-section>
+      <mj-column>
+        <mj-text align="center" color="#626262">
+          Remember you can check the dashboard for the latest status of all your dags.
+        </mj-text>
+        <mj-button background-color="#06F" href="https://detectordag.tk">
+          See live status
+        </mj-button>
+      </mj-column>
+    </mj-section>
+    <!-- Signature -->
+    <mj-section>
+      <mj-column>
+        <mj-text align="center" color="#626262">
+          Made with ❤ by <a href="https://sambriggs.dev">sam briggs</a>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

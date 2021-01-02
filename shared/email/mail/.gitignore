@@ -1,0 +1,4 @@
+# Ignore node packages
+node_modules/
+# Ignore the build output
+dist/

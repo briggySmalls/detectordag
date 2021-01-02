@@ -1,6 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"os"
+
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/briggysmalls/detectordag/connection"
@@ -10,8 +14,10 @@ import (
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/shared/sqs"
-	"log"
-	"os"
+)
+
+const (
+	senderEnvVar = "SENDER_EMAIL"
 )
 
 // Prepare an application to reuse across lambda runs
@@ -44,9 +50,14 @@ func init() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	// Get the email sender
+	sender := os.Getenv(senderEnvVar)
+	if sender == "" {
+		shared.LogErrorAndReturn(fmt.Errorf("Env var '%s' unset", senderEnvVar))
+	}
 	// Create a new session just for emailing (there is no emailing service in eu-west-2)
 	emailSesh := shared.CreateSession(aws.Config{Region: aws.String("eu-west-1")})
-	connectionUpdater, err := connection.NewConnectionUpdater(emailSesh, dbClient, shadowClient)
+	connectionUpdater, err := connection.NewConnectionUpdater(emailSesh, dbClient, shadowClient, sender)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

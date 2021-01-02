@@ -1,29 +1,36 @@
 <template>
-    <div>
-        <b-form v-if="isEditing" inline>
-            <b-input-group>
-                <label class="sr-only" for="inline-form-input-name">Device name</label>
-                <b-form-input
-                    id="inline-form-input-name"
-                    class="mb-2 mr-sm-2 mb-sm-0"
-                    placeholder="Device name"
-                    type="text"
-                    v-model="value"
-                ></b-form-input>
-                <b-input-group-append>
-                    <b-button
-                        @click="submit"
-                        variant="primary">
-                        Set
-                    </b-button>
-                </b-input-group-append>
-            </b-input-group>
-        </b-form>
-        <template v-else>
-            <slot/>
-            <b-icon-x-circle-fill @click="edit()"/>
-        </template>
-    </div>
+  <div>
+    <b-form
+      v-if="isEditing"
+      inline
+    >
+      <b-input-group>
+        <label
+          class="sr-only"
+          for="inline-form-input-name"
+        >Device name</label>
+        <b-form-input
+          id="inline-form-input-name"
+          v-model="value"
+          class="mb-2 mr-sm-2 mb-sm-0"
+          placeholder="Device name"
+          type="text"
+        />
+        <b-input-group-append>
+          <b-button
+            variant="primary"
+            @click="submit"
+          >
+            Set
+          </b-button>
+        </b-input-group-append>
+      </b-input-group>
+    </b-form>
+    <template v-else>
+      <slot />
+      <b-icon-x-circle-fill @click="edit()" />
+    </template>
+  </div>
 </template>
 
 <script lang="ts">

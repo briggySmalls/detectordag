@@ -1,5 +1,10 @@
 <template>
-  <b-alert v-if="error !== null" class="mt-3" variant="danger" show>
+  <b-alert
+    v-if="error !== null"
+    class="mt-3"
+    variant="danger"
+    show
+  >
     {{ error.message }}
   </b-alert>
 </template>

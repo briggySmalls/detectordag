@@ -1,5 +1,8 @@
 <template>
-  <Splash title='Page not found!' :error='error' />
+  <Splash
+    title="Page not found!"
+    :error="error"
+  />
 </template>
 
 <script lang="ts">

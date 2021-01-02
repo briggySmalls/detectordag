@@ -1,25 +1,39 @@
 <template>
-  <Topbar :error="error" title="Settings">
-    {{/* If we are loading, just show a spinner */}}
-    <b-spinner v-if="loading"></b-spinner>
-    <b-form v-else @submit.prevent="submit">
-      {{/* Display the settings */}}
-      <strong>{{ $store.state.account.username }}</strong>
+  <Topbar
+    :error="error"
+    title="Settings"
+  >
+    <!-- Email list -->
+    <b-form
+      v-if="emails"
+      @submit.prevent="submit"
+    >
       <b-form-group
-        class="mt-5"
-        description="These are the emails we'll use to notify you when you dag spots a change.">
+        description="These are the emails we'll use to notify you when you dag spots a change."
+      >
         <label for="emails">Notification emails:</label>
-        <b-form-tags v-model="emails" :tag-validator="emailValidator" no-outer-focus class="mb-2">
+        <b-form-tags
+          v-model="emails"
+          :tag-validator="emailValidator"
+          no-outer-focus
+          class="mb-2"
+        >
           <template v-slot="{ tags, inputAttrs, inputHandlers, addTag, removeTag }">
             {{/* Define a custom input */}}
             <b-input-group aria-controls="my-custom-emails-list">
               <input
                 v-bind="inputAttrs"
-                v-on="inputHandlers"
                 placeholder="New email - Press enter to add"
-                class="form-control">
+                class="form-control"
+                v-on="inputHandlers"
+              >
               <b-input-group-append>
-                <b-button @click="addTag()" variant="primary">Add</b-button>
+                <b-button
+                  variant="primary"
+                  @click="addTag()"
+                >
+                  Add
+                </b-button>
               </b-input-group-append>
             </b-input-group>
             {{/* Define a custom visualisation of the current list */}}
@@ -31,18 +45,24 @@
               >
                 {{ email }}
                 <b-button
-                  @click="removeTag(email)"
                   variant="secondary"
                   size="sm"
                   :aria-controls="`my-custom-emails-email_${email.replace(/\s/g, '_')}_`"
-                ><b-icon-x-circle-fill></b-icon-x-circle-fill></b-button>
+                  @click="removeTag(email)"
+                >
+                  <b-icon-x-circle-fill />
+                </b-button>
               </b-list-group-item>
             </b-list-group>
           </template>
         </b-form-tags>
       </b-form-group>
-      <b-button type="submit">Save</b-button>
+      <b-button type="submit">
+        Save
+      </b-button>
     </b-form>
+    <!-- Loading -->
+    <b-spinner v-else-if="loading" />
   </Topbar>
 </template>
 
@@ -65,7 +85,7 @@ export default class AccountView extends Vue {
   public created() {
     // Check if we already have the account info
     this.emails = null;
-    if (this.$store.state.account !== null) {
+    if (this.storedEmails !== null) {
       // Just copy them over then
       this.emails = this.storedEmails;
       return;
@@ -78,42 +98,42 @@ export default class AccountView extends Vue {
       return;
     }
     // Request the accounts to render them
-    this.$clients.accounts.getAccount(auth.accountId, `Bearer ${auth.token}`)
+    this.$clients.accounts
+      .getAccount(auth.accountId, `Bearer ${auth.token}`)
       .then((response) => {
-      // Save the account details to the store
+        // Save the account details to the store
         this.$logger.debug('Saving account details');
         this.$store.commit('setAccount', response.data);
       })
-      .catch((error) => {
+      .catch((err) => this.$checkUnauthorised(err, (error) => {
+        // Record the error
+        this.error = error;
         this.$logger.debug(`Account request error: ${error.response}`);
-        // Clear the token (we're assuming that's why we failed)
-        this.$storage.clear();
-        // Get the user to reauthenticate
-        this.$router.push('/login');
-      });
+      }));
   }
 
   // The emails from the store
   private get storedEmails() {
     const { account } = this.$store.state;
-    return (account !== null) ? account.emails : null;
+    return account !== null ? account.emails : null;
   }
 
   // Assign emails from the store (when changed)
   @Watch('storedEmails')
   private onPropertyChanged(
-    value: string[], _: string[], // eslint-disable-line @typescript-eslint/no-unused-vars
+    value: string[],
   ) {
     this.emails = value;
   }
 
   // Says if wer are loading device content
   private get loading() {
-    return (this.emails === null) && (this.error === null);
+    return this.emails === null && this.error === null;
   }
 
   // Submit update to API
-  private submit(_: Event) { // eslint-disable-line @typescript-eslint/no-unused-vars
+  private submit() {
+    // eslint-disable-line @typescript-eslint/no-unused-vars
     this.$logger.debug('Emails submitted');
     // Get auth token
     const auth = this.$storage.bundle;
@@ -130,17 +150,20 @@ export default class AccountView extends Vue {
       return;
     }
     // Request the account
-    this.$clients.accounts.updateAccount(auth.accountId, `Bearer ${auth.token}`, { emails: this.emails })
+    this.$clients.accounts
+      .updateAccount(auth.accountId, `Bearer ${auth.token}`, {
+        emails: this.emails,
+      })
       .then((response) => {
-      // Save the account details to the store
+        // Save the account details to the store
         this.$logger.debug('Saving account details');
         this.$store.commit('setAccount', response.data);
       })
-      .catch((error) => {
+      .catch((err) => this.$checkUnauthorised(err, (error) => {
         this.$logger.debug(`Account update error: ${error.response}`);
         // Set the error
         this.error = error;
-      });
+      }));
     // Indicate that our emails are updating
     this.emails = null;
   }

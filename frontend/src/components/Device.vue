@@ -1,26 +1,52 @@
 <template>
-  <b-card no-body border-variant="dark" header-border-variant="dark">
+  <b-card
+    no-body
+    border-variant="dark"
+    header-border-variant="dark"
+  >
     <template #header>
       <b-spinner v-if="isLoading" />
-      <EditableText v-else @edited="updateDeviceName">
-        <h4 class="mb-0">{{ device.name }}</h4>
+      <EditableText
+        v-else
+        @edited="updateDeviceName"
+      >
+        <h4 class="mb-0">
+          {{ device.name }}
+        </h4>
       </EditableText>
     </template>
 
     <b-card-body>
       {{/* Define a graphic to illustrate the status */}}
       <div class="status-graphic d-inline-block">
-        <div class="power-icon-container" v-bind:class="[deviceStateClass]">
-          <img v-if="powerState === powerStateEnum.Off"
-            alt="Power off" src="../assets/power-off.svg" class="power-icon">
-          <img v-else-if="powerState === powerStateEnum.On"
-            alt="Power on" src="../assets/power-on.svg" class="power-icon">
+        <div
+          class="power-icon-container"
+          :class="[deviceStateClass]"
+        >
+          <img
+            v-if="powerState === powerStateEnum.Off"
+            alt="Power off"
+            src="../assets/power-off.svg"
+            class="power-icon"
+          >
+          <img
+            v-else-if="powerState === powerStateEnum.On"
+            alt="Power on"
+            src="../assets/power-on.svg"
+            class="power-icon"
+          >
         </div>
-        <img v-if="connectionState === connectedStateEnum.Disconnected"
-          alt="Disconnected" src="../assets/no-signal.svg" class="connection-icon">
+        <img
+          v-if="connectionState === connectionStateEnum.Disconnected"
+          alt="Disconnected"
+          src="../assets/no-signal.svg"
+          class="connection-icon"
+        >
       </div>
       {{/* Add textual descriptions of the status */}}
-      <b-card-title class="mt-4">{{ deviceStateInfo[deviceState].title }}</b-card-title>
+      <b-card-title class="mt-4">
+        {{ deviceStateInfo[deviceState].title }}
+      </b-card-title>
       <b-card-text>{{ deviceStateInfo[deviceState].description }}</b-card-text>
     </b-card-body>
 
@@ -28,14 +54,20 @@
       <b-list-group-item v-if="powerState === powerStateEnum.Off">
         <!-- Add further detail about losing power -->
         Lost power
-        <span class="time" :datetime="device.state.updated">
+        <span
+          ref="stateUpdatedTime"
+          :datetime="device.state.updated"
+        >
           {{ device.state.updated }}
         </span>
       </b-list-group-item>
-      <b-list-group-item v-if="connectionState === connectedStateEnum.Disconnected">
+      <b-list-group-item v-if="connectionState === connectionStateEnum.Disconnected">
         <!-- Add further detail about the dag losing connection -->
         Lost connection
-        <span class="time" :datetime="device.connection.updated">
+        <span
+          ref="connectionUpdatedTime"
+          :datetime="device.connection.updated"
+        >
           {{ device.connection.updated }}
         </span>
       </b-list-group-item>
@@ -61,7 +93,7 @@ enum PowerState {
   Off,
 }
 
-enum ConnectedState {
+enum ConnectionState {
   Connected = 1,
   Disconnected,
 }
@@ -79,26 +111,51 @@ interface StateData {
 })
 export default class Device extends Vue {
   // Declare some enums so we can use them in the template
-  private readonly deviceStateEnum: typeof DeviceState = DeviceState
+  private readonly deviceStateEnum: typeof DeviceState = DeviceState;
 
-  private readonly powerStateEnum: typeof PowerState = PowerState
+  private readonly powerStateEnum: typeof PowerState = PowerState;
 
-  private readonly connectedStateEnum: typeof ConnectedState = ConnectedState
+  private readonly connectionStateEnum: typeof ConnectionState = ConnectionState;
 
   @Prop() private device!: DeviceModel;
 
   private isLoading = false;
 
   private readonly deviceStateInfo: Record<DeviceState, StateData> = {
-    [DeviceState.On]: { class: 'on', title: 'On', description: 'The power is on and your dag is online 💪' },
-    [DeviceState.Off]: { class: 'off', title: 'Off', description: 'Your dag has noticed the power has dropped 😰' },
-    [DeviceState.WasOn]: { class: 'was-on', title: 'Was On', description: 'We\'ve lost contact with your dag. The power was on the last we heard. Bit embarrassing... 🙈' },
-    [DeviceState.WasOff]: { class: 'was-off', title: 'Was Off', description: 'Your dag noticed the power go, and then we lost contact. It may have run out of battery. 😭' },
+    [DeviceState.On]: {
+      class: 'on',
+      title: 'On',
+      description: 'The power is on!',
+    },
+    [DeviceState.Off]: {
+      class: 'off',
+      title: 'Off',
+      description: 'Your dag says that the power is off',
+    },
+    [DeviceState.WasOn]: {
+      class: 'was-on',
+      title: 'Was On',
+      description: "We've lost contact with your dag. The power was on the last we heard...",
+    },
+    [DeviceState.WasOff]: {
+      class: 'was-off',
+      title: 'Was Off',
+      description:
+        'Your dag noticed the power go, and then we lost contact. It may have run out of battery.',
+    },
   };
 
   private mounted() {
-    // Render times nicely
-    render(this.$el.querySelectorAll('.time'));
+    // Gether together the time elements
+    // Note: some may be hidden (e.g. on and connected device)
+    const els = [
+      this.$refs.stateUpdatedTime as HTMLElement,
+      this.$refs.connectionUpdatedTime as HTMLElement,
+    ].filter((x) => x !== undefined);
+    // Render them
+    if (els.length) {
+      render(els);
+    }
   }
 
   private updateDeviceName(name: string) {
@@ -141,10 +198,10 @@ export default class Device extends Vue {
   }
 
   private get deviceState(): DeviceState {
-    if (this.connectionState === ConnectedState.Connected) {
-      return (this.powerState === PowerState.On) ? DeviceState.On : DeviceState.Off;
+    if (this.connectionState === ConnectionState.Connected) {
+      return this.powerState === PowerState.On ? DeviceState.On : DeviceState.Off;
     }
-    return (this.powerState === PowerState.On) ? DeviceState.WasOn : DeviceState.WasOff;
+    return this.powerState === PowerState.On ? DeviceState.WasOn : DeviceState.WasOff;
   }
 
   private get deviceStateClass(): string {
@@ -155,12 +212,12 @@ export default class Device extends Vue {
     return this.deviceStateInfo[this.deviceState].title;
   }
 
-  private get connectionState(): ConnectedState {
+  private get connectionState(): ConnectionState {
     switch (this.device.connection.status) {
       case 'connected':
-        return ConnectedState.Connected;
+        return ConnectionState.Connected;
       case 'disconnected':
-        return ConnectedState.Disconnected;
+        return ConnectionState.Disconnected;
       default:
         throw new Error(`Unexpected connection state: "${this.device.connection.status}"`);
     }
@@ -181,7 +238,8 @@ export default class Device extends Vue {
 
 
 <style lang="scss" scoped>
-@import "node_modules/bootstrap/scss/bootstrap";
+@import '~bootstrap/scss/_functions.scss';
+@import '~bootstrap/scss/_variables.scss';
 
 .status-graphic {
   position: relative;
@@ -192,11 +250,13 @@ export default class Device extends Vue {
     width: 10em;
     height: 10em;
 
-    &.on, &.was-on {
-      background-color: theme-color("success");
+    &.on,
+    &.was-on {
+      background-color: theme-color('success');
     }
-    &.off, &.was-off {
-      background-color: theme-color("danger");
+    &.off,
+    &.was-off {
+      background-color: theme-color('danger');
     }
   }
 
@@ -213,7 +273,7 @@ export default class Device extends Vue {
     padding: 0.8em;
     width: 3em;
     height: 3em;
-    background-color: theme-color("warning");
+
     border-radius: 1em;
   }
 }

@@ -1,29 +1,49 @@
 <template>
-  <Splash id="login" title="detector dag" :error="error">
-    <b-form v-if="!isRequesting" @submit="submit">
+  <Splash
+    id="login"
+    title="detector dag"
+    :error="error"
+  >
+    <b-form
+      v-if="!isRequesting"
+      @submit="submit"
+    >
       <b-form-group
         id="email"
         label="Email:"
-        label-for="email">
+        label-for="email"
+      >
         <b-form-input
-          id="email" type="email" name="email"
+          id="email"
           v-model="email"
-          trim required>
-        </b-form-input>
+          type="email"
+          name="email"
+          trim
+          required
+        />
       </b-form-group>
       <b-form-group
         id="password"
         label="Password:"
-        label-for="password">
+        label-for="password"
+      >
         <b-form-input
-          id="password" type="password" name="password"
+          id="password"
           v-model="password"
-          trim required>
-        </b-form-input>
+          type="password"
+          name="password"
+          trim
+          required
+        />
       </b-form-group>
-      <b-button type="submit" >Submit</b-button>
+      <b-button type="submit">
+        Submit
+      </b-button>
     </b-form>
-    <b-spinner v-else label="Spinning"></b-spinner>
+    <b-spinner
+      v-else
+      label="Spinning"
+    />
   </Splash>
 </template>
 
@@ -51,7 +71,8 @@ export default class Login extends Vue {
     // Request authentication
     this.isRequesting = true;
     this.error = null;
-    this.$clients.authentication.auth({ username: this.email, password: this.password })
+    this.$clients.authentication
+      .auth({ username: this.email, password: this.password })
       .then((response) => {
         // Record the token and account in local storage
         this.$logger.debug('Auth response received');

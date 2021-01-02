@@ -121,6 +121,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./consumer
+      Environment:
+        Variables:
+          SENDER_EMAIL: detectordag@sambriggs.dev
       Handler: main
       Runtime: go1.x
       Policies:
@@ -132,6 +135,7 @@ Resources:
               Action:
                 - 'ses:SendEmail'
                 - 'ses:SendRawEmail'
+                - 'ses:GetIdentityVerificationAttributes'
               Resource: '*'
         - Version: '2012-10-17'
           Statement:
@@ -160,12 +164,13 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./connection/listener
+      Environment:
+        Variables:
+          SENDER_EMAIL: detectordag@sambriggs.dev
+          DELAY_QUEUE_URL: !Ref ConnectionStatusQueue
       Handler: main
       Runtime: go1.x
       Timeout: 5
-      Environment:
-        Variables:
-          DELAY_QUEUE_URL: !Ref ConnectionStatusQueue
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -173,6 +178,7 @@ Resources:
               Action:
                 - 'ses:SendEmail'
                 - 'ses:SendRawEmail'
+                - 'ses:GetIdentityVerificationAttributes'
               Resource: '*'
         - Version: '2012-10-17'
           Statement:
@@ -207,6 +213,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./connection/disconnected
+      Environment:
+        Variables:
+          SENDER_EMAIL: detectordag@sambriggs.dev
       Handler: main
       Runtime: go1.x
       Timeout: 5
@@ -217,6 +226,7 @@ Resources:
               Action:
                 - 'ses:SendEmail'
                 - 'ses:SendRawEmail'
+                - 'ses:GetIdentityVerificationAttributes'
               Resource: '*'
         - Version: '2012-10-17'
           Statement:

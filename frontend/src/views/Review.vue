@@ -1,26 +1,34 @@
 <template>
-  <Topbar title="Your Dags" :error="error" >
+  <Topbar
+    title="Your Dags"
+    :error="error"
+  >
     <template #header>
       <h1 class="my-5">
         Your Dags
         <b-button
           class="ml-2"
-          v-on:click="request"
-          :disabled="loading">
+          :disabled="loading"
+          @click="request"
+        >
           Refresh
         </b-button>
       </h1>
     </template>
     <div>
       <!-- Device list -->
-      <b-card-group v-if="devices" deck>
+      <b-card-group
+        v-if="devices"
+        deck
+      >
         <DeviceComponent
           v-for="device in devices"
           :key="device.deviceId"
-          :device="device" />
+          :device="device"
+        />
       </b-card-group>
       <!-- Loading -->
-      <b-spinner v-if="loading"></b-spinner>
+      <b-spinner v-if="loading" />
     </div>
   </Topbar>
 </template>
@@ -50,7 +58,7 @@ export default class Review extends Vue {
 
   // Says if wer are loading device content
   private get loading() {
-    return (this.devices === null) && (this.error === null);
+    return this.devices === null && this.error === null;
   }
 
   private get devices(): Device[] | null {
@@ -70,20 +78,18 @@ export default class Review extends Vue {
       return;
     }
     // Get the devices
-    this.$logger.debug('Requesting account\'s devices');
-    this.$clients.accounts.getDevices(authBundle.accountId, `Bearer ${authBundle.token}`)
+    this.$logger.debug("Requesting account's devices");
+    this.$clients.accounts
+      .getDevices(authBundle.accountId, `Bearer ${authBundle.token}`)
       .then((request) => {
         // Display the requested devices
         this.$store.commit('setDevices', request.data);
       })
-      .catch((error) => {
+      .catch((err) => this.$checkUnauthorised(err, (error) => {
         // Assign the error
         this.error = error;
-        // Also log it
-        this.$logger.debug(error.response);
-        // If we have authorization issues, redirect to login
-        this.$router.push('/login');
-      });
+        this.$logger.debug(`Devices request error: ${error.response}`);
+      }));
   }
 }
 </script>

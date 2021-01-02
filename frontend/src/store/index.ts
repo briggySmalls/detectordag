@@ -30,8 +30,6 @@ export default new Vuex.Store({
       state.devices[index] = device;
     },
   },
-  actions: {
-  },
-  modules: {
-  },
+  actions: {},
+  modules: {},
 });

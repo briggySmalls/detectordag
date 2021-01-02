@@ -2,11 +2,10 @@ package server
 
 import (
 	"encoding/json"
-	"errors"
+	"net/http"
+
 	"github.com/briggysmalls/detectordag/api/app/models"
 	"github.com/briggysmalls/detectordag/shared/database"
-	"github.com/gorilla/mux"
-	"net/http"
 )
 
 func (s *server) GetAccount(w http.ResponseWriter, r *http.Request) {
@@ -114,53 +113,6 @@ func (s *server) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 	// Write the response
 	w.WriteHeader(http.StatusOK)
 	w.Write(payload)
-}
-
-func (s *server) RegisterDevice(w http.ResponseWriter, r *http.Request) {
-	// Ensure the auth middleware provided us with the account ID
-	accountID, err := getAccountId(r.Context())
-	if err != nil {
-		SetError(w, ErrAccountIDMissing, http.StatusInternalServerError)
-		return
-	}
-	// Parse the device name from the request
-	var params models.MutableDevice
-	err = json.NewDecoder(r.Body).Decode(&params)
-	if err != nil {
-		SetError(w, err, http.StatusBadRequest)
-		return
-	}
-	// Pull out the device ID
-	vars := mux.Vars(r)
-	deviceID, ok := vars["deviceId"]
-	if !ok {
-		SetError(w, errors.New("Device ID not found in URL"), http.StatusBadRequest)
-		return
-	}
-	// Make a request to register a device
-	device, certs, err := s.iot.RegisterThing(accountID, deviceID, params.Name)
-	if err != nil {
-		SetError(w, err, http.StatusInternalServerError)
-		return
-	}
-	// Construct the response
-	payload := models.DeviceRegistered{
-		Name:     device.Name,
-		DeviceId: device.DeviceId,
-		Certificate: &models.DeviceRegisteredCertificate{
-			Certificate: certs.Certificate,
-			PublicKey:   certs.Public,
-			PrivateKey:  certs.Private,
-		},
-	}
-	body, err := json.Marshal(payload)
-	if err != nil {
-		SetError(w, err, http.StatusInternalServerError)
-		return
-	}
-	// Send response
-	w.WriteHeader(http.StatusOK)
-	w.Write(body)
 }
 
 // Create account payload from database response
