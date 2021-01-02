@@ -25,7 +25,8 @@ export default new Vuex.Store({
         throw new Error('Cannot setDevice before setDevices');
       }
       const index = state.devices.findIndex((x) => x.deviceId === device.deviceId);
-      state.devices[index] = device;
+      // Use splice so changes to array are noticed
+      state.devices.splice(index, 1, device);
     },
   },
   actions: {},
