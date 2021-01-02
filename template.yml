@@ -26,12 +26,12 @@ Resources:
         UpdateDevice:
           Type: Api
           Properties:
-            Path: /v1/device/{deviceId}
+            Path: /v1/devices/{deviceId}
             Method: patch
         DeviceOptions:
           Type: Api
           Properties:
-            Path: /v1/device/{deviceId}
+            Path: /v1/devices/{deviceId}
             Method: options
         GetAccount:
           Type: Api
