@@ -12,10 +12,9 @@
         >Device name</label>
         <b-form-input
           id="inline-form-input-name"
-          v-model="value"
           class="mb-2 mr-sm-2 mb-sm-0"
-          :placeholder="value"
           type="text"
+          :placeholder="value"
         />
         <b-input-group-append>
           <b-button
