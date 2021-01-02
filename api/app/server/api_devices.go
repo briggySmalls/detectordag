@@ -1,29 +1,16 @@
 package server
 
 import (
+	"encoding/json"
+	"github.com/briggysmalls/detectordag/api/app/models"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
 func (s *server) UpdateDevice(w http.ResponseWriter, r *http.Request) {
 	var err error
-	// Ensure the auth middleware provided us with the account ID
-	accountID, err := getAccountId(r.Context())
-	if err != nil {
-		SetError(w, ErrAccountIDMissing, http.StatusInternalServerError)
-		return
-	}
-	// Get the device
+	// Get the device ID
 	id := mux.Vars(r)["deviceId"]
-	device, err := s.iot.GetThing(id)
-	if err != nil {
-		SetError(w, err, http.StatusInternalServerError)
-		return
-	}
-	// Ensure the user is allowed to modify this device
-	if device.AccountID != accountID {
-		SetError(w, err, http.StatusForbidden)
-		return
-	}
 	// Try to parse the body
 	var updates models.MutableDevice
 	err = json.NewDecoder(r.Body).Decode(&updates)
@@ -32,21 +19,21 @@ func (s *server) UpdateDevice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Update the name
-	device, err := s.iot.UpdateThing()
+	newDevice, err := s.iot.UpdateThing(id, updates.Name)
 	if err != nil {
 		SetError(w, err, http.StatusInternalServerError)
 		return
 	}
 	// Request the shadow
-	shdw, err := s.shadow.Get(device.DeviceId)
+	shdw, err := s.shadow.Get(newDevice.DeviceId)
 	if err != nil {
 		SetError(w, err, http.StatusInternalServerError)
 		return
 	}
 	// Build the payload
 	payload := models.Device{
-		Name:     device.Name,
-		DeviceId: device.DeviceId,
+		Name:     newDevice.Name,
+		DeviceId: newDevice.DeviceId,
 		State: &models.DeviceState{
 			Power:   shdw.Power.Value,
 			Updated: shdw.Power.Updated,
