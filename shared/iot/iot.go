@@ -25,6 +25,7 @@ type Client interface {
 	GetThing(id string) (*Device, error)
 	GetThingsByAccount(id string) ([]*Device, error)
 	RegisterThing(accountID, deviceID, name string) (*Device, *Certificates, error)
+	UpdateThing(id, name string) (*Device, error)
 }
 
 // Device holds the non-state properties of a device
@@ -113,6 +114,25 @@ func (c *client) RegisterThing(accountID, deviceID, name string) (*Device, *Cert
 		NewStatus:     aws.String("ACTIVE"),
 	})
 	return &d, &certs, nil
+}
+
+func (c *client) UpdateThing(id, name string) (*Device, error) {
+	// Set the attribute
+	_, err := c.iot.UpdateThing(&iot.UpdateThingInput{
+		ThingName:     aws.String(id),
+		ThingTypeName: aws.String(thingType),
+		AttributePayload: &iot.AttributePayload{
+			Attributes: map[string]*string{
+				nameAttributeName: aws.String(name),
+			},
+			Merge: aws.Bool(true), // Don't nuke the other attributes
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	// Fetch the new device info
+	return c.GetThing(id)
 }
 
 // createCertificate creates a new certificate

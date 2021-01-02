@@ -150,6 +150,41 @@ func TestRegisterDevice(t *testing.T) {
 	assert.Equal(t, certificatePrivateKey, certs.Private)
 }
 
+func TestUpdateThing(t *testing.T) {
+	// Create some test variables
+	const (
+		deviceID   = "8b5c7cc0-79ae-40ec-97df-92928cd852b7"
+		accountID  = "2783f4d7-e14b-442a-95c3-c37a859d2700"
+		deviceName = "New Name"
+	)
+	// Create unit under test and mocks
+	mock, c := createUnitAndMocks(t)
+	// Expect us to update the thing
+	mock.EXPECT().UpdateThing(gomock.Any()).Do(func(input *iot.UpdateThingInput) {
+		assert.Equal(t, deviceID, *input.ThingName)
+		assert.Equal(t, thingType, *input.ThingTypeName)
+		assert.Equal(t, deviceName, *input.AttributePayload.Attributes[nameAttributeName])
+		assert.Equal(t, true, *input.AttributePayload.Merge)
+	}).Return(nil, nil)
+	// Expect us to fetch the thing afterwards
+	mock.EXPECT().DescribeThing(&iot.DescribeThingInput{ThingName: aws.String(deviceID)}).Return(&iot.DescribeThingOutput{
+		ThingName: aws.String(deviceID),
+		Attributes: map[string]*string{
+			accountIDAttributeName: aws.String(accountID),
+			nameAttributeName:      aws.String(deviceName),
+		},
+	}, nil)
+	// Make the call
+	device, err := c.UpdateThing(deviceID, deviceName)
+	// Assert the response
+	assert.Nil(t, err)
+	assert.Equal(t, Device{
+		AccountId: accountID,
+		DeviceId:  deviceID,
+		Name:      deviceName,
+	}, *device)
+}
+
 func createUnitAndMocks(t *testing.T) (*MockIoTAPI, Client) {
 	// Create mock controller
 	ctrl := gomock.NewController(t)
