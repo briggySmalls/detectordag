@@ -8,6 +8,7 @@
       <b-spinner v-if="isLoading" />
       <EditableText
         v-else
+        :value="device.name"
         @edited="updateDeviceName"
       >
         <h4 class="mb-0">

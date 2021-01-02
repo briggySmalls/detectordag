@@ -14,7 +14,7 @@
           id="inline-form-input-name"
           v-model="value"
           class="mb-2 mr-sm-2 mb-sm-0"
-          placeholder="Device name"
+          :placeholder="value"
           type="text"
         />
         <b-input-group-append>
@@ -28,20 +28,20 @@
       </b-input-group>
     </b-form>
     <template v-else>
-      <div class="d-inline-block"><slot /></div>
+      <div class="d-inline-block"><slot>{{ value }}</slot></div>
       <div class="d-inline-block"><b-icon-pencil-square class="edit-icon" @click="edit()" /></div>
     </template>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component
 export default class EditableText extends Vue {
   private isEditing = false;
 
-  private value = '';
+  @Prop() private value!: string;
 
   private edit() {
     if (this.isEditing) {
