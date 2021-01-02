@@ -1,14 +1,11 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { Device } from '../../lib/client';
+import State from './state';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
-  state: {
-    account: null,
-    devices: Array <Device>(),
-  },
+  state: new State(),
   mutations: {
     setAccount(state, newAccount) {
       state.account = newAccount;
@@ -20,13 +17,14 @@ export default new Vuex.Store({
       state.devices = devices;
     },
     clearDevices(state) {
-      state.devices = [];
+      state.devices = null;
     },
     setDevice(state, device) {
-      const index = state.devices.findIndex((x) => x.deviceId === device.deviceId);
-      if (index === -1) {
-        state.devices.push(device);
+      // We'd expect the devices to already be here
+      if (state.devices === null) {
+        throw new Error('Cannot setDevice before setDevices');
       }
+      const index = state.devices.findIndex((x) => x.deviceId === device.deviceId);
       state.devices[index] = device;
     },
   },
