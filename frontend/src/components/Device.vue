@@ -8,11 +8,11 @@
       <b-spinner v-if="isLoading" />
       <EditableText
         v-else
-        :value="device.name"
+        :value="deviceName"
         @edited="updateDeviceName"
       >
         <h4 class="mb-0">
-          {{ device.name }}
+          {{ deviceName }}
         </h4>
       </EditableText>
     </template>
@@ -181,6 +181,14 @@ export default class Device extends Vue {
       });
     // Indicate we are saving the name
     this.isLoading = true;
+  }
+
+  private get deviceName(): string {
+    const { name } = this.device;
+    if (name === '') {
+      return this.device.deviceId.substring(0, 7);
+    }
+    return name;
   }
 
   private get deviceStatus(): string {
