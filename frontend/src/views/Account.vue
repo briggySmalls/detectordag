@@ -4,65 +4,68 @@
     title="Settings"
   >
     <!-- Email list -->
-    <b-form
-      v-if="emails"
-      @submit.prevent="submit"
-    >
-      <b-form-group
-        description="These are the emails we'll use to notify you when you dag spots a change."
+    <b-container id="account-container">
+      <b-form
+        v-if="emails"
+        id="account-form"
+        @submit.prevent="submit"
       >
-        <label for="emails">Notification emails:</label>
-        <b-form-tags
-          v-model="emails"
-          :tag-validator="emailValidator"
-          no-outer-focus
-          class="mb-2"
+        <b-form-group
+          description="These are the emails we'll use to notify you when you dag spots a change."
         >
-          <template v-slot="{ tags, inputAttrs, inputHandlers, addTag, removeTag }">
-            {{/* Define a custom input */}}
-            <b-input-group aria-controls="my-custom-emails-list">
-              <input
-                v-bind="inputAttrs"
-                placeholder="New email - Press enter to add"
-                class="form-control"
-                v-on="inputHandlers"
-              >
-              <b-input-group-append>
-                <b-button
-                  variant="primary"
-                  @click="addTag()"
+          <label for="emails">Notification emails:</label>
+          <b-form-tags
+            v-model="emails"
+            :tag-validator="emailValidator"
+            no-outer-focus
+            class="mb-2"
+          >
+            <template v-slot="{ tags, inputAttrs, inputHandlers, addTag, removeTag }">
+              {{/* Define a custom input */}}
+              <b-input-group aria-controls="my-custom-emails-list">
+                <input
+                  v-bind="inputAttrs"
+                  placeholder="New email - Press enter to add"
+                  class="form-control"
+                  v-on="inputHandlers"
                 >
-                  Add
-                </b-button>
-              </b-input-group-append>
-            </b-input-group>
-            {{/* Define a custom visualisation of the current list */}}
-            <b-list-group>
-              <b-list-group-item
-                v-for="email in tags"
-                :key="email"
-                class="d-flex justify-content-between align-items-center"
-              >
-                {{ email }}
-                <b-button
-                  variant="secondary"
-                  size="sm"
-                  :aria-controls="`my-custom-emails-email_${email.replace(/\s/g, '_')}_`"
-                  @click="removeTag(email)"
+                <b-input-group-append>
+                  <b-button
+                    variant="primary"
+                    @click="addTag()"
+                  >
+                    Add
+                  </b-button>
+                </b-input-group-append>
+              </b-input-group>
+              {{/* Define a custom visualisation of the current list */}}
+              <b-list-group>
+                <b-list-group-item
+                  v-for="email in tags"
+                  :key="email"
+                  class="d-flex justify-content-between align-items-center"
                 >
-                  <b-icon-x-circle-fill />
-                </b-button>
-              </b-list-group-item>
-            </b-list-group>
-          </template>
-        </b-form-tags>
-      </b-form-group>
-      <b-button type="submit">
-        Save
-      </b-button>
-    </b-form>
-    <!-- Loading -->
-    <b-spinner v-else-if="loading" />
+                  {{ email }}
+                  <b-button
+                    variant="secondary"
+                    size="sm"
+                    :aria-controls="`my-custom-emails-email_${email.replace(/\s/g, '_')}_`"
+                    @click="removeTag(email)"
+                  >
+                    <b-icon-x-circle-fill />
+                  </b-button>
+                </b-list-group-item>
+              </b-list-group>
+            </template>
+          </b-form-tags>
+        </b-form-group>
+        <b-button type="submit">
+          Save
+        </b-button>
+      </b-form>
+      <!-- Loading -->
+      <b-spinner v-else-if="loading" />
+    </b-container>
   </Topbar>
 </template>
 
@@ -174,3 +177,13 @@ export default class AccountView extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+@import '../app.scss';
+
+@include media-breakpoint-up(sm) {
+  #account-container {
+    max-width: map-get($grid-breakpoints, sm);
+  }
+}
+</style>

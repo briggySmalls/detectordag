@@ -104,4 +104,3 @@ export default class Login extends Vue {
   max-width: 20em;
 }
 </style>
--

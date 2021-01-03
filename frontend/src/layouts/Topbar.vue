@@ -42,8 +42,6 @@ export default class Topbar extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '../app.scss';
-
 $footer-padding: 100px;
 
 #topbar {
@@ -60,12 +58,6 @@ $footer-padding: 100px;
     position: absolute;
     width: 100%;
     bottom: 0;
-  }
-}
-
-@include media-breakpoint-up(sm) {
-  #content-container {
-    max-width: map-get($grid-breakpoints, sm);
   }
 }
 </style>
