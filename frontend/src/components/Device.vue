@@ -173,11 +173,14 @@ export default class Device extends Vue {
       .then((response) => {
         // Submit the new device info to the store
         this.$store.commit('setDevice', response.data);
-        // We've bound to this so it will update automatically!
-        this.isLoading = false;
       })
       .catch((error) => {
-        this.$logger.debug(`Ah bugger: ${error}`);
+        // Raise up chain of command
+        this.$emit('errored', error);
+      })
+      .then(() => {
+        // We've bound to this so it will update automatically!
+        this.isLoading = false;
       });
     // Indicate we are saving the name
     this.isLoading = true;

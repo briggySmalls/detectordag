@@ -25,6 +25,7 @@
           v-for="device in devices"
           :key="device.deviceId"
           :device="device"
+          @errored="errorHandler"
         />
       </b-card-group>
       <!-- Loading -->
@@ -90,6 +91,10 @@ export default class Review extends Vue {
         this.error = error;
         this.$logger.debug(`Devices request error: ${error.response}`);
       }));
+  }
+
+  private errorHandler(error: Error) {
+    this.error = error;
   }
 }
 </script>
