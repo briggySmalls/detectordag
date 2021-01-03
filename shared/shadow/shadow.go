@@ -53,7 +53,7 @@ type DeviceShadowSchema struct {
 	Version   int
 	State     struct {
 		Reported struct {
-			Name       string
+			Name       string // Name could be unset
 			Connection string `validate:"required,eq=connected|eq=disconnected"`
 			Status     string `validate:"required,eq=on|eq=off"`
 		}

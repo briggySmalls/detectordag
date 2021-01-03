@@ -73,7 +73,7 @@ func (c *client) Get(deviceId string) (*Shadow, error) {
 	}
 	// Unpack
 	var shadowSchema DeviceShadowSchema
-	return shadowSchema.Extract([]byte(payload))
+	return shadowSchema.Extract(payload)
 }
 
 func (c *client) UpdateConnectionStatus(deviceID, status string) (*Shadow, error) {

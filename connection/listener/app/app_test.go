@@ -48,7 +48,7 @@ func TestConnectedEvent(t *testing.T) {
 	}
 	mockIoTClient.EXPECT().GetThing(deviceID).Return(&device, nil)
 	// Configure call to update the connection status
-	mockConnectionUpdater.EXPECT().UpdateConnectionStatus(&device, createTime(t, timeString), status)
+	mockConnectionUpdater.EXPECT().UpdateConnectionStatus(device.DeviceId, createTime(t, timeString), status)
 	// Prepare an event
 	event := DeviceLifecycleEvent{DeviceID: deviceID, EventType: eventType, Timestamp: timestamp}
 	// Run the test
