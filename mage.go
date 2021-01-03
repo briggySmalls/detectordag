@@ -157,10 +157,6 @@ func ConfigureImg() error {
 func RegisterAWS() error {
 	mg.Deps(deviceBuildDir)
 	// Get some configuration
-	name, err := getEnvVar("DDAG_DEVICE_NAME")
-	if err != nil {
-		return err
-	}
 	deviceID, err := getEnvVar(deviceIDEnvVar)
 	if err != nil {
 		return err
@@ -176,7 +172,7 @@ func RegisterAWS() error {
 		return err
 	}
 	// Register the new device
-	_, certificates, err := client.RegisterThing(accountID, deviceID, name)
+	_, certificates, err := client.RegisterThing(accountID, deviceID)
 	if err != nil {
 		return err
 	}

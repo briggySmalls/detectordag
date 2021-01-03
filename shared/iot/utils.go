@@ -18,11 +18,6 @@ type deviceSource interface {
 }
 
 func (t *thingAttribute) ToDevice() (*Device, error) {
-	// Get the name
-	name, err := t.getAttribute(nameAttributeName)
-	if err != nil {
-		return nil, err
-	}
 	// Get the account ID
 	accountID, err := t.getAttribute(accountIDAttributeName)
 	if err != nil {
@@ -31,7 +26,6 @@ func (t *thingAttribute) ToDevice() (*Device, error) {
 	// Get the device ID
 	deviceID := t.ThingName
 	return &Device{
-		Name:      name,
 		DeviceId:  *deviceID,
 		AccountId: accountID,
 	}, nil
@@ -45,11 +39,6 @@ func (t *thingAttribute) getAttribute(key string) (string, error) {
 }
 
 func (t *describeThingOutput) ToDevice() (*Device, error) {
-	// Get the name
-	name, err := t.getAttribute(nameAttributeName)
-	if err != nil {
-		return nil, err
-	}
 	// Get the account ID
 	accountID, err := t.getAttribute(accountIDAttributeName)
 	if err != nil {
@@ -58,7 +47,6 @@ func (t *describeThingOutput) ToDevice() (*Device, error) {
 	// Get the device ID
 	deviceID := t.ThingName
 	return &Device{
-		Name:      name,
 		DeviceId:  *deviceID,
 		AccountId: accountID,
 	}, nil

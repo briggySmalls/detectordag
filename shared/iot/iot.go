@@ -24,13 +24,11 @@ type client struct {
 type Client interface {
 	GetThing(id string) (*Device, error)
 	GetThingsByAccount(id string) ([]*Device, error)
-	RegisterThing(accountID, deviceID, name string) (*Device, *Certificates, error)
-	UpdateThing(id, name string) (*Device, error)
+	RegisterThing(accountID, deviceID string) (*Device, *Certificates, error)
 }
 
 // Device holds the non-state properties of a device
 type Device struct {
-	Name      string
 	DeviceId  string
 	AccountId string
 }
@@ -76,14 +74,14 @@ func (c *client) GetThingsByAccount(id string) ([]*Device, error) {
 }
 
 // RegisterThing creates a new thing and provides certificates for it to communicate
-func (c *client) RegisterThing(accountID, deviceID, name string) (*Device, *Certificates, error) {
+func (c *client) RegisterThing(accountID, deviceID string) (*Device, *Certificates, error) {
 	// Create a new certificate
 	certsResponse, err := c.createCertificate()
 	if err != nil {
 		return nil, nil, err
 	}
 	// Create a new thing
-	_, err = c.registerThing(deviceID, *certsResponse.CertificateId, name, accountID)
+	_, err = c.registerThing(deviceID, *certsResponse.CertificateId, accountID)
 	// Check if we failed to create the thing
 	if err != nil {
 		log.Printf("Failed to RegisterThing: %v", err)
@@ -100,7 +98,6 @@ func (c *client) RegisterThing(accountID, deviceID, name string) (*Device, *Cert
 	// We're all done!
 	d := Device{
 		DeviceId:  deviceID,
-		Name:      name,
 		AccountId: accountID,
 	}
 	certs := Certificates{
@@ -116,25 +113,6 @@ func (c *client) RegisterThing(accountID, deviceID, name string) (*Device, *Cert
 	return &d, &certs, nil
 }
 
-func (c *client) UpdateThing(id, name string) (*Device, error) {
-	// Set the attribute
-	_, err := c.iot.UpdateThing(&iot.UpdateThingInput{
-		ThingName:     aws.String(id),
-		ThingTypeName: aws.String(thingType),
-		AttributePayload: &iot.AttributePayload{
-			Attributes: map[string]*string{
-				nameAttributeName: aws.String(name),
-			},
-			Merge: aws.Bool(true), // Don't nuke the other attributes
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
-	// Fetch the new device info
-	return c.GetThing(id)
-}
-
 // createCertificate creates a new certificate
 func (c *client) createCertificate() (*iot.CreateKeysAndCertificateOutput, error) {
 	return c.iot.CreateKeysAndCertificate(&iot.CreateKeysAndCertificateInput{
@@ -142,7 +120,7 @@ func (c *client) createCertificate() (*iot.CreateKeysAndCertificateOutput, error
 	})
 }
 
-func (c *client) registerThing(deviceId, certificateID, name, accountID string) (*iot.RegisterThingOutput, error) {
+func (c *client) registerThing(deviceId, certificateID, accountID string) (*iot.RegisterThingOutput, error) {
 	return c.iot.RegisterThing(&iot.RegisterThingInput{
 		// Use the template for provisioning a new device
 		TemplateBody: aws.String(provisioningTemplate),
@@ -151,7 +129,6 @@ func (c *client) registerThing(deviceId, certificateID, name, accountID string) 
 			"DeviceId":      aws.String(deviceId),
 			"ThingGroup":    aws.String(thingGroup),
 			"ThingType":     aws.String(thingType),
-			"DeviceName":    aws.String(name),
 			"AccountId":     aws.String(accountID),
 			"CertificateId": aws.String(certificateID),
 		},

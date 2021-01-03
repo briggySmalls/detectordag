@@ -15,9 +15,6 @@ var provisioningTemplate = `
         "CertificateId": {
             "Type": "String"
         },
-        "DeviceName": {
-            "Type": "String"
-        },
         "AccountId": {
             "Type": "String"
         }
@@ -29,7 +26,7 @@ var provisioningTemplate = `
                 "ThingName": {"Ref": "DeviceId"},
                 "ThingGroups": [{"Ref" : "ThingGroup"}],
                 "ThingTypeName" :  {"Ref" : "ThingType"},
-                "AttributePayload" : {"name": {"Ref": "DeviceName"}, "account-id": {"Ref": "AccountId"}, "visibility": "false"}
+                "AttributePayload" : {"account-id": {"Ref": "AccountId"}, "visibility": "false"}
             }
         },
         "certificate" : {

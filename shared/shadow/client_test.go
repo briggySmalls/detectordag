@@ -66,7 +66,7 @@ func TestGetShadow(t *testing.T) {
 	}
 }
 
-func TestSetVisibilityStatus(t *testing.T) {
+func TestSetConnectionStatus(t *testing.T) {
 	// Create some test iterations
 	testParams := []struct {
 		deviceID      string
@@ -126,11 +126,89 @@ func TestSetVisibilityStatus(t *testing.T) {
 		mock.EXPECT().UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
 			ThingName: aws.String(params.deviceID),
 			Payload:   []byte(params.payload),
-		}).Return(&iotdataplane.UpdateThingShadowOutput{
-			Payload: []byte(params.returnPayload),
-		}, nil)
+		})
+		mock.EXPECT().GetThingShadow(&iotdataplane.GetThingShadowInput{
+			ThingName: aws.String(params.deviceID),
+		}).Return(
+			&iotdataplane.GetThingShadowOutput{
+				Payload: []byte(params.returnPayload),
+			}, nil)
 		// Run the test
 		shadow, err := client.UpdateConnectionStatus(params.deviceID, params.status)
+		assert.Nil(t, err)
+		assert.Equal(t, params.shadow, *shadow)
+	}
+}
+
+func TestSetName(t *testing.T) {
+	// Create some test iterations
+	testParams := []struct {
+		deviceID      string
+		name          string
+		payload       string
+		returnPayload string
+		shadow        Shadow
+	}{
+		{
+			deviceID:      "eb49b2e7-fd3a-4c03-b47f-b819281475e5",
+			name:          "Hello",
+			payload:       `{"state":{"reported":{"name":"Hello"}}}`,
+			returnPayload: `{"name":"Hello","metadata":{"reported":{"connection":{"timestamp":1584803417},"status":{"timestamp":1584803414}}},"state":{"reported":{"connection":"connected","status":"off"}},"timestamp":1584810789,"version":50}`,
+			shadow: Shadow{
+				Time:    time.Unix(1584810789, 0),
+				Version: 50,
+				Connection: StringShadowField{
+					Value:   CONNECTION_STATUS_CONNECTED,
+					Updated: time.Unix(1584803417, 0),
+				},
+				Power: StringShadowField{
+					Value:   POWER_STATUS_OFF,
+					Updated: time.Unix(1584803414, 0),
+				},
+			},
+		},
+		{
+			deviceID:      "eb49b2e7-fd3a-4c03-b47f-b819281475e5",
+			name:          "My Dag",
+			payload:       `{"state":{"reported":{"name":"My Dag"}}}`,
+			returnPayload: `{"name":"My Dag","metadata":{"reported":{"connection":{"timestamp":1584803417},"status":{"timestamp":1584803414}}},"state":{"reported":{"connection":"disconnected","status":"off"}},"timestamp":1584810789,"version":50}`,
+			shadow: Shadow{
+				Time:    time.Unix(1584810789, 0),
+				Version: 50,
+				Connection: StringShadowField{
+					Value:   CONNECTION_STATUS_DISCONNECTED,
+					Updated: time.Unix(1584803417, 0),
+				},
+				Power: StringShadowField{
+					Value:   POWER_STATUS_OFF,
+					Updated: time.Unix(1584803414, 0),
+				},
+			},
+		},
+	}
+	// Iterate the tests
+	for _, params := range testParams {
+		// Create mock controller
+		ctrl := gomock.NewController(t)
+		// Create mock database client
+		mock := NewMockIoTDataPlaneAPI(ctrl)
+		// Create the unit under test
+		client := client{
+			dp: mock,
+		}
+		// Configure expectations
+		mock.EXPECT().UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
+			ThingName: aws.String(params.deviceID),
+			Payload:   []byte(params.payload),
+		})
+		mock.EXPECT().GetThingShadow(&iotdataplane.GetThingShadowInput{
+			ThingName: aws.String(params.deviceID),
+		}).Return(
+			&iotdataplane.GetThingShadowOutput{
+				Payload: []byte(params.returnPayload),
+			}, nil)
+		// Run the test
+		shadow, err := client.UpdateName(params.deviceID, params.name)
 		assert.Nil(t, err)
 		assert.Equal(t, params.shadow, *shadow)
 	}
