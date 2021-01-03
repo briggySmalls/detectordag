@@ -43,6 +43,7 @@ type StringShadowField struct {
 type Shadow struct {
 	Time       time.Time
 	Version    int
+	Name       string
 	Connection StringShadowField
 	Power      StringShadowField
 }
@@ -52,6 +53,7 @@ type DeviceShadowSchema struct {
 	Version   int
 	State     struct {
 		Reported struct {
+			Name       string // Name could be unset
 			Connection string `validate:"required,eq=connected|eq=disconnected"`
 			Status     string `validate:"required,eq=on|eq=off"`
 		}
@@ -78,6 +80,7 @@ func (c *DeviceShadowSchema) Extract(payload []byte) (*Shadow, error) {
 	s := Shadow{
 		Time:    c.Timestamp.Time,
 		Version: c.Version,
+		Name:    c.State.Reported.Name,
 		Connection: StringShadowField{
 			Value:   c.State.Reported.Connection,
 			Updated: c.Metadata.Reported.Connection.Timestamp.Time,

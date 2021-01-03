@@ -66,7 +66,8 @@ func (a *auth) middleware(next http.Handler) http.Handler {
 		}
 		// Ensure we are authorised to access the account's resources
 		if accountID != tokenAccountID {
-			server.SetError(w, err, http.StatusUnauthorized)
+			// Don't reveal that the account exists by returning 403
+			server.SetError(w, errors.New("Not found"), http.StatusNotFound)
 			return
 		}
 		// Record the account ID in the context, in case people want it

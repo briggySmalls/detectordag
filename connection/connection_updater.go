@@ -47,7 +47,7 @@ func (e *connectionUpdater) UpdateConnectionStatus(device *iot.Device, timestamp
 	}
 	// Assemble the visibility status context
 	context := email.ContextData{
-		DeviceName: device.Name,
+		DeviceName: shdw.Name,
 		Time:       timestamp,
 	}
 	state, transition, err := connectionStatusToEnums(shdw)
@@ -59,7 +59,7 @@ func (e *connectionUpdater) UpdateConnectionStatus(device *iot.Device, timestamp
 }
 
 func DeviceString(device *iot.Device) string {
-	return fmt.Sprintf("Device '%s' ('%s')", device.DeviceId, device.Name)
+	return fmt.Sprintf("Device '%s'", device.DeviceId)
 }
 
 func connectionStatusToEnums(shdw *shadow.Shadow) (email.StateType, email.TransitionType, error) {

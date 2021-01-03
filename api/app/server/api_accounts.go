@@ -56,7 +56,7 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 		}
 		// Build the payload
 		payload[i] = models.Device{
-			Name:     device.Name,
+			Name:     shdw.Name,
 			DeviceId: device.DeviceId,
 			State: &models.DeviceState{
 				Power:   shdw.Power.Value,

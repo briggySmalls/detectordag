@@ -121,7 +121,6 @@ func TestEmailsSent(t *testing.T) {
 	device := iot.Device{
 		AccountId: accountID,
 		DeviceId:  deviceID,
-		Name:      "Alderney",
 	}
 	mockIoT.EXPECT().GetThing(deviceID).Return(
 		&device,

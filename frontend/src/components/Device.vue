@@ -5,9 +5,16 @@
     header-border-variant="dark"
   >
     <template #header>
-      <h4 class="mb-0">
-        {{ device.name }}
-      </h4>
+      <b-spinner v-if="isLoading" />
+      <EditableText
+        v-else
+        :value="deviceName"
+        @edited="updateDeviceName"
+      >
+        <h4 class="mb-0">
+          {{ deviceName }}
+        </h4>
+      </EditableText>
     </template>
 
     <b-card-body>
@@ -73,6 +80,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { render } from 'timeago.js';
 import { Device as DeviceModel } from '../../lib/client';
+import EditableText from './EditableText.vue';
 
 enum DeviceState {
   On = 1,
@@ -97,7 +105,11 @@ interface StateData {
   description: string;
 }
 
-@Component
+@Component({
+  components: {
+    EditableText,
+  },
+})
 export default class Device extends Vue {
   // Declare some enums so we can use them in the template
   private readonly deviceStateEnum: typeof DeviceState = DeviceState;
@@ -107,6 +119,8 @@ export default class Device extends Vue {
   private readonly connectionStateEnum: typeof ConnectionState = ConnectionState;
 
   @Prop() private device!: DeviceModel;
+
+  private isLoading = false;
 
   private readonly deviceStateInfo: Record<DeviceState, StateData> = {
     [DeviceState.On]: {
@@ -143,6 +157,38 @@ export default class Device extends Vue {
     if (els.length) {
       render(els);
     }
+  }
+
+  private updateDeviceName(name: string) {
+    this.$logger.debug(`need to update to ${name}`);
+    // Submit a request to set the device name
+    const auth = this.$storage.bundle;
+    // Redirect to login if these are not present
+    if (auth == null) {
+      this.$logger.debug('Token not available');
+      this.$router.push('/login');
+      return;
+    }
+    this.$clients.devices.updateDevice(`Bearer ${auth.token}`, this.device.deviceId, { name })
+      .then((response) => {
+        // Submit the new device info to the store
+        this.$store.commit('setDevice', response.data);
+        // We've bound to this so it will update automatically!
+        this.isLoading = false;
+      })
+      .catch((error) => {
+        this.$logger.debug(`Ah bugger: ${error}`);
+      });
+    // Indicate we are saving the name
+    this.isLoading = true;
+  }
+
+  private get deviceName(): string {
+    const { name } = this.device;
+    if (name === '') {
+      return this.device.deviceId.substring(0, 7);
+    }
+    return name;
   }
 
   private get deviceStatus(): string {
@@ -199,6 +245,7 @@ export default class Device extends Vue {
 }
 </script>
 
+
 <style lang="scss" scoped>
 @import '~bootstrap/scss/_functions.scss';
 @import '~bootstrap/scss/_variables.scss';
@@ -235,7 +282,7 @@ export default class Device extends Vue {
     padding: 0.8em;
     width: 3em;
     height: 3em;
-    background-color: theme-color('warning');
+
     border-radius: 1em;
   }
 }

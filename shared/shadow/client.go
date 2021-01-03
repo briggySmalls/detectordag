@@ -15,7 +15,8 @@ import (
 // Client represents a client to the device shadow service
 type Client interface {
 	Get(deviceId string) (*Shadow, error)
-	UpdateConnectionStatus(deviceID string, status string) (*Shadow, error)
+	UpdateConnectionStatus(deviceID, status string) (*Shadow, error)
+	UpdateName(deviceId, name string) (*Shadow, error)
 }
 
 type client struct {
@@ -31,6 +32,18 @@ type ConnectionUpdatePayload struct {
 }
 
 func (p *ConnectionUpdatePayload) Dump() ([]byte, error) {
+	return json.Marshal(p)
+}
+
+type NameUpdatePayload struct {
+	State struct {
+		Reported struct {
+			Name string `json:"name"`
+		} `json:"reported"`
+	} `json:"state"`
+}
+
+func (p *NameUpdatePayload) Dump() ([]byte, error) {
 	return json.Marshal(p)
 }
 
@@ -60,10 +73,10 @@ func (c *client) Get(deviceId string) (*Shadow, error) {
 	}
 	// Unpack
 	var shadowSchema DeviceShadowSchema
-	return shadowSchema.Extract([]byte(payload))
+	return shadowSchema.Extract(payload)
 }
 
-func (c *client) UpdateConnectionStatus(deviceID string, status string) (*Shadow, error) {
+func (c *client) UpdateConnectionStatus(deviceID, status string) (*Shadow, error) {
 	// Create new reported state
 	updatePayload := ConnectionUpdatePayload{}
 	updatePayload.State.Reported.Connection = status
@@ -72,9 +85,27 @@ func (c *client) UpdateConnectionStatus(deviceID string, status string) (*Shadow
 	if err != nil {
 		return nil, err
 	}
+	// Update
+	return c.updateShadow(deviceID, payload)
+}
+
+func (c *client) UpdateName(deviceID, name string) (*Shadow, error) {
+	// Create new reported state
+	updatePayload := NameUpdatePayload{}
+	updatePayload.State.Reported.Name = name
+	// Bundle up the request
+	payload, err := updatePayload.Dump()
+	if err != nil {
+		return nil, err
+	}
+	// Make the request
+	return c.updateShadow(deviceID, payload)
+}
+
+func (c *client) updateShadow(deviceID string, payload []byte) (*Shadow, error) {
 	// Make the request
 	log.Print(string(payload))
-	_, err = c.dp.UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
+	_, err := c.dp.UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
 		ThingName: aws.String(deviceID),
 		Payload:   payload,
 	})

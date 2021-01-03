@@ -6,12 +6,15 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { BootstrapVue, BIcon, BIconXCircleFill } from 'bootstrap-vue';
+import {
+  BootstrapVue, BIcon, BIconXCircleFill, BIconPencilSquare,
+} from 'bootstrap-vue';
 
 // Install BootstrapVue
 Vue.use(BootstrapVue);
 Vue.component('BIcon', BIcon);
 Vue.component('BIconXCircleFill', BIconXCircleFill);
+Vue.component('BIconPencilSquare', BIconPencilSquare);
 
 @Component
 export default class App extends Vue {}

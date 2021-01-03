@@ -19,6 +19,7 @@
           class="mb-2"
         >
           <template v-slot="{ tags, inputAttrs, inputHandlers, addTag, removeTag }">
+            {{/* Define a custom input */}}
             <b-input-group aria-controls="my-custom-emails-list">
               <input
                 v-bind="inputAttrs"
@@ -35,6 +36,7 @@
                 </b-button>
               </b-input-group-append>
             </b-input-group>
+            {{/* Define a custom visualisation of the current list */}}
             <b-list-group>
               <b-list-group-item
                 v-for="email in tags"

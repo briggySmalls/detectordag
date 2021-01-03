@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iotdataplane"
 	"github.com/golang/mock/gomock"
-	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,9 +22,28 @@ func TestGetShadow(t *testing.T) {
 	}{
 		{
 			deviceID: "63eda5eb-7f56-417f-88ed-44a9eb9e5f67",
+			payload:  `{"metadata":{"reported":{"connection":{"timestamp":1584803417},"status":{"timestamp":1584803414}}},"state":{"reported":{"name":"hello world","connection":"connected","status":"off"}},"timestamp":1584810789,"version":50}`,
+			error:    nil,
+			shadow: Shadow{
+				Name:    "hello world",
+				Time:    time.Unix(1584810789, 0),
+				Version: 50,
+				Connection: StringShadowField{
+					Value:   CONNECTION_STATUS_CONNECTED,
+					Updated: time.Unix(1584803417, 0),
+				},
+				Power: StringShadowField{
+					Value:   POWER_STATUS_OFF,
+					Updated: time.Unix(1584803414, 0),
+				},
+			},
+		},
+		{ // Missing a name
+			deviceID: "63eda5eb-7f56-417f-88ed-44a9eb9e5f67",
 			payload:  `{"metadata":{"reported":{"connection":{"timestamp":1584803417},"status":{"timestamp":1584803414}}},"state":{"reported":{"connection":"connected","status":"off"}},"timestamp":1584810789,"version":50}`,
 			error:    nil,
 			shadow: Shadow{
+				Name:    "",
 				Time:    time.Unix(1584810789, 0),
 				Version: 50,
 				Connection: StringShadowField{
@@ -55,32 +73,89 @@ func TestGetShadow(t *testing.T) {
 		}).Return(&iotdataplane.GetThingShadowOutput{Payload: []byte(params.payload)}, params.error)
 		// Run the test
 		shadow, err := client.Get(params.deviceID)
-		if err != params.error {
-			t.Errorf("Unexpected error: %v", err)
-			continue
-		}
-		// Assert parts of the shadow
-		if cmp.Equal(shadow, params.shadow) {
-			t.Errorf("Unexpected shadow: %v", shadow)
-		}
+		// Assert the outcome
+		assert.Equal(t, params.error, err)
+		assert.Equal(t, params.shadow, *shadow)
 	}
 }
 
-func TestSetVisibilityStatus(t *testing.T) {
+// A helper for executing UpdateConnectionStatus without arguments
+func updateConnectionStatusFactory(id, status string) func(Client) (*Shadow, error) {
+	return func(client Client) (*Shadow, error) {
+		return client.UpdateConnectionStatus(id, status)
+	}
+}
+
+// A helper for executing UpdateName without arguments
+func updateNameFactory(id, name string) func(Client) (*Shadow, error) {
+	return func(client Client) (*Shadow, error) {
+		return client.UpdateName(id, name)
+	}
+}
+
+func TestUpdateShadow(t *testing.T) {
 	// Create some test iterations
 	testParams := []struct {
 		deviceID      string
-		status        string
 		payload       string
 		returnPayload string
 		shadow        Shadow
+		testFunc      func(Client) (*Shadow, error)
 	}{
-		{
+		{ // Update connection to 'connected'
+			testFunc: updateConnectionStatusFactory(
+				"eb49b2e7-fd3a-4c03-b47f-b819281475e5",
+				CONNECTION_STATUS_CONNECTED,
+			),
 			deviceID:      "eb49b2e7-fd3a-4c03-b47f-b819281475e5",
-			status:        CONNECTION_STATUS_CONNECTED,
 			payload:       `{"state":{"reported":{"connection":"connected"}}}`,
-			returnPayload: `{"metadata":{"reported":{"connection":{"timestamp":1584803417},"status":{"timestamp":1584803414}}},"state":{"reported":{"connection":"connected","status":"off"}},"timestamp":1584810789,"version":50}`,
+			returnPayload: `{"metadata":{"reported":{"connection":{"timestamp":1584803417},"status":{"timestamp":1584803414}}},"state":{"reported":{"name":"my dag","connection":"connected","status":"off"}},"timestamp":1584810789,"version":50}`,
 			shadow: Shadow{
+				Name:    "my dag",
+				Time:    time.Unix(1584810789, 0),
+				Version: 50,
+				Connection: StringShadowField{
+					Value:   CONNECTION_STATUS_CONNECTED,
+					Updated: time.Unix(1584803417, 0),
+				},
+				Power: StringShadowField{
+					Value:   POWER_STATUS_OFF,
+					Updated: time.Unix(1584803414, 0),
+				},
+			},
+		},
+		{ // Update connection to 'disconnected'
+			testFunc: updateConnectionStatusFactory(
+				"eb49b2e7-fd3a-4c03-b47f-b819281475e5",
+				CONNECTION_STATUS_DISCONNECTED,
+			),
+			deviceID:      "eb49b2e7-fd3a-4c03-b47f-b819281475e5",
+			payload:       `{"state":{"reported":{"connection":"disconnected"}}}`,
+			returnPayload: `{"metadata":{"reported":{"connection":{"timestamp":1584803417},"status":{"timestamp":1584803414}}},"state":{"reported":{"name":"Annex","connection":"disconnected","status":"off"}},"timestamp":1584810789,"version":50}`,
+			shadow: Shadow{
+				Name:    "Annex",
+				Time:    time.Unix(1584810789, 0),
+				Version: 50,
+				Connection: StringShadowField{
+					Value:   CONNECTION_STATUS_DISCONNECTED,
+					Updated: time.Unix(1584803417, 0),
+				},
+				Power: StringShadowField{
+					Value:   POWER_STATUS_OFF,
+					Updated: time.Unix(1584803414, 0),
+				},
+			},
+		},
+		{ // Update name to 'Hello'
+			testFunc: updateNameFactory(
+				"eb49b2e7-fd3a-4c03-b47f-b819281475e5",
+				"Hello",
+			),
+			deviceID:      "eb49b2e7-fd3a-4c03-b47f-b819281475e5",
+			payload:       `{"state":{"reported":{"name":"Hello"}}}`,
+			returnPayload: `{"metadata":{"reported":{"connection":{"timestamp":1584803417},"status":{"timestamp":1584803414}}},"state":{"reported":{"name":"Hello","connection":"connected","status":"off"}},"timestamp":1584810789,"version":50}`,
+			shadow: Shadow{
+				Name:    "Hello",
 				Time:    time.Unix(1584810789, 0),
 				Version: 50,
 				Connection: StringShadowField{
@@ -94,11 +169,15 @@ func TestSetVisibilityStatus(t *testing.T) {
 			},
 		},
 		{
+			testFunc: updateNameFactory(
+				"eb49b2e7-fd3a-4c03-b47f-b819281475e5",
+				"My Dag",
+			),
 			deviceID:      "eb49b2e7-fd3a-4c03-b47f-b819281475e5",
-			status:        CONNECTION_STATUS_DISCONNECTED,
-			payload:       `{"state":{"reported":{"connection":"disconnected"}}}`,
-			returnPayload: `{"metadata":{"reported":{"connection":{"timestamp":1584803417},"status":{"timestamp":1584803414}}},"state":{"reported":{"connection":"disconnected","status":"off"}},"timestamp":1584810789,"version":50}`,
+			payload:       `{"state":{"reported":{"name":"My Dag"}}}`,
+			returnPayload: `{"metadata":{"reported":{"connection":{"timestamp":1584803417},"status":{"timestamp":1584803414}}},"state":{"reported":{"name":"My Dag","connection":"disconnected","status":"off"}},"timestamp":1584810789,"version":50}`,
 			shadow: Shadow{
+				Name:    "My Dag",
 				Time:    time.Unix(1584810789, 0),
 				Version: 50,
 				Connection: StringShadowField{
@@ -126,11 +205,15 @@ func TestSetVisibilityStatus(t *testing.T) {
 		mock.EXPECT().UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
 			ThingName: aws.String(params.deviceID),
 			Payload:   []byte(params.payload),
-		}).Return(&iotdataplane.UpdateThingShadowOutput{
-			Payload: []byte(params.returnPayload),
-		}, nil)
+		})
+		mock.EXPECT().GetThingShadow(&iotdataplane.GetThingShadowInput{
+			ThingName: aws.String(params.deviceID),
+		}).Return(
+			&iotdataplane.GetThingShadowOutput{
+				Payload: []byte(params.returnPayload),
+			}, nil)
 		// Run the test
-		shadow, err := client.UpdateConnectionStatus(params.deviceID, params.status)
+		shadow, err := params.testFunc(&client)
 		assert.Nil(t, err)
 		assert.Equal(t, params.shadow, *shadow)
 	}

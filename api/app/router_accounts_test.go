@@ -51,11 +51,12 @@ func TestGetDevicesSuccess(t *testing.T) {
 	tokens.EXPECT().Validate(token).Return(accountID, nil)
 	// Configure the IoT client to expect a request for devices
 	iotClient.EXPECT().GetThingsByAccount(accountID).Return([]*iot.Device{
-		{Name: devices[0].Name, AccountId: accountID, DeviceId: devices[0].DeviceId},
-		{Name: devices[1].Name, AccountId: accountID, DeviceId: devices[1].DeviceId},
+		{AccountId: accountID, DeviceId: devices[0].DeviceId},
+		{AccountId: accountID, DeviceId: devices[1].DeviceId},
 	}, nil)
 	// Configure the mock shadow client to expect calls for each device
 	shdw.EXPECT().Get(devices[0].DeviceId).Return(&shadow.Shadow{
+		Name: devices[0].Name,
 		Time: createTime(t, "2020/03/22 00:27:00"),
 		Power: shadow.StringShadowField{
 			Value:   devices[0].State.Power,
@@ -67,6 +68,7 @@ func TestGetDevicesSuccess(t *testing.T) {
 		},
 	}, nil)
 	shdw.EXPECT().Get(devices[1].DeviceId).Return(&shadow.Shadow{
+		Name: devices[1].Name,
 		Time: createTime(t, "2020/03/22 00:27:00"),
 		Power: shadow.StringShadowField{
 			Value:   devices[1].State.Power,

@@ -34,18 +34,18 @@ func TestGetThing(t *testing.T) {
 	device, err := c.GetThing(deviceID)
 	assert.NoError(t, err)
 	// Assert it has expected fields
-	assert.Equal(t, accountID, device.AccountId)
-	assert.Equal(t, deviceName, device.Name)
+	assert.Equal(t, Device{
+		AccountId: accountID,
+		DeviceId:  deviceID,
+	}, *device)
 }
 
 func TestGetThingsByAccount(t *testing.T) {
 	const (
-		accountID     = "9962902c-f7e7-417d-bea0-dc2eb0bc67d7"
-		nextToken     = "1a13f6f2-13e5-408d-a184-1ce292320175"
-		deviceOne     = "4fa62730-dd7a-421b-91b9-ec1f20ad265b"
-		deviceOneName = "One"
-		deviceTwo     = "70c3e40a-fbc2-40d7-9cb3-7f7637f85cb4"
-		deviceTwoName = "Two"
+		accountID = "9962902c-f7e7-417d-bea0-dc2eb0bc67d7"
+		nextToken = "1a13f6f2-13e5-408d-a184-1ce292320175"
+		deviceOne = "4fa62730-dd7a-421b-91b9-ec1f20ad265b"
+		deviceTwo = "70c3e40a-fbc2-40d7-9cb3-7f7637f85cb4"
 	)
 	// Create unit under test and mocks
 	mock, c := createUnitAndMocks(t)
@@ -62,7 +62,6 @@ func TestGetThingsByAccount(t *testing.T) {
 					ThingName: aws.String(deviceOne),
 					Attributes: map[string]*string{
 						accountIDAttributeName: aws.String(accountID),
-						nameAttributeName:      aws.String(deviceOneName),
 					},
 				},
 			},
@@ -79,7 +78,6 @@ func TestGetThingsByAccount(t *testing.T) {
 					ThingName: aws.String(deviceTwo),
 					Attributes: map[string]*string{
 						accountIDAttributeName: aws.String(accountID),
-						nameAttributeName:      aws.String(deviceTwoName),
 					},
 				},
 			},
@@ -90,8 +88,8 @@ func TestGetThingsByAccount(t *testing.T) {
 	assert.NoError(t, err)
 	// Assert the returned devices
 	expectedDevices := []Device{
-		{DeviceId: deviceOne, Name: deviceOneName, AccountId: accountID},
-		{DeviceId: deviceTwo, Name: deviceTwoName, AccountId: accountID},
+		{DeviceId: deviceOne, AccountId: accountID},
+		{DeviceId: deviceTwo, AccountId: accountID},
 	}
 	assert.Len(t, devices, len(expectedDevices))
 	for i, device := range devices {
@@ -103,7 +101,6 @@ func TestRegisterDevice(t *testing.T) {
 	const (
 		accountID             = "aac45d02-c97d-442c-8431-336d578fdcf7"
 		deviceID              = "f80103e1-ba55-4b55-b80e-b24f5dd518bb"
-		deviceName            = "Annex"
 		certificateID         = "d5c29c58-5a69-4b46-908e-13d2ad5b21a6"
 		certificatePem        = "THIS IS A PEM"
 		certificatePrivateKey = "THIS IS A PRIVATE KEY"
@@ -127,7 +124,6 @@ func TestRegisterDevice(t *testing.T) {
 		assert.Equal(t, provisioningTemplate, *input.TemplateBody)
 		assert.Equal(t, thingGroup, *input.Parameters["ThingGroup"])
 		assert.Equal(t, thingType, *input.Parameters["ThingType"])
-		assert.Equal(t, deviceName, *input.Parameters["DeviceName"])
 		assert.Equal(t, certificateID, *input.Parameters["CertificateId"])
 		assert.Equal(t, accountID, *input.Parameters["AccountId"])
 		assert.Equal(t, deviceID, *input.Parameters["DeviceId"])
@@ -138,16 +134,19 @@ func TestRegisterDevice(t *testing.T) {
 		assert.Equal(t, "ACTIVE", *input.NewStatus)
 	}).Return(nil, nil)
 	// Query for devices associated with an account
-	device, certs, err := c.RegisterThing(accountID, deviceID, deviceName)
+	device, certs, err := c.RegisterThing(accountID, deviceID)
 	assert.NoError(t, err)
 	// Assert device has expected fields
-	assert.Equal(t, deviceName, device.Name)
-	assert.Equal(t, accountID, device.AccountId)
-	assert.Equal(t, deviceID, device.DeviceId)
+	assert.Equal(t, Device{
+		AccountId: accountID,
+		DeviceId:  deviceID,
+	}, *device)
 	// Assert certs has expected fields
-	assert.Equal(t, certificatePem, certs.Certificate)
-	assert.Equal(t, certificatePublicKey, certs.Public)
-	assert.Equal(t, certificatePrivateKey, certs.Private)
+	assert.Equal(t, Certificates{
+		Certificate: certificatePem,
+		Public:      certificatePublicKey,
+		Private:     certificatePrivateKey,
+	}, *certs)
 }
 
 func createUnitAndMocks(t *testing.T) (*MockIoTAPI, Client) {
