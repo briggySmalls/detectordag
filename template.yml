@@ -58,16 +58,6 @@ Resources:
           Properties:
             Path: /v1/accounts/{accountId}/devices
             Method: options
-        RegisterDevice:
-          Type: Api
-          Properties:
-            Path: /v1/accounts/{accountId}/devices/{deviceId}
-            Method: put
-        RegisterDeviceOptions:
-          Type: Api
-          Properties:
-            Path: /v1/accounts/{accountId}/devices/{deviceId}
-            Method: options
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -84,15 +74,6 @@ Resources:
             - Effect: Allow
               Action:
                 - 'iot:ListThings'
-                - 'iot:CreateKeysAndCertificate'
-                - 'iot:UpdateCertificate'
-                - 'iot:DeleteCertificate'
-                - 'iot:DescribeCertificate'
-                - 'iot:DescribeThingType'
-                - 'iot:DescribeThingGroup'
-                - 'iot:RegisterThing'
-                - 'iot:AddThingToThingGroup'
-                - 'iot:AttachThingPrincipal'
               Resource: '*'
         - Version: '2012-10-17'
           Statement:
