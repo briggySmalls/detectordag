@@ -282,7 +282,7 @@ export default class Device extends Vue {
     padding: 0.8em;
     width: 3em;
     height: 3em;
-
+    background-color: theme-color('warning');
     border-radius: 1em;
   }
 }
