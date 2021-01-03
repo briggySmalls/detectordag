@@ -21,12 +21,31 @@
         v-if="devices"
         deck
       >
-        <DeviceComponent
-          v-for="device in devices"
-          :key="device.deviceId"
-          :device="device"
-          @errored="errorHandler"
-        />
+        <template v-for="(device, index) in devices">
+          <!-- wrap every 2 on sm -->
+          <div
+            v-if="index % 2 === 0"
+            :key="device.deviceId"
+            class="w-100 d-none d-sm-block d-md-none"
+          />
+          <!-- wrap every 3 on md -->
+          <div
+            v-if="index % 3 === 0"
+            :key="device.deviceId"
+            class="w-100 d-none d-md-block d-lg-none"
+          />
+          <!-- wrap every 4 on lg -->
+          <div
+            v-if="index % 4 === 0"
+            :key="device.deviceId"
+            class="w-100 d-none d-lg-block d-xl-none"
+          />
+          <DeviceComponent
+            :key="device.deviceId"
+            :device="device"
+            @errored="errorHandler"
+          />
+        </template>
       </b-card-group>
       <!-- Loading -->
       <b-spinner v-if="loading" />
