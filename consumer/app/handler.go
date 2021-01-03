@@ -99,8 +99,7 @@ func HandleRequest(ctx context.Context, event StatusUpdatedEvent) error {
 	}
 	// Construct an event to pass to the emailer
 	update := email.ContextData{
-		DeviceName: device.Name,
-		Time:       time.Unix(event.Updated.Status.Timestamp, 0),
+		Time: time.Unix(event.Updated.Status.Timestamp, 0),
 	}
 	// Send 'power status updated' emails
 	log.Printf("Send emails to: %s", account.Emails)

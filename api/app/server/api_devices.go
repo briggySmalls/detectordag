@@ -19,21 +19,15 @@ func (s *server) UpdateDevice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Update the name
-	newDevice, err := s.iot.UpdateThing(id, updates.Name)
-	if err != nil {
-		SetError(w, err, http.StatusInternalServerError)
-		return
-	}
-	// Request the shadow
-	shdw, err := s.shadow.Get(newDevice.DeviceId)
+	shdw, err := s.shadow.UpdateName(id, updates.Name)
 	if err != nil {
 		SetError(w, err, http.StatusInternalServerError)
 		return
 	}
 	// Build the payload
 	payload := models.Device{
-		Name:     newDevice.Name,
-		DeviceId: newDevice.DeviceId,
+		Name:     shdw.Name,
+		DeviceId: id,
 		State: &models.DeviceState{
 			Power:   shdw.Power.Value,
 			Updated: shdw.Power.Updated,

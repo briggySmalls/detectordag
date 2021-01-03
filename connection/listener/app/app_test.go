@@ -44,7 +44,7 @@ func TestConnectedEvent(t *testing.T) {
 	app, mockConnectionUpdater, mockIoTClient, _ := getStubbedApp(t)
 	// Configure call to fetching device
 	device := iot.Device{
-		Name: "myname", DeviceId: deviceID, AccountId: accountID,
+		DeviceId: deviceID, AccountId: accountID,
 	}
 	mockIoTClient.EXPECT().GetThing(deviceID).Return(&device, nil)
 	// Configure call to update the connection status
