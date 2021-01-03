@@ -5,15 +5,14 @@
       inline
       class="justify-content-center"
     >
+      <label
+        class="sr-only"
+        for="inline-form-input-name"
+      >Device name</label>
       <b-input-group>
-        <label
-          class="sr-only"
-          for="inline-form-input-name"
-        >Device name</label>
         <b-form-input
           id="inline-form-input-name"
           v-model="input"
-          class="mb-2 mr-sm-2 mb-sm-0"
           type="text"
           :placeholder="value"
         />
@@ -23,7 +22,14 @@
             variant="primary"
             @click="submit"
           >
-            Set
+            Save
+          </b-button>
+          <b-button
+            type="cancel"
+            variant="secondary"
+            @click="cancel"
+          >
+            Cancel
           </b-button>
         </b-input-group-append>
       </b-input-group>
@@ -66,6 +72,13 @@ export default class EditableText extends Vue {
     this.isEditing = false;
     // Get the current value
     this.$emit('edited', this.input);
+  }
+
+  private cancel() {
+    this.$logger.debug('cancelled');
+    // Clear anything typed
+    this.input = '';
+    this.isEditing = false;
   }
 }
 </script>
