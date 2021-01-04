@@ -82,7 +82,7 @@ Resources:
                 - 'iot:DescribeThing'
                 - 'iot:ListThingGroupsForThing'
                 - 'iot:GetThingShadow'
-                - 'iot:CreateThing'
+                - 'iot:UpdateThingShadow'
               Resource:
                 - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
         - Version: '2012-10-17'
