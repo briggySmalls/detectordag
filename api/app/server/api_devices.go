@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/briggysmalls/detectordag/api/app/models"
 	"github.com/gorilla/mux"
+	"log"
 	"net/http"
 )
 
@@ -15,12 +16,14 @@ func (s *server) UpdateDevice(w http.ResponseWriter, r *http.Request) {
 	var updates models.MutableDevice
 	err = json.NewDecoder(r.Body).Decode(&updates)
 	if err != nil {
+		log.Printf("Failed to parse body: %v", r.Body)
 		SetError(w, err, http.StatusBadRequest)
 		return
 	}
 	// Update the name
 	shdw, err := s.shadow.UpdateName(id, updates.Name)
 	if err != nil {
+		log.Printf("Failed to update shadow")
 		SetError(w, err, http.StatusInternalServerError)
 		return
 	}
@@ -40,6 +43,7 @@ func (s *server) UpdateDevice(w http.ResponseWriter, r *http.Request) {
 	// Build response content
 	body, err := json.Marshal(payload)
 	if err != nil {
+		log.Printf("Failed to serialise response")
 		SetError(w, err, http.StatusInternalServerError)
 	}
 	// Write the response
