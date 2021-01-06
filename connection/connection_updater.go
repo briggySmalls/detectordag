@@ -36,7 +36,7 @@ func NewConnectionUpdater(sesh *session.Session, db database.Client, shadow shad
 func (e *connectionUpdater) UpdateConnectionStatus(device *iot.Device, timestamp time.Time, status string) error {
 	log.Printf("Sending visibility email for device: %s with state '%s'", DeviceString(device), status)
 	// Update the internal record of connection status
-	shdw, err := e.shadow.UpdateConnectionStatus(device.DeviceId, status)
+	shdw, err := e.shadow.UpdateConnectionStatus(device.DeviceId, status, timestamp)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func DeviceString(device *iot.Device) string {
 }
 
 func connectionStatusToEnums(shdw *shadow.Shadow) (email.StateType, email.TransitionType, error) {
-	connection := shdw.Connection.Value
+	connection := shdw.Connection.Status
 	power := shdw.Power.Value
 	// Lookup the state
 	state, err := email.ToStateType(connection, power)

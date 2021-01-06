@@ -63,7 +63,7 @@ func (s *server) GetDevices(w http.ResponseWriter, r *http.Request) {
 				Updated: shdw.Power.Updated,
 			},
 			Connection: &models.DeviceConnection{
-				Status:  shdw.Connection.Value,
+				Status:  shdw.Connection.Status,
 				Updated: shdw.Connection.Updated,
 			},
 		}
