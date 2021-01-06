@@ -1,9 +1,10 @@
 package shadow
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestInvalid(t *testing.T) {
@@ -35,7 +36,10 @@ func TestSuccess(t *testing.T) {
 	  },
 	  "state": {
 	    "reported": {
-	      "connection": "connected",
+	      "connection": {
+			  "status": "connected",
+			  "transientId": "f5dc1874-5ba1-4727-8366-35d8278ea3e4",
+			  "updated": 1584803417,
 	      "status": "off"
 	    }
 	  },
@@ -50,8 +54,9 @@ func TestSuccess(t *testing.T) {
 	assert.Equal(t, time.Unix(1584810789, 0), shadow.Time)
 	assert.Equal(t, 50, shadow.Version)
 	// Assert the connection values
-	assert.Equal(t, CONNECTION_STATUS_CONNECTED, shadow.Connection.Value)
+	assert.Equal(t, CONNECTION_STATUS_CONNECTED, shadow.Connection.Status)
 	assert.Equal(t, time.Unix(1584803417, 0), shadow.Connection.Updated)
+	assert.Equal(t, "f5dc1874-5ba1-4727-8366-35d8278ea3e4", shadow.Connection.TransientID)
 	// Assert the power values
 	assert.Equal(t, POWER_STATUS_OFF, shadow.Power.Value)
 	assert.Equal(t, time.Unix(1584803414, 0), shadow.Power.Updated)

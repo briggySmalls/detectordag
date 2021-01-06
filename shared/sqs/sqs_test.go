@@ -4,11 +4,12 @@ package sqs
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/golang/mock/gomock"
-	"testing"
-	"time"
 )
 
 const (
@@ -21,16 +22,22 @@ func TestSend(t *testing.T) {
 	// Set some test parameters
 	const (
 		deviceId = "573b0564-12f1-47fb-adf5-2d0906b39123"
+		eventID  = "186b8a97-bd3e-43fc-ade1-e1d4f66bcb18"
+		status   = "connected"
 	)
 	// Configure mock to expect a call
 	isqs.EXPECT().SendMessage(&sqs.SendMessageInput{
-		MessageBody: aws.String(fmt.Sprintf(`{"deviceId":"%s","time":"1970-01-01T00:00:00Z"}`, deviceId)),
-		QueueUrl:    aws.String(QueueUrl),
+		MessageBody: aws.String(fmt.Sprintf(
+			`{"deviceId":"%s","status":"%s","time":"1970-01-01T00:00:00Z","id":"%s"}`,
+			deviceId, status, eventID)),
+		QueueUrl: aws.String(QueueUrl),
 	}).Return(nil, nil)
 	// Make the call
-	client.QueueDisconnectedEvent(DisconnectedPayload{
+	client.QueueConnectionEvent(ConnectionEventPayload{
 		DeviceID: deviceId,
 		Time:     time.Unix(0, 0).UTC(),
+		Status:   status,
+		ID:       eventID,
 	})
 }
 

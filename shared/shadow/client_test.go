@@ -28,11 +28,12 @@ func TestGetShadow(t *testing.T) {
 				Name:    "hello world",
 				Time:    time.Unix(1584810789, 0),
 				Version: 50,
-				Connection: StringShadowField{
-					Value:   CONNECTION_STATUS_CONNECTED,
-					Updated: time.Unix(1584803417, 0),
+				Connection: ConnectionShadow{
+					Status:      CONNECTION_STATUS_CONNECTED,
+					TransientID: "f5dc1874-5ba1-4727-8366-35d8278ea3e4",
+					Updated:     time.Unix(1584803417, 0),
 				},
-				Power: StringShadowField{
+				Power: PowerShadow{
 					Value:   POWER_STATUS_OFF,
 					Updated: time.Unix(1584803414, 0),
 				},
@@ -46,11 +47,12 @@ func TestGetShadow(t *testing.T) {
 				Name:    "",
 				Time:    time.Unix(1584810789, 0),
 				Version: 50,
-				Connection: StringShadowField{
-					Value:   CONNECTION_STATUS_CONNECTED,
-					Updated: time.Unix(1584803417, 0),
+				Connection: ConnectionShadow{
+					Status:      CONNECTION_STATUS_CONNECTED,
+					Updated:     time.Unix(1584803417, 0),
+					TransientID: "f5dc1874-5ba1-4727-8366-35d8278ea3e4",
 				},
-				Power: StringShadowField{
+				Power: PowerShadow{
 					Value:   POWER_STATUS_OFF,
 					Updated: time.Unix(1584803414, 0),
 				},
@@ -80,9 +82,9 @@ func TestGetShadow(t *testing.T) {
 }
 
 // A helper for executing UpdateConnectionStatus without arguments
-func updateConnectionStatusFactory(id, status string) func(Client) (*Shadow, error) {
+func updateConnectionStatusFactory(id, status string, time time.Time) func(Client) (*Shadow, error) {
 	return func(client Client) (*Shadow, error) {
-		return client.UpdateConnectionStatus(id, status)
+		return client.UpdateConnectionStatus(id, status, time)
 	}
 }
 
@@ -97,6 +99,7 @@ func TestUpdateShadow(t *testing.T) {
 	// Create some test iterations
 	testParams := []struct {
 		deviceID      string
+		status        string
 		payload       string
 		returnPayload string
 		shadow        Shadow
@@ -106,6 +109,7 @@ func TestUpdateShadow(t *testing.T) {
 			testFunc: updateConnectionStatusFactory(
 				"eb49b2e7-fd3a-4c03-b47f-b819281475e5",
 				CONNECTION_STATUS_CONNECTED,
+				time.Unix(1584803414, 0),
 			),
 			deviceID:      "eb49b2e7-fd3a-4c03-b47f-b819281475e5",
 			payload:       `{"state":{"reported":{"connection":"connected"}}}`,
@@ -114,11 +118,12 @@ func TestUpdateShadow(t *testing.T) {
 				Name:    "my dag",
 				Time:    time.Unix(1584810789, 0),
 				Version: 50,
-				Connection: StringShadowField{
-					Value:   CONNECTION_STATUS_CONNECTED,
-					Updated: time.Unix(1584803417, 0),
+				Connection: ConnectionShadow{
+					Status:      CONNECTION_STATUS_CONNECTED,
+					TransientID: "8fc7a9b2-5422-461e-aa38-5e4c03d11f54",
+					Updated:     time.Unix(1584803417, 0),
 				},
-				Power: StringShadowField{
+				Power: PowerShadow{
 					Value:   POWER_STATUS_OFF,
 					Updated: time.Unix(1584803414, 0),
 				},
@@ -128,6 +133,7 @@ func TestUpdateShadow(t *testing.T) {
 			testFunc: updateConnectionStatusFactory(
 				"eb49b2e7-fd3a-4c03-b47f-b819281475e5",
 				CONNECTION_STATUS_DISCONNECTED,
+				time.Unix(1584803414, 0),
 			),
 			deviceID:      "eb49b2e7-fd3a-4c03-b47f-b819281475e5",
 			payload:       `{"state":{"reported":{"connection":"disconnected"}}}`,
@@ -136,11 +142,12 @@ func TestUpdateShadow(t *testing.T) {
 				Name:    "Annex",
 				Time:    time.Unix(1584810789, 0),
 				Version: 50,
-				Connection: StringShadowField{
-					Value:   CONNECTION_STATUS_DISCONNECTED,
-					Updated: time.Unix(1584803417, 0),
+				Connection: ConnectionShadow{
+					Status:      CONNECTION_STATUS_CONNECTED,
+					Updated:     time.Unix(1584803417, 0),
+					TransientID: "f5dc1874-5ba1-4727-8366-35d8278ea3e4",
 				},
-				Power: StringShadowField{
+				Power: PowerShadow{
 					Value:   POWER_STATUS_OFF,
 					Updated: time.Unix(1584803414, 0),
 				},
@@ -158,11 +165,12 @@ func TestUpdateShadow(t *testing.T) {
 				Name:    "Hello",
 				Time:    time.Unix(1584810789, 0),
 				Version: 50,
-				Connection: StringShadowField{
-					Value:   CONNECTION_STATUS_CONNECTED,
-					Updated: time.Unix(1584803417, 0),
+				Connection: ConnectionShadow{
+					Status:      CONNECTION_STATUS_CONNECTED,
+					Updated:     time.Unix(1584803417, 0),
+					TransientID: "f5dc1874-5ba1-4727-8366-35d8278ea3e4",
 				},
-				Power: StringShadowField{
+				Power: PowerShadow{
 					Value:   POWER_STATUS_OFF,
 					Updated: time.Unix(1584803414, 0),
 				},
@@ -180,11 +188,12 @@ func TestUpdateShadow(t *testing.T) {
 				Name:    "My Dag",
 				Time:    time.Unix(1584810789, 0),
 				Version: 50,
-				Connection: StringShadowField{
-					Value:   CONNECTION_STATUS_DISCONNECTED,
-					Updated: time.Unix(1584803417, 0),
+				Connection: ConnectionShadow{
+					Status:      CONNECTION_STATUS_DISCONNECTED,
+					Updated:     time.Unix(1584803417, 0),
+					TransientID: "f5dc1874-5ba1-4727-8366-35d8278ea3e4",
 				},
-				Power: StringShadowField{
+				Power: PowerShadow{
 					Value:   POWER_STATUS_OFF,
 					Updated: time.Unix(1584803414, 0),
 				},

@@ -9,6 +9,7 @@ import (
 	"github.com/briggysmalls/detectordag/api/app/models"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -47,38 +48,42 @@ func TestGetDevicesSuccess(t *testing.T) {
 	}
 	// Create a client
 	_, shdw, _, iotClient, tokens, router := createRealRouter(t)
-	// Configure the tokens to expect a call to validate a token
-	tokens.EXPECT().Validate(token).Return(accountID, nil)
-	// Configure the IoT client to expect a request for devices
-	iotClient.EXPECT().GetThingsByAccount(accountID).Return([]*iot.Device{
-		{AccountId: accountID, DeviceId: devices[0].DeviceId},
-		{AccountId: accountID, DeviceId: devices[1].DeviceId},
-	}, nil)
-	// Configure the mock shadow client to expect calls for each device
-	shdw.EXPECT().Get(devices[0].DeviceId).Return(&shadow.Shadow{
-		Name: devices[0].Name,
-		Time: createTime(t, "2020/03/22 00:27:00"),
-		Power: shadow.StringShadowField{
-			Value:   devices[0].State.Power,
-			Updated: devices[0].State.Updated,
-		},
-		Connection: shadow.StringShadowField{
-			Value:   devices[0].Connection.Status,
-			Updated: devices[0].Connection.Updated,
-		},
-	}, nil)
-	shdw.EXPECT().Get(devices[1].DeviceId).Return(&shadow.Shadow{
-		Name: devices[1].Name,
-		Time: createTime(t, "2020/03/22 00:27:00"),
-		Power: shadow.StringShadowField{
-			Value:   devices[1].State.Power,
-			Updated: devices[1].State.Updated,
-		},
-		Connection: shadow.StringShadowField{
-			Value:   devices[1].Connection.Status,
-			Updated: devices[1].Connection.Updated,
-		},
-	}, nil)
+	gomock.InOrder(
+		// Configure the tokens to expect a call to validate a token
+		tokens.EXPECT().Validate(token).Return(accountID, nil),
+		// Configure the IoT client to expect a request for devices
+		iotClient.EXPECT().GetThingsByAccount(accountID).Return([]*iot.Device{
+			{AccountId: accountID, DeviceId: devices[0].DeviceId},
+			{AccountId: accountID, DeviceId: devices[1].DeviceId},
+		}, nil),
+		// Configure the mock shadow client to expect calls for each device
+		shdw.EXPECT().Get(devices[0].DeviceId).Return(&shadow.Shadow{
+			Name: devices[0].Name,
+			Time: createTime(t, "2020/03/22 00:27:00"),
+			Power: shadow.PowerShadow{
+				Value:   devices[0].State.Power,
+				Updated: devices[0].State.Updated,
+			},
+			Connection: shadow.ConnectionShadow{
+				Status:      devices[0].Connection.Status,
+				TransientID: "0a72fb5e-6489-49d5-aadb-782d54d1ed1f",
+				Updated:     devices[0].Connection.Updated,
+			},
+		}, nil),
+		shdw.EXPECT().Get(devices[1].DeviceId).Return(&shadow.Shadow{
+			Name: devices[1].Name,
+			Time: createTime(t, "2020/03/22 00:27:00"),
+			Power: shadow.PowerShadow{
+				Value:   devices[1].State.Power,
+				Updated: devices[1].State.Updated,
+			},
+			Connection: shadow.ConnectionShadow{
+				Status:      devices[1].Connection.Status,
+				TransientID: "63c7d830-724a-4715-aa1e-dc8934cd32fb",
+				Updated:     devices[1].Connection.Updated,
+			},
+		}, nil),
+	)
 	// Create a request for devices
 	req := createRequest(t, "GET", fmt.Sprintf("/v1/accounts/%s/devices", accountID), nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))

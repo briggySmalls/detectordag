@@ -7,13 +7,14 @@ package app
 import (
 	"errors"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 func TestInvalidPayload(t *testing.T) {
@@ -64,12 +65,21 @@ func TestStaleEvent(t *testing.T) {
 	// Construct the event
 	event := events.SQSEvent{
 		Records: []events.SQSMessage{
-			{Body: `{"deviceId":"e35238bb-ca2c-4e2b-88da-3d305ffe904c","time":"2020-12-12T19:58:16+00:00"}`},
+			{Body: `{
+				"deviceId":"e35238bb-ca2c-4e2b-88da-3d305ffe904c",
+				"transientId":"4e0a66f2-c928-4ad5-8870-b0c72ded0ae4",
+				"time":"2020-12-12T19:58:16+00:00",
+				"status":"connected"
+			}`},
 		},
 	}
 	// Expect a call to shadow
 	mockShadow.EXPECT().Get(deviceID).Return(
-		&shadow.Shadow{Connection: shadow.StringShadowField{Value: shadow.CONNECTION_STATUS_CONNECTED, Updated: createTime(t, "2020/12/12 19:58:17")}},
+		&shadow.Shadow{Connection: shadow.ConnectionShadow{
+			Status:      shadow.CONNECTION_STATUS_CONNECTED,
+			TransientID: "52068a06-f89d-4256-9b64-48fa990088d9",
+			Updated:     createTime(t, "2020/12/12 19:58:17"),
+		}},
 		nil,
 	)
 	// Run the test
@@ -93,7 +103,11 @@ func TestDeviceLookupFailed(t *testing.T) {
 	// Expect a call to shadow
 	mockShadow.EXPECT().Get(deviceID).Return(
 		// Indicate the status hasn't been updated for a while
-		&shadow.Shadow{Connection: shadow.StringShadowField{Value: shadow.CONNECTION_STATUS_CONNECTED, Updated: createTime(t, "2020/12/12 00:00:00")}},
+		&shadow.Shadow{Connection: shadow.ConnectionShadow{
+			Status:      shadow.CONNECTION_STATUS_CONNECTED,
+			TransientID: "52068a06-f89d-4256-9b64-48fa990088d9",
+			Updated:     createTime(t, "2020/12/12 00:00:00"),
+		}},
 		nil,
 	)
 	// Configure lookup to fail
@@ -114,7 +128,11 @@ func TestEmailsSent(t *testing.T) {
 	// Expect a call to shadow
 	mockShadow.EXPECT().Get(deviceID).Return(
 		// Indicate the status hasn't been updated for a while
-		&shadow.Shadow{Connection: shadow.StringShadowField{Value: shadow.CONNECTION_STATUS_CONNECTED, Updated: createTime(t, "2020/12/12 00:00:00")}},
+		&shadow.Shadow{Connection: shadow.ConnectionShadow{
+			Status:      shadow.CONNECTION_STATUS_CONNECTED,
+			TransientID: "52068a06-f89d-4256-9b64-48fa990088d9",
+			Updated:     createTime(t, "2020/12/12 00:00:00"),
+		}},
 		nil,
 	)
 	// Configure lookup to succeed

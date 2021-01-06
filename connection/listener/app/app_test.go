@@ -5,13 +5,14 @@ package app
 //go:generate go run github.com/golang/mock/mockgen -destination mock_iot.go -package app -mock_names Client=MockIoTClient github.com/briggysmalls/detectordag/shared/iot Client
 
 import (
+	"testing"
+	"time"
+
 	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/shared/sqs"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 func TestInvalidEventType(t *testing.T) {
@@ -57,18 +58,21 @@ func TestConnectedEvent(t *testing.T) {
 
 func TestDisconnectedEvent(t *testing.T) {
 	const (
-		deviceID   = "792ac520-0733-4ffe-8137-8aba3ca446d7"
-		eventType  = "disconnected"
-		status     = false
-		timestamp  = 0
-		timeString = "1970/01/01 00:00:00"
+		deviceID    = "792ac520-0733-4ffe-8137-8aba3ca446d7"
+		eventType   = "disconnected"
+		status      = false
+		timestamp   = 0
+		timeString  = "1970/01/01 00:00:00"
+		TransientID = "f5e0f6e2-e8b4-4233-bba2-8b2f0725d483"
 	)
 	// Create app under test
 	app, _, _, mockSQS := getStubbedApp(t)
 	// Configure call to queue the disconnected event
-	mockSQS.EXPECT().QueueDisconnectedEvent(sqs.DisconnectedPayload{
+	mockSQS.EXPECT().QueueConnectionEvent(sqs.ConnectionEventPayload{
 		DeviceID: deviceID,
+		Status:   shadow.CONNECTION_STATUS_DISCONNECTED,
 		Time:     createTime(t, timeString),
+		ID:       TransientID,
 	})
 	// Prepare an event
 	event := DeviceLifecycleEvent{DeviceID: deviceID, EventType: eventType, Timestamp: timestamp}
