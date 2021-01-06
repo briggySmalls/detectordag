@@ -31,7 +31,7 @@ type ConnectionUpdatePayload struct {
 			Connection struct {
 				Status  string    `json:"current"`
 				Updated Timestamp `json:"updated"`
-			}
+			} `json:"connection"`
 		} `json:"reported"`
 	} `json:"state"`
 }
@@ -45,7 +45,7 @@ type TransientConnectionUpdatePayload struct {
 		Reported struct {
 			Connection struct {
 				TransientID string `json:"transientId"`
-			}
+			} `json:"connection"`
 		} `json:"reported"`
 	} `json:"state"`
 }
@@ -138,7 +138,7 @@ func (c *client) updateShadow(deviceID string, payload []byte) (*Shadow, error) 
 	return shadowSchema.Extract([]byte(shdw))
 }
 
-func (c *client) UpdateConnectionTransientID(deviceID string, ID string) error {
+func (c *client) UpdateConnectionTransientID(deviceID, ID string) error {
 	// Create new reported state
 	updatePayload := TransientConnectionUpdatePayload{}
 	updatePayload.State.Reported.Connection.TransientID = ID

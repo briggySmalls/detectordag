@@ -28,7 +28,7 @@ func TestSend(t *testing.T) {
 	// Configure mock to expect a call
 	isqs.EXPECT().SendMessage(&sqs.SendMessageInput{
 		MessageBody: aws.String(fmt.Sprintf(
-			`{"deviceId":"%s","status":"%s","time":"1970-01-01T00:00:00Z","id":"%s"}`,
+			`{"deviceId":"%s","type":"%s","time":"1970-01-01T00:00:00Z","id":"%s"}`,
 			deviceId, status, eventID)),
 		QueueUrl: aws.String(QueueUrl),
 	}).Return(nil, nil)

@@ -2,6 +2,7 @@ package shadow
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -35,6 +36,11 @@ func (t *Timestamp) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (t *Timestamp) MarshalJSON() ([]byte, error) {
+	// Convert the timestamp to a number
+	return []byte(fmt.Sprint(t.Unix())), nil
+}
+
 type PowerShadow struct {
 	Value   string
 	Updated time.Time
@@ -59,7 +65,7 @@ type DeviceShadowSchema struct {
 	Version   int
 	State     struct {
 		Reported struct {
-		    Name string
+			Name       string
 			Connection struct {
 				Current     string    `validate:"required,eq=connected|eq=disconnected"`
 				Updated     Timestamp `validate:"required"`

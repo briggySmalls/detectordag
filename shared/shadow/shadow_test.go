@@ -26,9 +26,6 @@ func TestSuccess(t *testing.T) {
 	{
 	  "metadata": {
 	    "reported": {
-	      "connection": {
-	        "timestamp": 1584803417
-	      },
 	      "status": {
 	        "timestamp": 1584803414
 	      }
@@ -37,9 +34,10 @@ func TestSuccess(t *testing.T) {
 	  "state": {
 	    "reported": {
 	      "connection": {
-			  "status": "connected",
+			  "current": "connected",
 			  "transientId": "f5dc1874-5ba1-4727-8366-35d8278ea3e4",
-			  "updated": 1584803417,
+			  "updated": 1584803417
+		  },
 	      "status": "off"
 	    }
 	  },

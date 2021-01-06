@@ -67,9 +67,9 @@ func TestStaleEvent(t *testing.T) {
 		Records: []events.SQSMessage{
 			{Body: `{
 				"deviceId":"e35238bb-ca2c-4e2b-88da-3d305ffe904c",
-				"transientId":"4e0a66f2-c928-4ad5-8870-b0c72ded0ae4",
+				"id":"4e0a66f2-c928-4ad5-8870-b0c72ded0ae4",
 				"time":"2020-12-12T19:58:16+00:00",
-				"status":"connected"
+				"type":"connected"
 			}`},
 		},
 	}
@@ -89,7 +89,8 @@ func TestStaleEvent(t *testing.T) {
 func TestDeviceLookupFailed(t *testing.T) {
 	// Prepare some test parameters
 	const (
-		deviceID = "b6d62b30-00ac-49c4-9268-88559a46889f"
+		deviceID    = "b6d62b30-00ac-49c4-9268-88559a46889f"
+		transientID = "2afad0d4-4075-4370-9ddf-5177ab706374"
 	)
 	// Create app under test
 	app, mockIoT, mockShadow, _ := getStubbedApp(t)
@@ -97,7 +98,12 @@ func TestDeviceLookupFailed(t *testing.T) {
 	// Construct the event
 	event := events.SQSEvent{
 		Records: []events.SQSMessage{
-			{Body: fmt.Sprintf(`{"deviceId":"%s","time":"2020-12-12T19:58:16+00:00"}`, deviceID)},
+			{Body: fmt.Sprintf(`{
+				"deviceId":"%s",
+				"id":"%s",
+				"time":"2020-12-12T19:58:16+00:00",
+				"type":"connected"
+			}`, deviceID, transientID)},
 		},
 	}
 	// Expect a call to shadow
@@ -105,15 +111,16 @@ func TestDeviceLookupFailed(t *testing.T) {
 		// Indicate the status hasn't been updated for a while
 		&shadow.Shadow{Connection: shadow.ConnectionShadow{
 			Status:      shadow.CONNECTION_STATUS_CONNECTED,
-			TransientID: "52068a06-f89d-4256-9b64-48fa990088d9",
+			TransientID: transientID,
 			Updated:     createTime(t, "2020/12/12 00:00:00"),
 		}},
 		nil,
 	)
 	// Configure lookup to fail
-	mockIoT.EXPECT().GetThing(deviceID).Return(nil, errors.New("Something went wrong"))
+	err := errors.New("Something went wrong")
+	mockIoT.EXPECT().GetThing(deviceID).Return(nil, err)
 	// Run test
-	assert.NotNil(t, app.Handler(nil, event))
+	assert.Equal(t, err, app.Handler(nil, event))
 }
 
 func TestEmailsSent(t *testing.T) {
@@ -122,37 +129,46 @@ func TestEmailsSent(t *testing.T) {
 		deviceID     = "b6d62b30-00ac-49c4-9268-88559a46889f"
 		accountID    = "c6d62b30-00ac-49c4-9268-88559a46889f"
 		eventTimeStr = "2020-12-12T19:58:16+00:00"
+		transientID  = "52068a06-f89d-4256-9b64-48fa990088d9"
 	)
+	connectionStatus := shadow.CONNECTION_STATUS_CONNECTED
 	// Create app under test
 	app, mockIoT, mockShadow, mockUpdater := getStubbedApp(t)
-	// Expect a call to shadow
-	mockShadow.EXPECT().Get(deviceID).Return(
-		// Indicate the status hasn't been updated for a while
-		&shadow.Shadow{Connection: shadow.ConnectionShadow{
-			Status:      shadow.CONNECTION_STATUS_CONNECTED,
-			TransientID: "52068a06-f89d-4256-9b64-48fa990088d9",
-			Updated:     createTime(t, "2020/12/12 00:00:00"),
-		}},
-		nil,
-	)
 	// Configure lookup to succeed
 	device := iot.Device{
 		AccountId: accountID,
 		DeviceId:  deviceID,
 	}
-	mockIoT.EXPECT().GetThing(deviceID).Return(
-		&device,
-		nil,
-	)
-	// Expect a call to update status
 	eventTime, err := time.Parse(time.RFC3339, eventTimeStr)
 	assert.Nil(t, err)
-	mockUpdater.EXPECT().UpdateConnectionStatus(&device, eventTime, shadow.CONNECTION_STATUS_DISCONNECTED)
+	gomock.InOrder(
+		// Expect a call to shadow
+		mockShadow.EXPECT().Get(deviceID).Return(
+			// Indicate the status hasn't been updated for a while
+			&shadow.Shadow{Connection: shadow.ConnectionShadow{
+				Status:      shadow.CONNECTION_STATUS_CONNECTED,
+				TransientID: transientID,
+				Updated:     createTime(t, "2020/12/12 00:00:00"),
+			}},
+			nil,
+		),
+		mockIoT.EXPECT().GetThing(deviceID).Return(
+			&device,
+			nil,
+		),
+		// Expect a call to update status
+		mockUpdater.EXPECT().UpdateConnectionStatus(&device, eventTime, connectionStatus),
+	)
 	// Run test
 	// Prepare an event
 	event := events.SQSEvent{
 		Records: []events.SQSMessage{
-			{Body: fmt.Sprintf(`{"deviceId":"%s","time":"%s"}`, deviceID, eventTimeStr)},
+			{Body: fmt.Sprintf(`{
+				"deviceId":"%s",
+				"id":"%s",
+				"type":"%s",
+				"time":"%s"
+			}`, deviceID, transientID, connectionStatus, eventTimeStr)},
 		},
 	}
 	assert.Nil(t, app.Handler(nil, event))
