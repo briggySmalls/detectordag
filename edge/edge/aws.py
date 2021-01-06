@@ -63,7 +63,9 @@ class CloudClient:
 
     def __enter__(self) -> "CloudClient":
         # Connect
+        logging.info("Connecting client...")
         self.client.connect()
+        logging.info("Connected!")
         # Return this
         return self
 

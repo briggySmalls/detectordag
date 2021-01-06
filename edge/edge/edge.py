@@ -38,7 +38,9 @@ class EdgeApp:
         # Connect the MQTT client
         self._client.__enter__()
         # Configure the device
+        logging.info("Configuring edge...")
         self.configure()
+        logging.info("Configured!")
         # Send the current status
         self._publish_update(self._device)
         # Return this instance
