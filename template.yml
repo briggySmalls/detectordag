@@ -130,8 +130,15 @@ Resources:
             - Effect: Allow
               Action:
                 - 'iot:DescribeThing'
+                - 'iot:GetThingShadow'
               Resource:
                 - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'iot:DescribeEndpoint'
+              Resource: '*'
   ConnectionStatusQueue:
     Type: AWS::SQS::Queue
     Properties:

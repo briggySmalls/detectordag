@@ -38,6 +38,7 @@ type StatusUpdatedEvent struct {
 var db database.Client
 var iot iotp.Client
 var emailClient email.Emailer
+var shadowClient shadow.Client
 
 func init() {
 	// Create an AWS session
@@ -57,6 +58,11 @@ func init() {
 	iot, err = iotp.New(sesh)
 	if err != nil {
 		shared.LogErrorAndExit(err)
+	}
+	// Create a new shadow client
+	shadowClient, err = shadow.New(sesh)
+	if err != nil {
+		log.Fatal(err.Error())
 	}
 	// Get the email sender
 	sender := os.Getenv(senderEnvVar)
@@ -85,6 +91,11 @@ func HandleRequest(ctx context.Context, event StatusUpdatedEvent) error {
 	if err != nil {
 		shared.LogErrorAndExit(err)
 	}
+	// Get the device shadow
+	shdw, err := shadowClient.Get(event.DeviceId)
+	if err != nil {
+		return err
+	}
 	accountID := device.AccountId
 	log.Printf("Device '%s' associated with account '%s'", event.DeviceId, accountID)
 	// Get the account
@@ -99,7 +110,8 @@ func HandleRequest(ctx context.Context, event StatusUpdatedEvent) error {
 	}
 	// Construct an event to pass to the emailer
 	update := email.ContextData{
-		Time: time.Unix(event.Updated.Status.Timestamp, 0),
+		DeviceName: shdw.Name,
+		Time:       time.Unix(event.Updated.Status.Timestamp, 0),
 	}
 	// Send 'power status updated' emails
 	log.Printf("Send emails to: %s", account.Emails)
