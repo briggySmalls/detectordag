@@ -2,20 +2,18 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
 	"github.com/briggysmalls/detectordag/connection"
-	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/shared/sqs"
+	"github.com/google/uuid"
 )
 
 type app struct {
-	sqs     sqs.Client
-	iot     iot.Client
-	updater connection.ConnectionUpdater
+	sqs    sqs.Client
+	shadow shadow.Client
 }
 
 type App interface {
@@ -24,20 +22,14 @@ type App interface {
 
 func New(
 	updater connection.ConnectionUpdater,
-	iot iot.Client,
+	shadow shadow.Client,
 	sqs sqs.Client,
 ) App {
 	return &app{
-		updater: updater,
-		sqs:     sqs,
-		iot:     iot,
+		sqs:    sqs,
+		shadow: shadow,
 	}
 }
-
-const (
-	LifecycleEventTypeConnected    = "connected"
-	LifecycleEventTypeDisconnected = "disconnected"
-)
 
 // DeviceLifecycleEvent tells us when a device has last been seen
 type DeviceLifecycleEvent struct {
@@ -49,30 +41,36 @@ type DeviceLifecycleEvent struct {
 // RunJob handles a lambda call
 // The visibility status approach depends on the following invariants:
 // - Connection events will always alternate (never consecutive "connected" or "disconnected")
-// - "Connected" events are always geniune
 // - "Disconnected" events may be spurious (quickly followed with a "connected" event)
 func (a *app) RunJob(ctx context.Context, event DeviceLifecycleEvent) error {
 	// Print the event
 	log.Printf("%v\n", event)
+	// Prepare and validate the event
 	eventTime := time.Unix(event.Timestamp/1000, 0).UTC()
-	// Handle a connected event
-	if event.EventType == LifecycleEventTypeConnected {
-		// Get the device
-		device, err := a.iot.GetThing(event.DeviceID)
-		if err != nil {
+	id := uuid.New().String()
+	connectionEventPayload := sqs.ConnectionEventPayload{
+		DeviceID: event.DeviceID,
+		Status:   event.EventType,
+		Time:     eventTime,
+		ID:       id,
+	}
+	if err := connectionEventPayload.Validate(); err != nil {
+		return err
+	}
+	// Always update the transient state
+	a.shadow.UpdateConnectionTransientID(event.DeviceID, id)
+	// Get the device shadow
+	shdw, err := a.shadow.Get(event.DeviceID)
+	if err != nil {
+		return err
+	}
+	// Check if we need to enqueue a handler
+	if event.EventType != shdw.Connection.Status {
+		// The status has changed, enqueue a callback
+		if err := a.sqs.QueueConnectionEvent(connectionEventPayload); err != nil {
 			return err
 		}
-		// "Connected" is always trustworthy, so update directly
-		return a.updater.UpdateConnectionStatus(device, eventTime, shadow.CONNECTION_STATUS_CONNECTED)
-	}
-	// Handle a disconnected event
-	if event.EventType == LifecycleEventTypeDisconnected {
-		// Delay dealing with disconnected events, to debounce
-		return a.sqs.QueueDisconnectedEvent(sqs.DisconnectedPayload{
-			DeviceID: event.DeviceID,
-			Time:     eventTime,
-		})
 	}
 	// Something went wrong
-	return fmt.Errorf("Unexpected lifecycle event: %s", event.EventType)
+	return nil
 }

@@ -11,7 +11,6 @@ import (
 	"github.com/briggysmalls/detectordag/connection/listener/app"
 	"github.com/briggysmalls/detectordag/shared"
 	"github.com/briggysmalls/detectordag/shared/database"
-	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/shared/sqs"
 )
@@ -30,11 +29,6 @@ func init() {
 	// Create an AWS session
 	// Good practice will share this session for all services
 	sesh := shared.CreateSession(aws.Config{})
-	// Create a new iot client
-	iotClient, err := iot.New(sesh)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
 	// Create a new shadow client
 	shadowClient, err := shadow.New(sesh)
 	if err != nil {
@@ -62,7 +56,7 @@ func init() {
 		log.Fatal(err.Error())
 	}
 	// Create the application
-	listener = app.New(connectionUpdater, iotClient, sqsQueue)
+	listener = app.New(connectionUpdater, shadowClient, sqsQueue)
 }
 
 // main is the entrypoint to the lambda function

@@ -2,6 +2,7 @@ package shadow
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -35,17 +36,28 @@ func (t *Timestamp) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type StringShadowField struct {
+func (t *Timestamp) MarshalJSON() ([]byte, error) {
+	// Convert the timestamp to a number
+	return []byte(fmt.Sprint(t.Unix())), nil
+}
+
+type PowerShadow struct {
 	Value   string
 	Updated time.Time
+}
+
+type ConnectionShadow struct {
+	Status      string
+	Updated     time.Time
+	TransientID string
 }
 
 type Shadow struct {
 	Time       time.Time
 	Version    int
 	Name       string
-	Connection StringShadowField
-	Power      StringShadowField
+	Connection ConnectionShadow
+	Power      PowerShadow
 }
 
 type DeviceShadowSchema struct {
@@ -53,15 +65,18 @@ type DeviceShadowSchema struct {
 	Version   int
 	State     struct {
 		Reported struct {
-			Name       string // Name could be unset
-			Connection string `validate:"required,eq=connected|eq=disconnected"`
-			Status     string `validate:"required,eq=on|eq=off"`
+			Name       string
+			Connection struct {
+				Current     string    `validate:"required,eq=connected|eq=disconnected"`
+				Updated     Timestamp `validate:"required"`
+				TransientID string    `validate:"required,uuid"`
+			}
+			Status string `validate:"required,eq=on|eq=off"`
 		}
 	}
 	Metadata struct {
 		Reported struct {
-			Connection MetadataEntry `validate:"required"`
-			Status     MetadataEntry `validate:"required"`
+			Status MetadataEntry `validate:"required"`
 		}
 	}
 }
@@ -81,11 +96,12 @@ func (c *DeviceShadowSchema) Extract(payload []byte) (*Shadow, error) {
 		Time:    c.Timestamp.Time,
 		Version: c.Version,
 		Name:    c.State.Reported.Name,
-		Connection: StringShadowField{
-			Value:   c.State.Reported.Connection,
-			Updated: c.Metadata.Reported.Connection.Timestamp.Time,
+		Connection: ConnectionShadow{
+			Status:      c.State.Reported.Connection.Current,
+			Updated:     c.State.Reported.Connection.Updated.Time,
+			TransientID: c.State.Reported.Connection.TransientID,
 		},
-		Power: StringShadowField{
+		Power: PowerShadow{
 			Value:   c.State.Reported.Status,
 			Updated: c.Metadata.Reported.Status.Timestamp.Time,
 		},

@@ -3,12 +3,13 @@ package sqs
 import (
 	"encoding/json"
 	"errors"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
 	"github.com/briggysmalls/detectordag/shared"
-	"time"
 )
 
 type client struct {
@@ -16,18 +17,20 @@ type client struct {
 	queueUrl string
 }
 
-type DisconnectedPayload struct {
+type ConnectionEventPayload struct {
 	DeviceID string    `json:"deviceId" validate:"uuid"`
+	Status   string    `json:"type" validate:"eq=connected|eq=disconnected"`
 	Time     time.Time `json:"time" validate:"required"`
+	ID       string    `json:"id" validate:"uuid"`
 }
 
-func (d *DisconnectedPayload) Validate() error {
+func (d *ConnectionEventPayload) Validate() error {
 	return shared.Validate.Struct(d)
 }
 
 // Client is a client for sending status updates to the queue
 type Client interface {
-	QueueDisconnectedEvent(payload DisconnectedPayload) error
+	QueueConnectionEvent(payload ConnectionEventPayload) error
 }
 
 // NewSender gets a new Client
@@ -45,7 +48,7 @@ func New(sesh *session.Session, queueUrl string) (Client, error) {
 	return &client, nil
 }
 
-func (c *client) QueueDisconnectedEvent(payload DisconnectedPayload) error {
+func (c *client) QueueConnectionEvent(payload ConnectionEventPayload) error {
 	// Ensure the struct is valid
 	if err := shared.Validate.Struct(payload); err != nil {
 		return err

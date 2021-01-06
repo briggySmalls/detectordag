@@ -2,10 +2,11 @@ package server
 
 import (
 	"encoding/json"
-	"github.com/briggysmalls/detectordag/api/app/models"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+
+	"github.com/briggysmalls/detectordag/api/app/models"
+	"github.com/gorilla/mux"
 )
 
 func (s *server) UpdateDevice(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +37,7 @@ func (s *server) UpdateDevice(w http.ResponseWriter, r *http.Request) {
 			Updated: shdw.Power.Updated,
 		},
 		Connection: &models.DeviceConnection{
-			Status:  shdw.Connection.Value,
+			Status:  shdw.Connection.Status,
 			Updated: shdw.Connection.Updated,
 		},
 	}

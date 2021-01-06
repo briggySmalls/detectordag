@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/briggysmalls/detectordag/connection"
 	"github.com/briggysmalls/detectordag/shared/iot"
@@ -46,7 +47,7 @@ func (a *app) Handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 
 func (a *app) processMessage(message events.SQSMessage) error {
 	// Deserialise the disconnection message
-	var payload sqs.DisconnectedPayload
+	var payload sqs.ConnectionEventPayload
 	err := json.Unmarshal([]byte(message.Body), &payload)
 	if err != nil {
 		return err
@@ -61,8 +62,8 @@ func (a *app) processMessage(message events.SQSMessage) error {
 		return err
 	}
 	// Check if the connection status has changed in this time
-	if shdw.Connection.Updated.After(payload.Time) {
-		// Some other status change got there first
+	if shdw.Connection.TransientID != payload.ID {
+		// Some other status change has occurred since, ignore
 		return nil
 	}
 	// Fetch the device
@@ -70,6 +71,6 @@ func (a *app) processMessage(message events.SQSMessage) error {
 	if err != nil {
 		return err
 	}
-	// Send emails to indicate the disconnection
-	return a.updater.UpdateConnectionStatus(device, payload.Time, shadow.CONNECTION_STATUS_DISCONNECTED)
+	// Send emails to indicate the updated status
+	return a.updater.UpdateConnectionStatus(device, payload.Time, payload.Status)
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -15,7 +16,8 @@ import (
 // Client represents a client to the device shadow service
 type Client interface {
 	Get(deviceId string) (*Shadow, error)
-	UpdateConnectionStatus(deviceID, status string) (*Shadow, error)
+	UpdateConnectionStatus(deviceID string, status string, updated time.Time) (*Shadow, error)
+	UpdateConnectionTransientID(deviceID string, ID string) error
 	UpdateName(deviceId, name string) (*Shadow, error)
 }
 
@@ -26,13 +28,26 @@ type client struct {
 type ConnectionUpdatePayload struct {
 	State struct {
 		Reported struct {
-			Connection string `json:"connection"`
+			Connection struct {
+				Status  string    `json:"current"`
+				Updated Timestamp `json:"updated"`
+			} `json:"connection"`
 		} `json:"reported"`
 	} `json:"state"`
 }
 
 func (p *ConnectionUpdatePayload) Dump() ([]byte, error) {
 	return json.Marshal(p)
+}
+
+type TransientConnectionUpdatePayload struct {
+	State struct {
+		Reported struct {
+			Connection struct {
+				TransientID string `json:"transientId"`
+			} `json:"connection"`
+		} `json:"reported"`
+	} `json:"state"`
 }
 
 type NameUpdatePayload struct {
@@ -76,10 +91,11 @@ func (c *client) Get(deviceId string) (*Shadow, error) {
 	return shadowSchema.Extract(payload)
 }
 
-func (c *client) UpdateConnectionStatus(deviceID, status string) (*Shadow, error) {
+func (c *client) UpdateConnectionStatus(deviceID, status string, updated time.Time) (*Shadow, error) {
 	// Create new reported state
 	updatePayload := ConnectionUpdatePayload{}
-	updatePayload.State.Reported.Connection = status
+	updatePayload.State.Reported.Connection.Status = status
+	updatePayload.State.Reported.Connection.Updated.Time = updated
 	// Bundle up the request
 	payload, err := updatePayload.Dump()
 	if err != nil {
@@ -120,6 +136,24 @@ func (c *client) updateShadow(deviceID string, payload []byte) (*Shadow, error) 
 	// Parse the response
 	var shadowSchema DeviceShadowSchema
 	return shadowSchema.Extract([]byte(shdw))
+}
+
+func (c *client) UpdateConnectionTransientID(deviceID, ID string) error {
+	// Create new reported state
+	updatePayload := TransientConnectionUpdatePayload{}
+	updatePayload.State.Reported.Connection.TransientID = ID
+	// Bundle up the request
+	payload, err := json.Marshal(updatePayload)
+	if err != nil {
+		return err
+	}
+	// Make the request
+	log.Print(string(payload))
+	_, err = c.dp.UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
+		ThingName: aws.String(deviceID),
+		Payload:   payload,
+	})
+	return err
 }
 
 func (c *client) getShadow(deviceID string) ([]byte, error) {
