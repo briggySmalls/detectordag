@@ -2,6 +2,7 @@
 import logging
 import sys
 from typing import Any
+from threading import Event
 
 import click
 
@@ -37,8 +38,8 @@ def app(ctx: Any) -> None:
     power_status_device = DigitalInputDevice(_POWER_PIN, bounce_time=0.2)
     # Start the application
     with EdgeApp(power_status_device, ctx.obj["config"]):
-        while True:
-            pass
+        # Sleep forever without burning clock cycles
+        Event().wait()
 
 
 @main.command()
