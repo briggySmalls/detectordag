@@ -8,6 +8,7 @@ from typing import Optional, Type
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 
 from edge.data import DeviceShadowState, PowerStatus
+from edge.exceptions import ConnectionFailedError
 
 _LOGGER = logging.getLogger(__file__)
 logging.getLogger("AWSIoTPythonSDK").setLevel(logging.WARNING)
@@ -64,7 +65,8 @@ class CloudClient:
     def __enter__(self) -> "CloudClient":
         # Connect
         logging.info("Connecting client...")
-        self.client.connect()
+        if not self.client.connect():
+            raise ConnectionFailedError()
         logging.info("Connected!")
         # Return this
         return self
