@@ -18,6 +18,22 @@ from edge.data import DeviceShadowState, PowerStatus
             DeviceShadowState(status=False),
             '{"state":{"reported":{"status":"off"}}}',
         ),
+        (
+            DeviceShadowState(status="on"),
+            '{"state":{"reported":{"status":"on"}}}',
+        ),
+        (
+            DeviceShadowState(status="off"),
+            '{"state":{"reported":{"status":"off"}}}',
+        ),
+        (
+            DeviceShadowState(status=PowerStatus.ON),
+            '{"state":{"reported":{"status":"on"}}}',
+        ),
+        (
+            DeviceShadowState(status=PowerStatus.OFF),
+            '{"state":{"reported":{"status":"off"}}}',
+        ),
     ],
 )
 def test_serialize(state: DeviceShadowState, output: str) -> None:

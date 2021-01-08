@@ -25,8 +25,11 @@ class DeviceShadowState(BaseModel):  # pylint: disable=too-few-public-methods
         alias_generator = camelcase
 
     @validator('status', pre=True)
-    def to_status(cls, status: bool) -> PowerStatus:
-        return PowerStatus.ON if status else PowerStatus.OFF
+    def _to_status(cls, status: Any) -> PowerStatus:
+        """Map a boolean input for status to the correct string"""
+        if isinstance(status, bool):
+            return PowerStatus.ON if status else PowerStatus.OFF
+        return status
 
     def dict(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
         """Serialization step"""
