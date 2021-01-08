@@ -11,6 +11,7 @@ from edge.edge import EdgeApp
 from edge.exceptions import DetectorDagException
 
 _POWER_PIN = 4
+_DEBOUNCE_DURATION = 0.2
 
 
 @click.group()
@@ -36,7 +37,9 @@ def app(ctx: Any) -> None:
         DigitalInputDevice,
     )
 
-    power_status_device = DigitalInputDevice(_POWER_PIN, bounce_time=0.2)
+    power_status_device = DigitalInputDevice(
+        _POWER_PIN, bounce_time=_DEBOUNCE_DURATION
+    )
 
     try:
         # Start the application
