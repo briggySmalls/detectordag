@@ -86,8 +86,7 @@ class CloudClient:
         Args:
             status (bool): New power status
         """
-        status_enum = PowerStatus.ON if status else PowerStatus.OFF
-        payload = DeviceShadowState(status=status_enum).json()
+        payload = DeviceShadowState(status=status).json()
         _LOGGER.info("Publishing status update: %s", payload)
         token = self.shadow.shadowUpdate(
             payload, self.shadow_update_handler, self._OPERATION_TIMEOUT

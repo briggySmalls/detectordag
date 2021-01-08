@@ -3,7 +3,7 @@
 from enum import Enum
 from typing import Any, Dict
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from stringcase import camelcase
 
 
@@ -23,6 +23,10 @@ class DeviceShadowState(BaseModel):  # pylint: disable=too-few-public-methods
         """Configuration for the pydantic model"""
 
         alias_generator = camelcase
+
+    @validator('status', pre=True)
+    def to_status(cls, status: bool) -> PowerStatus:
+        return PowerStatus.ON if status else PowerStatus.OFF
 
     def dict(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
         """Serialization step"""

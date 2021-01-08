@@ -11,11 +11,11 @@ from edge.data import DeviceShadowState, PowerStatus
     "state,output",
     [
         (
-            DeviceShadowState(status=PowerStatus.ON),
+            DeviceShadowState(status=True),
             '{"state":{"reported":{"status":"on"}}}',
         ),
         (
-            DeviceShadowState(status=PowerStatus.OFF),
+            DeviceShadowState(status=False),
             '{"state":{"reported":{"status":"off"}}}',
         ),
     ],
