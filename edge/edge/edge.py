@@ -85,6 +85,7 @@ class EdgeApp:
             # No change, short-circuit
             return
         # We need to send an update
+        _LOGGER.warning("Status change was missed by gpiozero")
         self._publish_update()
 
     def _publish_update(self) -> None:
