@@ -47,8 +47,6 @@ class EdgeApp:
         logging.info("Configuring edge...")
         self.configure()
         logging.info("Configured!")
-        # Send the current status
-        self._publish_update(self._device)
         # Return this instance
         return self
 
@@ -84,6 +82,7 @@ class EdgeApp:
         """
         if self._previous_status == self._get_status():
             # No change, short-circuit
+            _LOGGER.debug("Status is up-to-date")
             return
         # We need to send an update
         _LOGGER.warning("Status change was missed by gpiozero")
@@ -98,6 +97,6 @@ class EdgeApp:
         # Get the current status of the device
         status = self._get_status()
         # Send it
-        self._client.send_status_update(status, callback=_record_status)
+        self._client.send_status_update(status, callback=self._record_status)
         # Record what we sent
         self._previous_status = status
