@@ -5,6 +5,7 @@ from typing import Optional, Type
 
 from edge.aws import ClientConfig, CloudClient
 from edge.config import AppConfig
+from edge.timer import PeriodicTimer
 
 try:
     from gpiozero import DigitalInputDevice
@@ -14,6 +15,7 @@ except ImportError:
     )
 
 _LOGGER = logging.getLogger(__name__)
+_UPDATE_CHECK_PERIOD_S = 60  # Check for updates every minute
 
 
 class EdgeApp:
@@ -33,6 +35,9 @@ class EdgeApp:
         self._device = device
         # Create the client
         self._client = CloudClient(client_config)
+        # Prepare to periodically check for status changes
+        self._timer = PeriodicTimer(_UPDATE_CHECK_PERIOD_S, self._check_status)
+        self._previous_state = None
 
     def __enter__(self) -> "EdgeApp":
         # Connect the MQTT client
@@ -48,9 +53,11 @@ class EdgeApp:
 
     def configure(self) -> None:
         """Configure the app"""
-        # Send messages when power status changes
+        # Send updates when power status changes
         self._device.when_activated = self._publish_update
         self._device.when_deactivated = self._publish_update
+        # Check to send updates on a timer
+        self._timer.start()
 
     def __exit__(
         self,
@@ -60,11 +67,31 @@ class EdgeApp:
     ) -> None:
         # Teardown the AWS client
         self._client.__exit__(exc_type, exc_value, traceback)
+        # Stop the timer
+        self._timer.stop()
 
     def _get_status(self) -> DeviceShadowState:
         """Fetch the current device state"""
         return DeviceShadowState(status=self._device.value)
 
+    def _check_status(self) -> None:
+        """
+        Check our most-recent message is still valid
+
+        For some reason recently gpiozero's edge detection has been playing up.
+        This function sends an update if the last message we sent is out-of-date.
+        """
+        if self._previous_state == self._get_status():
+            # No change, short-circuit
+            return
+        # We need to send an update
+        self._publish_update()
+
     def _publish_update(self) -> None:
         """Publish an update to the cloud"""
-        self._client.send_status_update(self._get_status())
+        # Get the current status of the device
+        status = self._get_status()
+        # Send it
+        self._client.send_status_update(status)
+        # Record what we sent
+        self._previous_state = status
