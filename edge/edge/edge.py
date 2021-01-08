@@ -6,6 +6,7 @@ from typing import Optional, Type
 from edge.aws import ClientConfig, CloudClient
 from edge.config import AppConfig
 from edge.timer import PeriodicTimer
+from edge.data import DeviceShadowState
 
 try:
     from gpiozero import DigitalInputDevice
