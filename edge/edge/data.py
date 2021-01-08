@@ -24,7 +24,7 @@ class DeviceShadowState(BaseModel):  # pylint: disable=too-few-public-methods
 
         alias_generator = camelcase
 
-    @validator('status', pre=True)
+    @validator("status", pre=True)
     def _to_status(cls, status: Any) -> PowerStatus:
         """Map a boolean input for status to the correct string"""
         if isinstance(status, bool):

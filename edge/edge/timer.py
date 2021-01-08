@@ -6,7 +6,8 @@ from typing import Callable
 
 class PeriodicTimer:
     """Simple periodic timer"""
-    def __init__(self, period: float, callback: Callable[[],None]) -> None:
+
+    def __init__(self, period: float, callback: Callable[[], None]) -> None:
         self._callback = callback
         self._period = period
         self._timer = None

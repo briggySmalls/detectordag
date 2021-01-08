@@ -9,9 +9,11 @@ def test_timer() -> None:
     # Create a timer to increment periodically
     period = 0.01
     counter = 0
+
     def increment() -> None:
         nonlocal counter
         counter += 1
+
     t = PeriodicTimer(period, increment)
     # Start
     t.start()
@@ -21,6 +23,7 @@ def test_timer() -> None:
     # Expect roughly 'factor' number of ticks
     assert pytest.approx(factor, counter)
     t.stop()
+
 
 def test_stop_timer() -> None:
     # Create
