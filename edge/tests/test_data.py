@@ -16,6 +16,14 @@ _DATA = [
         '{"state":{"reported":{"status":"off"}}}',
     ),
     (
+        DeviceShadowState(status=1),
+        '{"state":{"reported":{"status":"on"}}}',
+    ),
+    (
+        DeviceShadowState(status=0),
+        '{"state":{"reported":{"status":"off"}}}',
+    ),
+    (
         DeviceShadowState(status="on"),
         '{"state":{"reported":{"status":"on"}}}',
     ),
