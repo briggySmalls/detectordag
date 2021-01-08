@@ -3,7 +3,7 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
-from typing import Optional, Type
+from typing import Optional, Type, Callable
 
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 
