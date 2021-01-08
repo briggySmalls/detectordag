@@ -61,8 +61,10 @@ class EdgeApp:
         # Teardown the AWS client
         self._client.__exit__(exc_type, exc_value, traceback)
 
-    def _publish_update(self, device: DigitalInputDevice) -> None:
-        # Get the status
-        status = bool(device.value)
-        # Publish
-        self._client.power_status_changed(status)
+    def _get_status(self) -> DeviceShadowState:
+        """Fetch the current device state"""
+        return DeviceShadowState(status=self._device.value)
+
+    def _publish_update(self) -> None:
+        """Publish an update to the cloud"""
+        self._client.send_status_update(self._get_status())

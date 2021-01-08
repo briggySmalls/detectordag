@@ -80,13 +80,13 @@ class CloudClient:
         del exc_type, exc_value, traceback
         self.client.disconnect()
 
-    def power_status_changed(self, status: bool) -> None:
+    def send_status_update(self, state: DeviceShadowState) -> None:
         """Send a messaging indicating the power status has updated
 
         Args:
             status (bool): New power status
         """
-        payload = DeviceShadowState(status=status).json()
+        payload = state.json()
         _LOGGER.info("Publishing status update: %s", payload)
         token = self.shadow.shadowUpdate(
             payload, self.shadow_update_handler, self._OPERATION_TIMEOUT
