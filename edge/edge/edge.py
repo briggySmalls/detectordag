@@ -5,8 +5,8 @@ from typing import Optional, Type
 
 from edge.aws import ClientConfig, CloudClient
 from edge.config import AppConfig
-from edge.timer import PeriodicTimer
 from edge.data import DeviceShadowState
+from edge.timer import PeriodicTimer
 
 try:
     from gpiozero import DigitalInputDevice
@@ -38,7 +38,7 @@ class EdgeApp:
         self._client = CloudClient(client_config)
         # Prepare to periodically check for status changes
         self._timer = PeriodicTimer(_UPDATE_CHECK_PERIOD_S, self._check_status)
-        self._previous_state = None
+        self._previous_status = None
 
     def __enter__(self) -> "EdgeApp":
         # Connect the MQTT client
@@ -82,18 +82,22 @@ class EdgeApp:
         For some reason recently gpiozero's edge detection has been playing up.
         This function sends an update if the last message we sent is out-of-date.
         """
-        if self._previous_state == self._get_status():
+        if self._previous_status == self._get_status():
             # No change, short-circuit
             return
         # We need to send an update
         _LOGGER.warning("Status change was missed by gpiozero")
         self._publish_update()
 
+    def _record_status(self, status: DeviceShadowState) -> None:
+        # Record the provided payload
+        self._previous_status = status
+
     def _publish_update(self) -> None:
         """Publish an update to the cloud"""
         # Get the current status of the device
         status = self._get_status()
         # Send it
-        self._client.send_status_update(status)
+        self._client.send_status_update(status, callback=_record_status)
         # Record what we sent
-        self._previous_state = status
+        self._previous_status = status

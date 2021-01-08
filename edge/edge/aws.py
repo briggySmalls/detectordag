@@ -80,7 +80,11 @@ class CloudClient:
         del exc_type, exc_value, traceback
         self.client.disconnect()
 
-    def send_status_update(self, state: DeviceShadowState) -> None:
+    def send_status_update(
+        self,
+        state: DeviceShadowState,
+        callback: Callable[[DeviceShadowState], None] = None,
+    ) -> None:
         """Send a messaging indicating the power status has updated
 
         Args:
@@ -89,13 +93,20 @@ class CloudClient:
         payload = state.json()
         _LOGGER.info("Publishing status update: %s", payload)
         token = self.shadow.shadowUpdate(
-            payload, self.shadow_update_handler, self._OPERATION_TIMEOUT
+            payload,
+            lambda payload, response_status, token: self.shadow_update_handler(
+                payload, response_status, token, callback
+            ),
+            self._OPERATION_TIMEOUT,
         )
         _LOGGER.debug("Status update returned token: %s", token)
 
     @staticmethod
     def shadow_update_handler(
-        payload: str, response_status: str, token: str
+        payload: str,
+        response_status: str,
+        token: str,
+        callback: Callable[[DeviceShadowState], None],
     ) -> None:
         """Handle a device shadow update response
 
@@ -107,9 +118,13 @@ class CloudClient:
         Raises:
             RuntimeError: Unexpected response
         """
+        # Log the outcome of the update
         del token
         if response_status == "accepted":
             _LOGGER.info("Shadow update accepted: payload=%s", payload)
+            # Send confirmation to the caller, if requested
+            if callback is not None:
+                callback(DeviceShadowState.parse_raw(payload))
         elif response_status in ["timeout", "rejected"]:
             _LOGGER.error(
                 "Shadow update failed: status=%s, payload=%s",
