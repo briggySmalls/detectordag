@@ -1,14 +1,17 @@
 """Console script for edge."""
 import logging
 import sys
+from threading import Event
 from typing import Any
 
 import click
 
 from edge.config import AppConfig
 from edge.edge import EdgeApp
+from edge.exceptions import DetectorDagException
 
 _POWER_PIN = 4
+_DEBOUNCE_DURATION = 0.2
 
 
 @click.group()
@@ -34,11 +37,17 @@ def app(ctx: Any) -> None:
         DigitalInputDevice,
     )
 
-    power_status_device = DigitalInputDevice(_POWER_PIN, bounce_time=0.2)
-    # Start the application
-    with EdgeApp(power_status_device, ctx.obj["config"]):
-        while True:
-            pass
+    power_status_device = DigitalInputDevice(
+        _POWER_PIN, bounce_time=_DEBOUNCE_DURATION
+    )
+
+    try:
+        # Start the application
+        with EdgeApp(power_status_device, ctx.obj["config"]):
+            # Sleep forever without burning clock cycles
+            Event().wait()
+    except DetectorDagException as err:
+        logging.exception(err)
 
 
 @main.command()
