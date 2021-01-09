@@ -13,14 +13,17 @@ class MockDigitalInputDevice:
 
     def high(self) -> None:
         """Simulate reading a 'high' value"""
+        _LOGGER.debug("simulating low transition")
         self.set_status(1)
 
     def low(self) -> None:
         """Simulate reading a 'low' value"""
+        _LOGGER.debug("simulating high transition")
         self.set_status(0)
 
     def toggle(self) -> None:
         """Simulate the input toggling value"""
+        _LOGGER.debug("simulating toggle transition")
         self.set_status(1 if self._status == 0 else 0)
 
     @property
