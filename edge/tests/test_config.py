@@ -20,6 +20,7 @@ def test_variables() -> None:
         "AWS_ENDPOINT",
         "AWS_PORT",
         "CERT_DIR",
+        "POWER_POLL_PERIOD",
     ]
     assert set(_variable_ids) == set(AppConfig.variables())
 
@@ -69,6 +70,7 @@ def test_present(monkeypatch: Any, tmp_path: Path) -> None:
     assert config.aws_thing_key == aws_thing_key_path
     assert config.aws_port == 8883
     assert config.aws_thing_name == aws_thing_name
+    assert config.power_poll_period == 60
 
 
 _VARIABLES = {

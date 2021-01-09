@@ -16,7 +16,6 @@ except ImportError:
     )
 
 _LOGGER = logging.getLogger(__name__)
-_UPDATE_CHECK_PERIOD_S = 60  # Check for updates every minute
 
 
 class EdgeApp:
@@ -37,7 +36,7 @@ class EdgeApp:
         # Create the client
         self._client = CloudClient(client_config)
         # Prepare to periodically check for status changes
-        self._timer = PeriodicTimer(_UPDATE_CHECK_PERIOD_S, self._check_status)
+        self._timer = PeriodicTimer(config.power_poll_period, self._check_status)
         self._previous_status = None
 
     def __enter__(self) -> "EdgeApp":
@@ -82,10 +81,9 @@ class EdgeApp:
         """
         if self._previous_status == self._get_status():
             # No change, short-circuit
-            _LOGGER.debug("Status is up-to-date")
             return
         # We need to send an update
-        _LOGGER.warning("Status change was missed by gpiozero")
+        _LOGGER.info("Periodic check noticed status change")
         self._publish_update()
 
     def _record_status(self, status: DeviceShadowState) -> None:

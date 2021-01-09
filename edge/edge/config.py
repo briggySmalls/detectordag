@@ -34,6 +34,7 @@ class AppConfig:
         "aws_endpoint": ConfigMapper("AWS_ENDPOINT", "str"),
         "aws_port": ConfigMapper("AWS_PORT", "int", default=8883),
         "certs_dir": ConfigMapper("CERT_DIR", "path", "~/.detectordag/certs"),
+        "power_poll_period": ConfigMapper("POWER_POLL_PERIOD", "float", default=60.0),
     }
     _certs = {
         "aws_root_cert": "root-CA.crt",
@@ -48,6 +49,7 @@ class AppConfig:
     aws_endpoint: str
     aws_port: int
     certs_dir: Path
+    power_poll_period: float
 
     @classmethod
     def from_env(cls, dotenv: bool = True) -> "AppConfig":
