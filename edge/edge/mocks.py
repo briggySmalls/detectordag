@@ -31,10 +31,16 @@ class MockDigitalInputDevice:
     def set_status(self, status: int) -> None:
         """Simulate reading a new status"""
         self._status = status
+        # Get the appropriate callback func
         if status:
-            self.when_activated(self)
+            callback = self.when_activated
         else:
-            self.when_deactivated(self)
+            callback = self.when_deactivated
+        # Call with or without arg
+        try:
+            callback()
+        except TypeError:
+            callback(self)
 
     def when_activated(self, device: "MockDigitalInputDevice") -> None:
         """Faked handler for original DigitalInputDevice"""
