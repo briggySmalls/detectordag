@@ -3,11 +3,11 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
-from typing import Optional, Type, Callable
+from typing import Callable, Optional, Type
 
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 
-from edge.data import DeviceShadowState, PowerStatus
+from edge.data import DeviceShadowState
 from edge.exceptions import ConnectionFailedError
 
 _LOGGER = logging.getLogger(__file__)

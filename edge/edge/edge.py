@@ -36,7 +36,9 @@ class EdgeApp:
         # Create the client
         self._client = CloudClient(client_config)
         # Prepare to periodically check for status changes
-        self._timer = PeriodicTimer(config.power_poll_period, self._check_status)
+        self._timer = PeriodicTimer(
+            config.power_poll_period, self._check_status
+        )
         self._previous_status = None
 
     def __enter__(self) -> "EdgeApp":
@@ -77,7 +79,8 @@ class EdgeApp:
         Check our most-recent message is still valid
 
         For some reason recently gpiozero's edge detection has been playing up.
-        This function sends an update if the last message we sent is out-of-date.
+        This function sends an update if the last message we sent is
+        out-of-date.
         """
         if self._previous_status == self._get_status():
             # No change, short-circuit
