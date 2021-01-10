@@ -10,7 +10,7 @@ from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 from edge.data import DeviceShadowState
 from edge.exceptions import ConnectionFailedError
 
-_LOGGER = logging.getLogger(__file__)
+_LOGGER = logging.getLogger(__name__)
 logging.getLogger("AWSIoTPythonSDK").setLevel(logging.WARNING)
 
 
