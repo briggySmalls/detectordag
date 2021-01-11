@@ -23,6 +23,9 @@ class EdgeApp:
 
     def __init__(self, device: DigitalInputDevice, config: AppConfig) -> None:
         self.config = config
+        _LOGGER.info(
+            "Parsed configuration:\n{\n%s\n}",
+            "\n".join([f"    {key}: {value}" for key, value in config.dict().items()]))
         # Prepare configuration for the client
         client_config = ClientConfig(
             device_id=config.aws_thing_name,
