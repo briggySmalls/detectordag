@@ -81,8 +81,9 @@ class CloudClient:
         traceback: Optional[TracebackType],
     ) -> None:
         del exc_type, exc_value, traceback
+        _LOGGER.info("Disconnecting MQTT")
         future = self._mqtt.disconnect()
-        future.add_done_callback(self._on_disconnected)
+        future.result()
 
     def send_status_update(
         self,
@@ -181,5 +182,6 @@ class CloudClient:
             error.message,
         )
 
-    def _on_disconnected(self, _: Future) -> None:
-        _LOGGER.info("MQTT connection terminated")
+    def _on_status_requested(self, topic: str, payload: str, **kwargs) -> None:
+        _LOGGER.debug("Status update requested")
+        self._status_request_callback()
