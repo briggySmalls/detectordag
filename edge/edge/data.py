@@ -1,7 +1,7 @@
 """Module for basic data structures"""
 
 from enum import Enum
-from typing import Any, Dict
+from typing import Any
 
 from pydantic import BaseModel, validator
 from stringcase import camelcase

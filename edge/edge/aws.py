@@ -1,17 +1,24 @@
 """Logic for connecting to AWS IoT"""
 import logging
+from asyncio import Future
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
-from typing import Callable, Optional, Type
-from asyncio import Future
+from typing import Optional, Type
 
-from awsiot.iotshadow import IotShadowClient, UpdateShadowResponse, UpdateShadowRequest, ShadowState, UpdateShadowSubscriptionRequest, ErrorResponse
+from awscrt import io
+from awscrt import mqtt as awsmqtt
 from awsiot import mqtt_connection_builder
-from awscrt import auth, io, mqtt as awsmqtt, http
+from awsiot.iotshadow import (
+    ErrorResponse,
+    IotShadowClient,
+    ShadowState,
+    UpdateShadowRequest,
+    UpdateShadowResponse,
+    UpdateShadowSubscriptionRequest,
+)
 
 from edge.data import DeviceShadowState
-from edge.exceptions import ConnectionFailedError
 
 _LOGGER = logging.getLogger(__name__)
 _KEEPALIVE_SECONDS = 10
@@ -45,7 +52,7 @@ class CloudClient:
         event_loop_group = io.EventLoopGroup(1)
         host_resolver = io.DefaultHostResolver(event_loop_group)
         client_bootstrap = io.ClientBootstrap(event_loop_group, host_resolver)
-        # Create a connection (we need a connection to have started for the shadow)
+        # Create a connection (the shadow needs a started connection)
         _LOGGER.info("Connecting...")
         self._mqtt = self._create_mqtt_connection(client_bootstrap)
         connected_future = self._mqtt.connect()
@@ -87,12 +94,16 @@ class CloudClient:
             thing_name=self._config.device_id,
             state=ShadowState(
                 reported=payload,
-            )
+            ),
         )
         # Make the request
-        self._shadow.publish_update_shadow(request, awsmqtt.QoS.AT_LEAST_ONCE).result()
+        self._shadow.publish_update_shadow(
+            request, awsmqtt.QoS.AT_LEAST_ONCE
+        ).result()
 
-    def _create_mqtt_connection(self, client_bootstrap: io.ClientBootstrap) -> awsmqtt.Connection:
+    def _create_mqtt_connection(
+        self, client_bootstrap: io.ClientBootstrap
+    ) -> awsmqtt.Connection:
         # Create the connection
         return mqtt_connection_builder.mtls_from_path(
             endpoint=self._config.endpoint,
@@ -102,28 +113,47 @@ class CloudClient:
             ca_filepath=str(self._config.root_cert.resolve()),
             client_id=self._config.device_id,
             clean_session=False,
-            keep_alive_secs=_KEEPALIVE_SECONDS)
+            keep_alive_secs=_KEEPALIVE_SECONDS,
+        )
 
-    def _create_shadow_client(self, mqtt: awsmqtt.Connection) -> IotShadowClient:
+    def _create_shadow_client(
+        self, mqtt: awsmqtt.Connection
+    ) -> IotShadowClient:
         # Create the client
         shadow = IotShadowClient(mqtt)
         # Subscribe to shadow update events
-        update_accepted_subscribed_future, _ = shadow.subscribe_to_update_shadow_accepted(
-            request=UpdateShadowSubscriptionRequest(thing_name=self._config.device_id),
+        (
+            update_accepted_subscribed_future,
+            _,
+        ) = shadow.subscribe_to_update_shadow_accepted(
+            request=UpdateShadowSubscriptionRequest(
+                thing_name=self._config.device_id
+            ),
             qos=awsmqtt.QoS.AT_LEAST_ONCE,
-            callback=self._on_update_shadow_accepted)
-        update_rejected_subscribed_future, _ = shadow.subscribe_to_update_shadow_rejected(
-            request=UpdateShadowSubscriptionRequest(thing_name=self._config.device_id),
+            callback=self._on_update_shadow_accepted,
+        )
+        (
+            update_rejected_subscribed_future,
+            _,
+        ) = shadow.subscribe_to_update_shadow_rejected(
+            request=UpdateShadowSubscriptionRequest(
+                thing_name=self._config.device_id
+            ),
             qos=awsmqtt.QoS.AT_LEAST_ONCE,
-            callback=self._on_update_shadow_rejected)
+            callback=self._on_update_shadow_rejected,
+        )
         # It is important to wait for "accepted/rejected" subscriptions
         # to succeed before publishing the corresponding "request".
         update_accepted_subscribed_future.result()
         update_rejected_subscribed_future.result()
         return shadow
 
-    def _on_update_shadow_accepted(self, response: UpdateShadowResponse) -> None:
-        _LOGGER.info("Shadow update accepted: payload=%s", response.state.reported)
+    def _on_update_shadow_accepted(
+        self, response: UpdateShadowResponse
+    ) -> None:
+        _LOGGER.info(
+            "Shadow update accepted: payload=%s", response.state.reported
+        )
 
     def _on_update_shadow_rejected(self, error: ErrorResponse) -> None:
         _LOGGER.error(
