@@ -98,6 +98,7 @@ class EdgeApp:
         # Get the current status of the device
         status = self._get_status()
         # Send it
-        self._client.send_status_update(status, callback=self._record_status)
+        self._client.send_status_update(status)
+        self._record_status(status)
         # Record what we sent
         self._previous_status = status
