@@ -51,9 +51,6 @@ class EdgeApp:
 
     def configure(self) -> None:
         """Configure the app"""
-        # Send updates when power status changes
-        self._device.when_activated = self._publish_update
-        self._device.when_deactivated = self._publish_update
         # Check to send updates on a timer
         self._timer.start()
 
@@ -87,10 +84,6 @@ class EdgeApp:
         _LOGGER.info("Periodic check noticed status change")
         self._publish_update()
 
-    def _record_status(self, status: DeviceShadowState) -> None:
-        # Record the provided payload
-        self._previous_status = status
-
     def _publish_update(self) -> None:
         """Publish an update to the cloud"""
         # Get the current status of the device
@@ -98,6 +91,5 @@ class EdgeApp:
         # Send it
         _LOGGER.info("Sending status update")
         self._client.send_status_update(status)
-        self._record_status(status)
         # Record what we sent
         self._previous_status = status
