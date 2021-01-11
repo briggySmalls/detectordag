@@ -23,6 +23,9 @@ RUN ~/.poetry/bin/poetry build -f wheel
 # Build the real image
 FROM balenalib/raspberry-pi-python:3.7-buster-run
 
+# Install wheels from piwheels (awscrt from source is ridiculous)
+RUN printf "[global]\nextra-index-url=https://www.piwheels.org/simple\n" > /etc/pip.conf
+
 # Install GPIO stuff
 RUN apt-get update && apt-get install python3-gpiozero python3-rpi.gpio
 
