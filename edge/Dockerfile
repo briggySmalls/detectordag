@@ -1,5 +1,8 @@
 # Start with a builder image, this can have pip on it
-FROM balenalib/%%BALENA_MACHINE_NAME%%-python:3.7-buster-build AS builder
+FROM balenalib/raspberry-pi-python:3.7-buster-build AS builder
+
+# Install wheels from piwheels (awscrt from source is ridiculous)
+RUN printf "[global]\nextra-index-url=https://www.piwheels.org/simple\n" > /etc/pip.conf
 
 # Install poetry
 ENV POETRY_VERSION=1.0.10
@@ -18,7 +21,10 @@ COPY . /app
 RUN ~/.poetry/bin/poetry build -f wheel
 
 # Build the real image
-FROM balenalib/%%BALENA_MACHINE_NAME%%-python:3.7-buster-run
+FROM balenalib/raspberry-pi-python:3.7-buster-run
+
+# Install wheels from piwheels (awscrt from source is ridiculous)
+RUN printf "[global]\nextra-index-url=https://www.piwheels.org/simple\n" > /etc/pip.conf
 
 # Install GPIO stuff
 RUN apt-get update && apt-get install python3-gpiozero python3-rpi.gpio

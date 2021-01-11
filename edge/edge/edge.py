@@ -23,14 +23,17 @@ class EdgeApp:
 
     def __init__(self, device: DigitalInputDevice, config: AppConfig) -> None:
         self.config = config
+        _LOGGER.info(
+            "Parsed configuration:\n{\n%s\n}",
+            "\n".join([f"    {key}: {value}" for key, value in config.dict().items()]))
         # Prepare configuration for the client
         client_config = ClientConfig(
             device_id=config.aws_thing_name,
             endpoint=config.aws_endpoint,
-            port=config.aws_port,
             root_cert=config.aws_root_cert,
             thing_cert=config.aws_thing_cert,
             thing_key=config.aws_thing_key,
+            keep_alive=config.keep_alive_period,
         )
         self._device = device
         # Create the client
@@ -51,9 +54,6 @@ class EdgeApp:
 
     def configure(self) -> None:
         """Configure the app"""
-        # Send updates when power status changes
-        self._device.when_activated = self._publish_update
-        self._device.when_deactivated = self._publish_update
         # Check to send updates on a timer
         self._timer.start()
 
@@ -87,10 +87,6 @@ class EdgeApp:
         _LOGGER.info("Periodic check noticed status change")
         self._publish_update()
 
-    def _record_status(self, status: DeviceShadowState) -> None:
-        # Record the provided payload
-        self._previous_status = status
-
     def _publish_update(self) -> None:
         """Publish an update to the cloud"""
         # Get the current status of the device
@@ -98,6 +94,5 @@ class EdgeApp:
         # Send it
         _LOGGER.info("Sending status update")
         self._client.send_status_update(status)
-        self._record_status(status)
         # Record what we sent
         self._previous_status = status
