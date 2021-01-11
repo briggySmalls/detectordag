@@ -33,7 +33,6 @@ class ClientConfig:
     thing_cert: Path
     thing_key: Path
     endpoint: str
-    port: int
 
 
 class CloudClient:

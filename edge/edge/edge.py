@@ -27,7 +27,6 @@ class EdgeApp:
         client_config = ClientConfig(
             device_id=config.aws_thing_name,
             endpoint=config.aws_endpoint,
-            port=config.aws_port,
             root_cert=config.aws_root_cert,
             thing_cert=config.aws_thing_cert,
             thing_key=config.aws_thing_key,

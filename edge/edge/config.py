@@ -50,7 +50,6 @@ class AppConfig(BaseModel):
         "aws_thing_cert": ConfigMapper(identifier="AWS_THING_CERT", parser="str"),
         "aws_thing_key": ConfigMapper(identifier="AWS_THING_KEY", parser="str"),
         "aws_endpoint": ConfigMapper(identifier="AWS_ENDPOINT", parser="str"),
-        "aws_port": ConfigMapper(identifier="AWS_PORT", parser="int"),
         "certs_dir": ConfigMapper(identifier="CERT_DIR", parser="path"),
         "power_poll_period": ConfigMapper(identifier="POWER_POLL_PERIOD", parser="float"),
     }
@@ -66,7 +65,6 @@ class AppConfig(BaseModel):
     aws_thing_cert: Path
     aws_thing_key: Path
     aws_endpoint: str
-    aws_port: int = 8883
     power_poll_period: float = 60.0
     keep_alive_period: int = 1200
 
