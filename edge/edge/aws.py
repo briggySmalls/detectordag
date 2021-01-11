@@ -118,7 +118,6 @@ class CloudClient:
             client_bootstrap=client_bootstrap,
             ca_filepath=str(self._config.root_cert.resolve()),
             client_id=self._config.device_id,
-            clean_session=False,
             keep_alive_secs=_KEEPALIVE_SECONDS,
         )
 
