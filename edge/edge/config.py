@@ -52,6 +52,7 @@ class AppConfig(BaseModel):
         "aws_endpoint": ConfigMapper(identifier="AWS_ENDPOINT", parser="str"),
         "certs_dir": ConfigMapper(identifier="CERT_DIR", parser="path"),
         "power_poll_period": ConfigMapper(identifier="POWER_POLL_PERIOD", parser="float"),
+        "keep_alive_period": ConfigMapper(identifier="KEEP_ALIVE_PERIOD", parser="int"),
     }
     _certs = {
         "aws_root_cert": "root-CA.crt",

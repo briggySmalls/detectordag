@@ -21,7 +21,6 @@ from awsiot.iotshadow import (
 from edge.data import DeviceShadowState
 
 _LOGGER = logging.getLogger(__name__)
-_KEEPALIVE_SECONDS = 10
 
 
 @dataclass
@@ -33,6 +32,7 @@ class ClientConfig:
     thing_cert: Path
     thing_key: Path
     endpoint: str
+    keep_alive: int
 
 
 class CloudClient:
@@ -117,7 +117,7 @@ class CloudClient:
             client_bootstrap=client_bootstrap,
             ca_filepath=str(self._config.root_cert.resolve()),
             client_id=self._config.device_id,
-            keep_alive_secs=_KEEPALIVE_SECONDS,
+            keep_alive_secs=self._config.keep_alive,
         )
 
     def _create_shadow_client(self, mqtt: awsmqtt.Connection) -> IotShadowClient:

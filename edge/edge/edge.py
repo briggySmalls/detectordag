@@ -30,6 +30,7 @@ class EdgeApp:
             root_cert=config.aws_root_cert,
             thing_cert=config.aws_thing_cert,
             thing_key=config.aws_thing_key,
+            keep_alive=config.keep_alive_period,
         )
         self._device = device
         # Create the client
