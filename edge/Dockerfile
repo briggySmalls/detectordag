@@ -21,7 +21,7 @@ COPY . /app
 RUN ~/.poetry/bin/poetry build -f wheel
 
 # Build the real image
-FROM balenalib/%%BALENA_MACHINE_NAME%%-python:3.7-buster-run
+FROM balenalib/raspberry-pi-python:3.7-buster-run
 
 # Install GPIO stuff
 RUN apt-get update && apt-get install python3-gpiozero python3-rpi.gpio
