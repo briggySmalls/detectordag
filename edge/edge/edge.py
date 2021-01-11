@@ -34,11 +34,9 @@ class EdgeApp:
         )
         self._device = device
         # Create the client
-        self._client = CloudClient(client_config)
+        self._client = CloudClient(client_config, self._publish_update)
         # Prepare to periodically check for status changes
-        self._timer = PeriodicTimer(
-            config.power_poll_period, self._check_status
-        )
+        self._timer = PeriodicTimer(config.power_poll_period, self._check_status)
         self._previous_status = None
 
     def __enter__(self) -> "EdgeApp":
@@ -98,6 +96,7 @@ class EdgeApp:
         # Get the current status of the device
         status = self._get_status()
         # Send it
+        _LOGGER.info("Sending status update")
         self._client.send_status_update(status)
         self._record_status(status)
         # Record what we sent
