@@ -18,22 +18,28 @@ type connectionUpdater struct {
 	email  email.Emailer
 	db     database.Client
 	shadow shadow.Client
+	iot    iot.Client
 }
 
 type ConnectionUpdater interface {
-	UpdateConnectionStatus(device *iot.Device, timestamp time.Time, status string) error
+	UpdateConnectionStatus(deviceID string, timestamp time.Time, status string) error
 }
 
-func NewConnectionUpdater(sesh *session.Session, db database.Client, shadow shadow.Client, sender string) (ConnectionUpdater, error) {
+func NewConnectionUpdater(sesh *session.Session, db database.Client, shadow shadow.Client, iot iot.Client, sender string) (ConnectionUpdater, error) {
 	// Create a new email client
 	email, err := email.NewEmailer(ses.New(sesh), sender)
 	if err != nil {
 		return nil, err
 	}
-	return &connectionUpdater{email: email, db: db, shadow: shadow}, nil
+	return &connectionUpdater{email: email, db: db, shadow: shadow, iot: iot}, nil
 }
 
-func (e *connectionUpdater) UpdateConnectionStatus(device *iot.Device, timestamp time.Time, status string) error {
+func (e *connectionUpdater) UpdateConnectionStatus(deviceID string, timestamp time.Time, status string) error {
+	// Fetch the device
+	device, err := e.iot.GetThing(deviceID)
+	if err != nil {
+		return err
+	}
 	log.Printf("Sending visibility email for device: %s with state '%s'", DeviceString(device), status)
 	// Update the internal record of connection status
 	shdw, err := e.shadow.UpdateConnectionStatus(device.DeviceId, status, timestamp)

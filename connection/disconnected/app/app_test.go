@@ -1,6 +1,5 @@
 package app
 
-//go:generate go run github.com/golang/mock/mockgen -destination mock_iot.go -package app -mock_names Client=MockIoTClient github.com/briggysmalls/detectordag/shared/iot Client
 //go:generate go run github.com/golang/mock/mockgen -destination mock_shadow.go -package app -mock_names Client=MockShadowClient github.com/briggysmalls/detectordag/shared/shadow Client
 //go:generate go run github.com/golang/mock/mockgen -destination mock_connection_updater.go -package app github.com/briggysmalls/detectordag/connection ConnectionUpdater
 
@@ -11,7 +10,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -30,7 +28,7 @@ func TestInvalidPayload(t *testing.T) {
 	// Run the test
 	for _, params := range testParams {
 		// Create app under test
-		app, _, _, _ := getStubbedApp(t)
+		app, _, _ := getStubbedApp(t)
 		// Prepare an event
 		event := events.SQSEvent{Records: []events.SQSMessage{{Body: params.event}}}
 		// Run the test
@@ -43,7 +41,7 @@ func TestConnectionStatusLookupFailed(t *testing.T) {
 		deviceID = "e35238bb-ca2c-4e2b-88da-3d305ffe904c"
 	)
 	// Create app under test
-	app, _, shadow, _ := getStubbedApp(t)
+	app, shadow, _ := getStubbedApp(t)
 	// Construct the event
 	event := events.SQSEvent{
 		Records: []events.SQSMessage{
@@ -61,7 +59,7 @@ func TestStaleEvent(t *testing.T) {
 		deviceID = "e35238bb-ca2c-4e2b-88da-3d305ffe904c"
 	)
 	// Create app under test
-	app, _, mockShadow, _ := getStubbedApp(t)
+	app, mockShadow, _ := getStubbedApp(t)
 	// Construct the event
 	event := events.SQSEvent{
 		Records: []events.SQSMessage{
@@ -86,43 +84,6 @@ func TestStaleEvent(t *testing.T) {
 	assert.Nil(t, app.Handler(nil, event))
 }
 
-func TestDeviceLookupFailed(t *testing.T) {
-	// Prepare some test parameters
-	const (
-		deviceID    = "b6d62b30-00ac-49c4-9268-88559a46889f"
-		transientID = "2afad0d4-4075-4370-9ddf-5177ab706374"
-	)
-	// Create app under test
-	app, mockIoT, mockShadow, _ := getStubbedApp(t)
-	// Prepare an event
-	// Construct the event
-	event := events.SQSEvent{
-		Records: []events.SQSMessage{
-			{Body: fmt.Sprintf(`{
-				"deviceId":"%s",
-				"id":"%s",
-				"time":"2020-12-12T19:58:16+00:00",
-				"type":"connected"
-			}`, deviceID, transientID)},
-		},
-	}
-	// Expect a call to shadow
-	mockShadow.EXPECT().Get(deviceID).Return(
-		// Indicate the status hasn't been updated for a while
-		&shadow.Shadow{Connection: shadow.ConnectionShadow{
-			Status:      shadow.CONNECTION_STATUS_CONNECTED,
-			TransientID: transientID,
-			Updated:     createTime(t, "2020/12/12 00:00:00"),
-		}},
-		nil,
-	)
-	// Configure lookup to fail
-	err := errors.New("Something went wrong")
-	mockIoT.EXPECT().GetThing(deviceID).Return(nil, err)
-	// Run test
-	assert.Equal(t, err, app.Handler(nil, event))
-}
-
 func TestEmailsSent(t *testing.T) {
 	// Prepare some test parameters
 	const (
@@ -133,12 +94,7 @@ func TestEmailsSent(t *testing.T) {
 	)
 	connectionStatus := shadow.CONNECTION_STATUS_CONNECTED
 	// Create app under test
-	app, mockIoT, mockShadow, mockUpdater := getStubbedApp(t)
-	// Configure lookup to succeed
-	device := iot.Device{
-		AccountId: accountID,
-		DeviceId:  deviceID,
-	}
+	app, mockShadow, mockUpdater := getStubbedApp(t)
 	eventTime, err := time.Parse(time.RFC3339, eventTimeStr)
 	assert.Nil(t, err)
 	gomock.InOrder(
@@ -152,12 +108,8 @@ func TestEmailsSent(t *testing.T) {
 			}},
 			nil,
 		),
-		mockIoT.EXPECT().GetThing(deviceID).Return(
-			&device,
-			nil,
-		),
 		// Expect a call to update status
-		mockUpdater.EXPECT().UpdateConnectionStatus(&device, eventTime, connectionStatus),
+		mockUpdater.EXPECT().UpdateConnectionStatus(deviceID, eventTime, connectionStatus),
 	)
 	// Run test
 	// Prepare an event
@@ -174,17 +126,15 @@ func TestEmailsSent(t *testing.T) {
 	assert.Nil(t, app.Handler(nil, event))
 }
 
-func getStubbedApp(t *testing.T) (*app, *MockIoTClient, *MockShadowClient, *MockConnectionUpdater) {
+func getStubbedApp(t *testing.T) (*app, *MockShadowClient, *MockConnectionUpdater) {
 	// Create mock controller
 	ctrl := gomock.NewController(t)
 	// Create mock shadow
 	shadow := NewMockShadowClient(ctrl)
-	// Create mock iot
-	iot := NewMockIoTClient(ctrl)
 	// Create mock connection updater
 	updater := NewMockConnectionUpdater(ctrl)
 	// Bundle up into an app
-	return &app{iot: iot, shadow: shadow, updater: updater}, iot, shadow, updater
+	return &app{shadow: shadow, updater: updater}, shadow, updater
 }
 
 func createTime(t *testing.T, timeString string) time.Time {

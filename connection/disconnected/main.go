@@ -44,19 +44,19 @@ func init() {
 	if sender == "" {
 		shared.LogErrorAndReturn(fmt.Errorf("Env var '%s' unset", senderEnvVar))
 	}
-	// Create a new session just for emailing (there is no emailing service in eu-west-2)
-	emailSesh := shared.CreateSession(aws.Config{Region: aws.String("eu-west-1")})
-	connectionUpdater, err := connection.NewConnectionUpdater(emailSesh, dbClient, shadowClient, sender)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
 	// Create a new iot client
 	iotClient, err := iot.New(sesh)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	// Create a new session just for emailing (there is no emailing service in eu-west-2)
+	emailSesh := shared.CreateSession(aws.Config{Region: aws.String("eu-west-1")})
+	connectionUpdater, err := connection.NewConnectionUpdater(emailSesh, dbClient, shadowClient, iotClient, sender)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	// Create the application
-	emailer = app.New(connectionUpdater, iotClient, shadowClient)
+	emailer = app.New(connectionUpdater, shadowClient)
 }
 
 // main is the entrypoint to the lambda function

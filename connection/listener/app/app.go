@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -12,8 +13,9 @@ import (
 )
 
 type app struct {
-	sqs    sqs.Client
-	shadow shadow.Client
+	sqs     sqs.Client
+	shadow  shadow.Client
+	updater connection.ConnectionUpdater
 }
 
 type App interface {
@@ -26,8 +28,9 @@ func New(
 	sqs sqs.Client,
 ) App {
 	return &app{
-		sqs:    sqs,
-		shadow: shadow,
+		updater: updater,
+		sqs:     sqs,
+		shadow:  shadow,
 	}
 }
 
@@ -65,12 +68,20 @@ func (a *app) RunJob(ctx context.Context, event DeviceLifecycleEvent) error {
 		return err
 	}
 	// Check if we need to enqueue a handler
-	if event.EventType != shdw.Connection.Status {
-		// The status has changed, enqueue a callback
-		if err := a.sqs.QueueConnectionEvent(connectionEventPayload); err != nil {
-			return err
-		}
+	if event.EventType == shdw.Connection.Status {
+		// This event won't change the state
+		// All we needed to do was record it happened for debouncing (transient ID)
+		return nil
 	}
-	// Something went wrong
-	return nil
+	if event.EventType == shadow.CONNECTION_STATUS_CONNECTED {
+		// We can always trust connected events, so publish an update immediately
+		// Send emails to indicate the updated status
+		return a.updater.UpdateConnectionStatus(event.DeviceID, eventTime, event.EventType)
+	} else if event.EventType == shadow.CONNECTION_STATUS_DISCONNECTED {
+		// TODO: Ask the device to confirm if it's connected
+		// Enqueue a callback to check if the device responds
+		return a.sqs.QueueConnectionEvent(connectionEventPayload)
+	} else {
+		return fmt.Errorf("Unexpected connection status: %s", event.EventType)
+	}
 }
