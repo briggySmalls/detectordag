@@ -123,27 +123,6 @@ class CloudClient:
     def _create_shadow_client(self, mqtt: awsmqtt.Connection) -> IotShadowClient:
         # Create the client
         shadow = IotShadowClient(mqtt)
-        # Subscribe to shadow update events
-        (
-            update_accepted_subscribed_future,
-            _,
-        ) = shadow.subscribe_to_update_shadow_accepted(
-            request=UpdateShadowSubscriptionRequest(thing_name=self._config.device_id),
-            qos=awsmqtt.QoS.AT_LEAST_ONCE,
-            callback=self._on_update_shadow_accepted,
-        )
-        (
-            update_rejected_subscribed_future,
-            _,
-        ) = shadow.subscribe_to_update_shadow_rejected(
-            request=UpdateShadowSubscriptionRequest(thing_name=self._config.device_id),
-            qos=awsmqtt.QoS.AT_LEAST_ONCE,
-            callback=self._on_update_shadow_rejected,
-        )
-        # It is important to wait for "accepted/rejected" subscriptions
-        # to succeed before publishing the corresponding "request".
-        update_accepted_subscribed_future.result()
-        update_rejected_subscribed_future.result()
         return shadow
 
     def _subscribe_to_update_requests(self, mqtt: awsmqtt.Connection) -> None:
@@ -164,20 +143,8 @@ class CloudClient:
         return f"dags/{self._config.device_id}/status/request"
 
     @staticmethod
-    def _on_update_shadow_accepted(response: UpdateShadowResponse) -> None:
-        _LOGGER.info("Shadow update accepted: payload=%s", response.state.reported)
-
-    @staticmethod
     def _on_status_update_published(_: Future) -> None:
         _LOGGER.debug("Status update published")
-
-    @staticmethod
-    def _on_update_shadow_rejected(error: ErrorResponse) -> None:
-        _LOGGER.error(
-            "Shadow update failed: code=%s, message=%s",
-            error.code,
-            error.message,
-        )
 
     def _on_status_requested(self, topic: str, payload: str, **kwargs) -> None:
         _LOGGER.debug("Status update requested")
