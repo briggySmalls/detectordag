@@ -64,6 +64,7 @@ def mock(ctx: Any) -> None:
     with EdgeApp(power_status_device, ctx.obj["config"]):
         # Allow the user to toggle the power status
         while True:
+            logging.debug("listening for input")
             char = click.getchar()
             if char == "t":
                 # Toggle power status

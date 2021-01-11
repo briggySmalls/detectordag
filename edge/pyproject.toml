@@ -8,10 +8,10 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.7"
 click = "^7.1.2"
-AWSIoTPythonSDK = "^1.4.9"
 environs = "^9.2.0"
 pydantic = "^1.7.3"
 stringcase = "^1.2.0"
+awsiotsdk = "^1.5.3"
 
 [tool.poetry.dev-dependencies]
 invoke = "^1.4.1"

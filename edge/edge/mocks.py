@@ -13,14 +13,17 @@ class MockDigitalInputDevice:
 
     def high(self) -> None:
         """Simulate reading a 'high' value"""
+        _LOGGER.debug("simulating low transition")
         self.set_status(1)
 
     def low(self) -> None:
         """Simulate reading a 'low' value"""
+        _LOGGER.debug("simulating high transition")
         self.set_status(0)
 
     def toggle(self) -> None:
         """Simulate the input toggling value"""
+        _LOGGER.debug("simulating toggle transition")
         self.set_status(1 if self._status == 0 else 0)
 
     @property
@@ -31,10 +34,16 @@ class MockDigitalInputDevice:
     def set_status(self, status: int) -> None:
         """Simulate reading a new status"""
         self._status = status
+        # Get the appropriate callback func
         if status:
-            self.when_activated(self)
+            callback = self.when_activated
         else:
-            self.when_deactivated(self)
+            callback = self.when_deactivated
+        # Call with or without arg
+        try:
+            callback()
+        except TypeError:
+            callback(self)
 
     def when_activated(self, device: "MockDigitalInputDevice") -> None:
         """Faked handler for original DigitalInputDevice"""
