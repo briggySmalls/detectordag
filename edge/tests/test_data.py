@@ -9,35 +9,35 @@ from edge.data import DeviceShadowState, PowerStatus
 _DATA = [
     (
         DeviceShadowState(status=True),
-        '{"state":{"reported":{"status":"on"}}}',
+        '{"status":"on"}',
     ),
     (
         DeviceShadowState(status=False),
-        '{"state":{"reported":{"status":"off"}}}',
+        '{"status":"off"}',
     ),
     (
         DeviceShadowState(status=1),
-        '{"state":{"reported":{"status":"on"}}}',
+        '{"status":"on"}',
     ),
     (
         DeviceShadowState(status=0),
-        '{"state":{"reported":{"status":"off"}}}',
+        '{"status":"off"}',
     ),
     (
         DeviceShadowState(status="on"),
-        '{"state":{"reported":{"status":"on"}}}',
+        '{"status":"on"}',
     ),
     (
         DeviceShadowState(status="off"),
-        '{"state":{"reported":{"status":"off"}}}',
+        '{"status":"off"}',
     ),
     (
         DeviceShadowState(status=PowerStatus.ON),
-        '{"state":{"reported":{"status":"on"}}}',
+        '{"status":"on"}',
     ),
     (
         DeviceShadowState(status=PowerStatus.OFF),
-        '{"state":{"reported":{"status":"off"}}}',
+        '{"status":"off"}',
     ),
 ]
 
