@@ -172,12 +172,18 @@ Resources:
           Statement:
             - Effect: Allow
               Action:
-              Action:
                 - 'iot:DescribeThing'
                 - 'iot:GetThingShadow'
                 - 'iot:UpdateThingShadow'
               Resource:
                 - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:thing/*"
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'iot:Publish'
+              Resource:
+                - !Sub "arn:${AWS::Partition}:iot:${AWS::Region}:${AWS::AccountId}:topic/dags/*/status/request"
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -219,7 +225,6 @@ Resources:
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
-              Action:
               Action:
                 - 'iot:DescribeThing'
                 - 'iot:GetThingShadow'
