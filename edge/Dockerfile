@@ -1,8 +1,8 @@
 # Start with a builder image, this can have pip on it
 FROM balenalib/raspberry-pi-python:3.7-buster-build AS builder
 
-# Install prerequisites for awscrt
-RUN apt-get update && apt-get install cmake libssl-dev
+# Install wheels from piwheels (awscrt from source is ridiculous)
+RUN printf "[global]\nextra-index-url=https://www.piwheels.org/simple\n" > /etc/pip.conf
 
 # Install poetry
 ENV POETRY_VERSION=1.0.10
