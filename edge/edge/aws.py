@@ -45,6 +45,8 @@ class CloudClient:
     def __init__(self, config: ClientConfig) -> None:
         # Record the configuration
         self._config = config
+        self._mqtt = None
+        self._shadow = None
 
     def __enter__(self) -> "CloudClient":
         # Spin up resources
@@ -148,19 +150,19 @@ class CloudClient:
         update_rejected_subscribed_future.result()
         return shadow
 
-    def _on_update_shadow_accepted(
-        self, response: UpdateShadowResponse
-    ) -> None:
+    @staticmethod
+    def _on_update_shadow_accepted(response: UpdateShadowResponse) -> None:
         _LOGGER.info(
             "Shadow update accepted: payload=%s", response.state.reported
         )
 
-    def _on_update_shadow_rejected(self, error: ErrorResponse) -> None:
+    @staticmethod
+    def _on_update_shadow_rejected(error: ErrorResponse) -> None:
         _LOGGER.error(
             "Shadow update failed: code=%s, message=%s",
             error.code,
             error.message,
         )
 
-    def _on_disconnected(self, disconnect_future: Future) -> None:
+    def _on_disconnected(self, _: Future) -> None:
         _LOGGER.info("MQTT connection terminated")

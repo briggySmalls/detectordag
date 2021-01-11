@@ -1,3 +1,6 @@
+"""Tests for edge application"""
+# pylint: disable=redefined-outer-name
+
 from unittest.mock import Mock, call, patch
 
 import pytest
@@ -42,7 +45,7 @@ def config(tmp_path) -> None:
     )
 
 
-def test_setup(config, aws, timer, device) -> None:
+def test_setup(config, aws, device) -> None:
     # Create the unit under test
     with EdgeApp(device, config):
         # Check we immediately send an update
@@ -51,7 +54,7 @@ def test_setup(config, aws, timer, device) -> None:
         )
 
 
-def test_update(config, aws, timer, device) -> None:
+def test_update(config, aws, device) -> None:
     # Create the unit under test
     with EdgeApp(device, config):
         # Simulate a state change
