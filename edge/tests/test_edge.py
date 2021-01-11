@@ -52,14 +52,3 @@ def test_setup(config, aws, device) -> None:
         aws.send_status_update.assert_called_once_with(
             DeviceShadowState(status="off")
         )
-
-
-def test_update(config, aws, device) -> None:
-    # Create the unit under test
-    with EdgeApp(device, config):
-        # Simulate a state change
-        device.toggle()
-        # Assert expected update was sent
-        aws.send_status_update.assert_has_calls(
-            [call(DeviceShadowState(status="on"))]
-        )
