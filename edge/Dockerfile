@@ -1,5 +1,8 @@
 # Start with a builder image, this can have pip on it
-FROM balenalib/%%BALENA_MACHINE_NAME%%-python:3.7-buster-build AS builder
+FROM balenalib/raspberry-pi-python:3.7-buster-build AS builder
+
+# Install prerequisites for awscrt
+RUN apt-get update && apt-get install cmake libssl-dev
 
 # Install poetry
 ENV POETRY_VERSION=1.0.10
