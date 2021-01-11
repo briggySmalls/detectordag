@@ -4,7 +4,7 @@ from asyncio import Future
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
-from typing import Optional, Type
+from typing import Optional, Type, Callable
 
 from awscrt import io
 from awscrt import mqtt as awsmqtt
@@ -42,9 +42,12 @@ class CloudClient:
     _QOS = 1
     _OPERATION_TIMEOUT = 5
 
-    def __init__(self, config: ClientConfig) -> None:
+    def __init__(
+        self, config: ClientConfig, status_request_callback: Callable[[], None]
+    ) -> None:
         # Record the configuration
         self._config = config
+        self._status_request_callback = status_request_callback
         self._mqtt = None
         self._shadow = None
 
@@ -68,6 +71,7 @@ class CloudClient:
         # fails or succeeds.
         connected_future.result()
         _LOGGER.info("Connected!")
+        self._subscribe_to_update_requests(self._mqtt)
         return self
 
     def __exit__(
@@ -118,9 +122,7 @@ class CloudClient:
             keep_alive_secs=_KEEPALIVE_SECONDS,
         )
 
-    def _create_shadow_client(
-        self, mqtt: awsmqtt.Connection
-    ) -> IotShadowClient:
+    def _create_shadow_client(self, mqtt: awsmqtt.Connection) -> IotShadowClient:
         # Create the client
         shadow = IotShadowClient(mqtt)
         # Subscribe to shadow update events
@@ -128,9 +130,7 @@ class CloudClient:
             update_accepted_subscribed_future,
             _,
         ) = shadow.subscribe_to_update_shadow_accepted(
-            request=UpdateShadowSubscriptionRequest(
-                thing_name=self._config.device_id
-            ),
+            request=UpdateShadowSubscriptionRequest(thing_name=self._config.device_id),
             qos=awsmqtt.QoS.AT_LEAST_ONCE,
             callback=self._on_update_shadow_accepted,
         )
@@ -138,9 +138,7 @@ class CloudClient:
             update_rejected_subscribed_future,
             _,
         ) = shadow.subscribe_to_update_shadow_rejected(
-            request=UpdateShadowSubscriptionRequest(
-                thing_name=self._config.device_id
-            ),
+            request=UpdateShadowSubscriptionRequest(thing_name=self._config.device_id),
             qos=awsmqtt.QoS.AT_LEAST_ONCE,
             callback=self._on_update_shadow_rejected,
         )
@@ -150,11 +148,30 @@ class CloudClient:
         update_rejected_subscribed_future.result()
         return shadow
 
+    def _subscribe_to_update_requests(self, mqtt: awsmqtt.Connection) -> None:
+        subscribe_future, _ = mqtt.subscribe(
+            topic=self._status_request_topic,
+            qos=awsmqtt.QoS.AT_LEAST_ONCE,
+            callback=self._on_status_requested,
+        )
+        subscribe_result = subscribe_future.result()
+        _LOGGER.debug(
+            "Subscribed to '%s' with QOS '%s'",
+            subscribe_result["topic"],
+            subscribe_result["qos"],
+        )
+
+    @property
+    def _status_request_topic(self) -> str:
+        return f"dags/{self._config.device_id}/status/request"
+
     @staticmethod
     def _on_update_shadow_accepted(response: UpdateShadowResponse) -> None:
-        _LOGGER.info(
-            "Shadow update accepted: payload=%s", response.state.reported
-        )
+        _LOGGER.info("Shadow update accepted: payload=%s", response.state.reported)
+
+    @staticmethod
+    def _on_status_update_published(_: Future) -> None:
+        _LOGGER.debug("Status update published")
 
     @staticmethod
     def _on_update_shadow_rejected(error: ErrorResponse) -> None:
