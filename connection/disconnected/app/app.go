@@ -6,13 +6,11 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/briggysmalls/detectordag/connection"
-	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/shared/sqs"
 )
 
 type app struct {
-	iot     iot.Client
 	updater connection.ConnectionUpdater
 	shadow  shadow.Client
 }
@@ -23,11 +21,9 @@ type App interface {
 
 func New(
 	updater connection.ConnectionUpdater,
-	iot iot.Client,
 	shadow shadow.Client,
 ) App {
 	return &app{
-		iot:     iot,
 		shadow:  shadow,
 		updater: updater,
 	}
@@ -66,11 +62,6 @@ func (a *app) processMessage(message events.SQSMessage) error {
 		// Some other status change has occurred since, ignore
 		return nil
 	}
-	// Fetch the device
-	device, err := a.iot.GetThing(payload.DeviceID)
-	if err != nil {
-		return err
-	}
 	// Send emails to indicate the updated status
-	return a.updater.UpdateConnectionStatus(device, payload.Time, payload.Status)
+	return a.updater.UpdateConnectionStatus(payload.DeviceID, payload.Time, payload.Status)
 }

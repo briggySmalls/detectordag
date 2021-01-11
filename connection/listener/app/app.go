@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/briggysmalls/detectordag/connection"
-	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/shared/sqs"
 	"github.com/google/uuid"
@@ -17,7 +16,6 @@ type app struct {
 	sqs     sqs.Client
 	shadow  shadow.Client
 	updater connection.ConnectionUpdater
-	iot     iot.Client
 }
 
 type App interface {
@@ -27,13 +25,11 @@ type App interface {
 func New(
 	updater connection.ConnectionUpdater,
 	shadow shadow.Client,
-	iot iot.Client,
 	sqs sqs.Client,
 ) App {
 	return &app{
 		updater: updater,
 		sqs:     sqs,
-		iot:     iot,
 		shadow:  shadow,
 	}
 }
@@ -79,13 +75,8 @@ func (a *app) RunJob(ctx context.Context, event DeviceLifecycleEvent) error {
 	}
 	if event.EventType == shadow.CONNECTION_STATUS_CONNECTED {
 		// We can always trust connected events, so publish an update immediately
-		// Fetch the device
-		device, err := a.iot.GetThing(event.DeviceID)
-		if err != nil {
-			return err
-		}
 		// Send emails to indicate the updated status
-		return a.updater.UpdateConnectionStatus(device, eventTime, event.EventType)
+		return a.updater.UpdateConnectionStatus(event.DeviceID, eventTime, event.EventType)
 	} else if event.EventType == shadow.CONNECTION_STATUS_DISCONNECTED {
 		// TODO: Ask the device to confirm if it's connected
 		// Enqueue a callback to check if the device responds
