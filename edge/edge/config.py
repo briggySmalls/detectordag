@@ -60,7 +60,7 @@ class AppConfig(BaseModel):
         "aws_thing_cert": "thing.cert.pem",
     }
 
-    certs_dir: Path = "~/.detectordag/certs"
+    certs_dir: Path = Path("~/.detectordag/certs")
     aws_thing_name: str
     aws_root_cert: Path
     aws_thing_cert: Path
