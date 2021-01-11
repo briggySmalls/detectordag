@@ -2,18 +2,22 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/briggysmalls/detectordag/connection"
+	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/shared/sqs"
 	"github.com/google/uuid"
 )
 
 type app struct {
-	sqs    sqs.Client
-	shadow shadow.Client
+	sqs     sqs.Client
+	shadow  shadow.Client
+	updater connection.ConnectionUpdater
+	iot     iot.Client
 }
 
 type App interface {
@@ -23,11 +27,14 @@ type App interface {
 func New(
 	updater connection.ConnectionUpdater,
 	shadow shadow.Client,
+	iot iot.Client,
 	sqs sqs.Client,
 ) App {
 	return &app{
-		sqs:    sqs,
-		shadow: shadow,
+		updater: updater,
+		sqs:     sqs,
+		iot:     iot,
+		shadow:  shadow,
 	}
 }
 
@@ -65,12 +72,25 @@ func (a *app) RunJob(ctx context.Context, event DeviceLifecycleEvent) error {
 		return err
 	}
 	// Check if we need to enqueue a handler
-	if event.EventType != shdw.Connection.Status {
-		// The status has changed, enqueue a callback
-		if err := a.sqs.QueueConnectionEvent(connectionEventPayload); err != nil {
+	if event.EventType == shdw.Connection.Status {
+		// This event won't change the state
+		// All we needed to do was record it happened for debouncing (transient ID)
+		return nil
+	}
+	if event.EventType == shadow.CONNECTION_STATUS_CONNECTED {
+		// We can always trust connected events, so publish an update immediately
+		// Fetch the device
+		device, err := a.iot.GetThing(event.DeviceID)
+		if err != nil {
 			return err
 		}
+		// Send emails to indicate the updated status
+		return a.updater.UpdateConnectionStatus(device, eventTime, event.EventType)
+	} else if event.EventType == shadow.CONNECTION_STATUS_DISCONNECTED {
+		// TODO: Ask the device to confirm if it's connected
+		// Enqueue a callback to check if the device responds
+		return a.sqs.QueueConnectionEvent(connectionEventPayload)
+	} else {
+		return fmt.Errorf("Unexpected connection status: %s", event.EventType)
 	}
-	// Something went wrong
-	return nil
 }

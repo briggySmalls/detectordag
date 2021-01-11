@@ -11,6 +11,7 @@ import (
 	"github.com/briggysmalls/detectordag/connection/listener/app"
 	"github.com/briggysmalls/detectordag/shared"
 	"github.com/briggysmalls/detectordag/shared/database"
+	"github.com/briggysmalls/detectordag/shared/iot"
 	"github.com/briggysmalls/detectordag/shared/shadow"
 	"github.com/briggysmalls/detectordag/shared/sqs"
 )
@@ -55,8 +56,13 @@ func init() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	// Create a new iot client
+	iotClient, err := iot.New(sesh)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	// Create the application
-	listener = app.New(connectionUpdater, shadowClient, sqsQueue)
+	listener = app.New(connectionUpdater, shadowClient, iotClient, sqsQueue)
 }
 
 // main is the entrypoint to the lambda function
