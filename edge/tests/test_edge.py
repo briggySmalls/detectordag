@@ -1,13 +1,11 @@
-from unittest.mock import ANY, MagicMock, Mock, call, patch
+from unittest.mock import Mock, call, patch
 
 import pytest
 
-from edge.aws import CloudClient
 from edge.config import AppConfig
 from edge.data import DeviceShadowState
 from edge.edge import EdgeApp
 from edge.mocks import MockDigitalInputDevice
-from edge.timer import PeriodicTimer
 
 
 @pytest.fixture
@@ -46,7 +44,7 @@ def config(tmp_path) -> None:
 
 def test_setup(config, aws, timer, device) -> None:
     # Create the unit under test
-    with EdgeApp(device, config) as app:
+    with EdgeApp(device, config):
         # Check we immediately send an update
         aws.send_status_update.assert_called_once_with(
             DeviceShadowState(status="off")
@@ -55,7 +53,7 @@ def test_setup(config, aws, timer, device) -> None:
 
 def test_update(config, aws, timer, device) -> None:
     # Create the unit under test
-    with EdgeApp(device, config) as app:
+    with EdgeApp(device, config):
         # Simulate a state change
         device.toggle()
         # Assert expected update was sent
