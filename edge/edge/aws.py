@@ -104,9 +104,8 @@ class CloudClient:
             ),
         )
         # Make the request
-        self._shadow.publish_update_shadow(
-            request, awsmqtt.QoS.AT_LEAST_ONCE
-        ).result()
+        future = self._shadow.publish_update_shadow(request, awsmqtt.QoS.AT_LEAST_ONCE)
+        future.add_done_callback(self._on_status_update_published)
 
     def _create_mqtt_connection(
         self, client_bootstrap: io.ClientBootstrap
