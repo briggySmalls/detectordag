@@ -101,36 +101,54 @@ Resources:
   PowerStatusChanged:
     Type: AWS::IoT::TopicRule
     Properties:
-      RuleName: PowerStatusChanged
       TopicRulePayload:
         RuleDisabled: 'false'
+        AwsIotSqlVersion: '2016-03-23'
         Sql: SELECT topic(3) as deviceId, timestamp, current.state.reported as state, current.metadata.reported as updated FROM '$aws/things/+/shadow/update/documents' WHERE current.state.reported.status <> previous.state.reported.status
         Actions:
         - Lambda:
-            FunctionArn:
-              Ref: consumer
+            FunctionArn: !GetAtt consumer.Arn
   ConnectionStatusChanged:
     Type: AWS::IoT::TopicRule
     Properties:
-      RuleName: ConnectionStatusChanged
       TopicRulePayload:
         RuleDisabled: 'false'
         Sql: SELECT * FROM '$aws/events/presence/#'
+        AwsIotSqlVersion: '2016-03-23'
         Actions:
         - Lambda:
-            FunctionArn:
-              Ref: ConnectionStatusListener
+            FunctionArn: !GetAtt ConnectionStatusListener.Arn
   PowerUpdateIsConnected:
     Type: AWS::IoT::TopicRule
     Properties:
-      RuleName: PowerUpdateIsConnected
       TopicRulePayload:
         RuleDisabled: 'false'
+        AwsIotSqlVersion: '2016-03-23'
         Sql: SELECT topic(3) as clientId, timestamp() as timestamp, "connected" as eventType FROM '$aws/things/+/shadow/update'
         Actions:
         - Lambda:
-            FunctionArn:
-              Ref: ConnectionStatusListener
+            FunctionArn: !GetAtt ConnectionStatusListener.Arn
+  ConsumerPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt consumer.Arn
+      Principal: iot.amazonaws.com
+      SourceArn: !GetAtt PowerStatusChanged.Arn
+  ConnectionStatusListenerPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt ConnectionStatusListener.Arn
+      Principal: iot.amazonaws.com
+      SourceArn: !GetAtt ConnectionStatusChanged.Arn
+  PowerUpdateIsConnectedPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt ConnectionStatusListener.Arn
+      Principal: iot.amazonaws.com
+      SourceArn: !GetAtt PowerUpdateIsConnected.Arn
   consumer:
     Type: AWS::Serverless::Function
     Properties:
@@ -313,4 +331,4 @@ Resources:
           Resource:
           - arn:aws:iot:eu-west-2:670763423833:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/update/*
           - arn:aws:iot:eu-west-2:670763423833:topic/dags/${iot:Connection.Thing.ThingName}/status/request
-      PolicyName: detectordag-edge-policy
+
