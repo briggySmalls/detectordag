@@ -98,6 +98,39 @@ Resources:
                 - 'ses:VerifyEmailIdentity'
                 - 'ses:GetIdentityVerificationAttributes'
               Resource: '*'
+  PowerStatusChanged:
+    Type: AWS::IoT::TopicRule
+    Properties:
+      RuleName: PowerStatusChanged
+      TopicRulePayload:
+        RuleDisabled: 'false'
+        Sql: SELECT topic(3) as deviceId, timestamp, current.state.reported as state, current.metadata.reported as updated FROM '$aws/things/+/shadow/update/documents' WHERE current.state.reported.status <> previous.state.reported.status
+        Actions:
+        - Lambda:
+            FunctionArn:
+              Ref: consumer
+  ConnectionStatusChanged:
+    Type: AWS::IoT::TopicRule
+    Properties:
+      RuleName: ConnectionStatusChanged
+      TopicRulePayload:
+        RuleDisabled: 'false'
+        Sql: SELECT * FROM '$aws/events/presence/#'
+        Actions:
+        - Lambda:
+            FunctionArn:
+              Ref: ConnectionStatusListener
+  PowerUpdateIsConnected:
+    Type: AWS::IoT::TopicRule
+    Properties:
+      RuleName: PowerUpdateIsConnected
+      TopicRulePayload:
+        RuleDisabled: 'false'
+        Sql: SELECT topic(3) as clientId, timestamp() as timestamp, "connected" as eventType FROM '$aws/things/+/shadow/update'
+        Actions:
+        - Lambda:
+            FunctionArn:
+              Ref: ConnectionStatusListener
   consumer:
     Type: AWS::Serverless::Function
     Properties:
@@ -252,3 +285,32 @@ Resources:
                 - 'sqs:GetQueueAttributes'
                 - 'sqs:ReceiveMessage'
               Resource: !Sub ${ConnectionStatusQueue.Arn}
+  ThingPolicy:
+    Type: AWS::IoT::Policy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - iot:Connect
+          Resource:
+          - arn:aws:iot:eu-west-2:670763423833:client/${iot:Connection.Thing.ThingName}
+        - Effect: Allow
+          Action:
+          - iot:Publish
+          Resource:
+          - arn:aws:iot:eu-west-2:670763423833:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/update
+        - Effect: Allow
+          Action:
+          - iot:Subscribe
+          Resource:
+          - arn:aws:iot:eu-west-2:670763423833:topicfilter/$aws/things/${iot:Connection.Thing.ThingName}/shadow/update/*
+          - arn:aws:iot:eu-west-2:670763423833:topicfilter/dags/${iot:Connection.Thing.ThingName}/status/request
+        - Effect: Allow
+          Action:
+          - iot:Receive
+          Resource:
+          - arn:aws:iot:eu-west-2:670763423833:topic/$aws/things/${iot:Connection.Thing.ThingName}/shadow/update/*
+          - arn:aws:iot:eu-west-2:670763423833:topic/dags/${iot:Connection.Thing.ThingName}/status/request
+      PolicyName: detectordag-edge-policy
