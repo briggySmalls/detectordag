@@ -328,8 +328,9 @@ func TestRequestStatusUpdate(t *testing.T) {
 		topic    = "dags/eb49b2e7-fd3a-4c03-b47f-b819281475e5/status/request"
 	)
 	mock.EXPECT().Publish(&iotdataplane.PublishInput{
-		Qos:   aws.Int64(1),
-		Topic: aws.String(topic),
+		Qos:     aws.Int64(1),
+		Topic:   aws.String(topic),
+		Payload: []byte("{}"),
 	}).Return(nil, nil)
 	// Run the test
 	assert.Nil(t, client.RequestStatusUpdate(deviceID))

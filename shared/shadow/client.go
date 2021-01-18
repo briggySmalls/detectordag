@@ -163,8 +163,9 @@ func (c *client) UpdateConnectionTransientID(deviceID, ID string) error {
 
 func (c *client) RequestStatusUpdate(deviceID string) error {
 	_, err := c.dp.Publish(&iotdataplane.PublishInput{
-		Qos:   aws.Int64(1),
-		Topic: aws.String(fmt.Sprintf(TopicPatternRequestStatusUpdate, deviceID)),
+		Qos:     aws.Int64(1),
+		Topic:   aws.String(fmt.Sprintf(TopicPatternRequestStatusUpdate, deviceID)),
+		Payload: []byte("{}"),
 	})
 	return err
 }
