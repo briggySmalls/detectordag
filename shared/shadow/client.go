@@ -13,12 +13,17 @@ import (
 	"github.com/aws/aws-sdk-go/service/iotdataplane/iotdataplaneiface"
 )
 
+const (
+	TopicPatternRequestStatusUpdate = "dags/%s/status/request"
+)
+
 // Client represents a client to the device shadow service
 type Client interface {
 	Get(deviceId string) (*Shadow, error)
 	UpdateConnectionStatus(deviceID string, status string, updated time.Time) (*Shadow, error)
 	UpdateConnectionTransientID(deviceID string, ID string) error
 	UpdateName(deviceId, name string) (*Shadow, error)
+	RequestStatusUpdate(deviceID string) error
 }
 
 type client struct {
@@ -152,6 +157,15 @@ func (c *client) UpdateConnectionTransientID(deviceID, ID string) error {
 	_, err = c.dp.UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
 		ThingName: aws.String(deviceID),
 		Payload:   payload,
+	})
+	return err
+}
+
+func (c *client) RequestStatusUpdate(deviceID string) error {
+	_, err := c.dp.Publish(&iotdataplane.PublishInput{
+		Qos:     aws.Int64(1),
+		Topic:   aws.String(fmt.Sprintf(TopicPatternRequestStatusUpdate, deviceID)),
+		Payload: []byte("{}"),
 	})
 	return err
 }

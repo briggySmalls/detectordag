@@ -58,6 +58,8 @@ func TestDisconnectedEvents(t *testing.T) {
 			mockShadowClient.EXPECT().Get(deviceID).Return(&shadow.Shadow{Connection: shadow.ConnectionShadow{
 				Status: params.currentStatus,
 			}}, nil),
+			// Expect a
+			mockShadowClient.EXPECT().RequestStatusUpdate(deviceID),
 			// This test checks that events are enqueued
 			mockSQSClient.EXPECT().QueueConnectionEvent(gomock.Any()).Do(func(payload sqs.ConnectionEventPayload) {
 				assert.Equal(t, deviceID, payload.DeviceID)

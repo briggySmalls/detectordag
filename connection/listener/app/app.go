@@ -78,7 +78,9 @@ func (a *app) RunJob(ctx context.Context, event DeviceLifecycleEvent) error {
 		// Send emails to indicate the updated status
 		return a.updater.UpdateConnectionStatus(event.DeviceID, eventTime, event.EventType)
 	} else if event.EventType == shadow.CONNECTION_STATUS_DISCONNECTED {
-		// TODO: Ask the device to confirm if it's connected
+		// Ask the device to confirm if it's connected
+		log.Printf("Request status update from device '%s' to confirm disconnection", event.DeviceID)
+		a.shadow.RequestStatusUpdate(event.DeviceID)
 		// Enqueue a callback to check if the device responds
 		return a.sqs.QueueConnectionEvent(connectionEventPayload)
 	} else {

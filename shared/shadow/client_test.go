@@ -86,14 +86,8 @@ func TestGetShadow(t *testing.T) {
 	}
 	// Cycle through the tests
 	for _, params := range testParams {
-		// Create mock controller
-		ctrl := gomock.NewController(t)
-		// Create mock database client
-		mock := NewMockIoTDataPlaneAPI(ctrl)
-		// Create the unit under test
-		client := client{
-			dp: mock,
-		}
+		// Create mocks
+		client, mock := createStubbedClient(t)
 		// Configure expectations
 		mock.EXPECT().GetThingShadow(&iotdataplane.GetThingShadowInput{
 			ThingName: aws.String(params.deviceID),
@@ -270,14 +264,8 @@ func TestUpdateShadow(t *testing.T) {
 	// Iterate the tests
 	for i, params := range testParams {
 		log.Printf("Test iteration: %d", i)
-		// Create mock controller
-		ctrl := gomock.NewController(t)
-		// Create mock database client
-		mock := NewMockIoTDataPlaneAPI(ctrl)
-		// Create the unit under test
-		client := client{
-			dp: mock,
-		}
+		// Create mocks
+		client, mock := createStubbedClient(t)
 		// Configure expectations
 		mock.EXPECT().UpdateThingShadow(&iotdataplane.UpdateThingShadowInput{
 			ThingName: aws.String(params.deviceID),
@@ -290,7 +278,7 @@ func TestUpdateShadow(t *testing.T) {
 				Payload: []byte(params.returnPayload),
 			}, nil)
 		// Run the test
-		shadow, err := params.testFunc(&client)
+		shadow, err := params.testFunc(client)
 		assert.Nil(t, err)
 		assert.Equal(t, params.shadow, shadow)
 	}
@@ -329,4 +317,33 @@ func TestUpdateTransientID(t *testing.T) {
 		err := client.UpdateConnectionTransientID(params.deviceID, params.transientID)
 		assert.Nil(t, err)
 	}
+}
+
+func TestRequestStatusUpdate(t *testing.T) {
+	// Create mocks
+	client, mock := createStubbedClient(t)
+	// Expect a call
+	const (
+		deviceID = "eb49b2e7-fd3a-4c03-b47f-b819281475e5"
+		topic    = "dags/eb49b2e7-fd3a-4c03-b47f-b819281475e5/status/request"
+	)
+	mock.EXPECT().Publish(&iotdataplane.PublishInput{
+		Qos:     aws.Int64(1),
+		Topic:   aws.String(topic),
+		Payload: []byte("{}"),
+	}).Return(nil, nil)
+	// Run the test
+	assert.Nil(t, client.RequestStatusUpdate(deviceID))
+}
+
+func createStubbedClient(t *testing.T) (Client, *MockIoTDataPlaneAPI) {
+	// Create mock controller
+	ctrl := gomock.NewController(t)
+	// Create mock database client
+	mock := NewMockIoTDataPlaneAPI(ctrl)
+	// Create the unit under test
+	client := client{
+		dp: mock,
+	}
+	return &client, mock
 }
