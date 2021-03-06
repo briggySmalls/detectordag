@@ -20,11 +20,11 @@ Broadly the system divides in two:
 - 'the cloud'
 
 An edge device is a RaspberryPi-Zero device paired with the UPS-Lite uninterruptable power supply
-and an LTE dongle for connectivity. Software is deployed via BalenaCloud, along with other fleet management tasks.
+and an LTE dongle for connectivity. Software is deployed via [BalenaCloud](https://www.balena.io/cloud/),
+along with other fleet management tasks.
 
 The cloud sub-system is a collection of serverless entities on AWS:
 including IoT Core, Lambda, API gateway, SQS.
-
 The Cloudformation designer, when supplied this project's [template.yml](./template.yml) gives this spaghetti mess:
 
 ![aws architecture](./docs/aws-architecture.png)
