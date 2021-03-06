@@ -37,8 +37,6 @@ class ClientConfig:
 
 class CloudClient:
     """Client for interfacing with the cloud"""
-
-    _QOS = 1
     _OPERATION_TIMEOUT = 5
 
     def __init__(
