@@ -17,7 +17,7 @@ const (
 )
 
 // Reads all .txt files in the current folder
-// and encodes them as strings literals in textfiles.go
+// and encodes them as strings literals in 'outputName'
 func main() {
 	// Grab the directory to work on
 	argsWithoutProg := os.Args[1:]
@@ -39,7 +39,7 @@ func main() {
 			// Add a variable with the same name as the file
 			_, err = out.Write([]byte(
 				fmt.Sprintf(
-					"%sHtmlTemplateSource = `",
+					"%sHTMLTemplateSource = `",
 					strings.TrimSuffix(f.Name(), suffixOfInterest),
 				),
 			))
