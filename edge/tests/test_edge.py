@@ -2,7 +2,7 @@
 # pylint: disable=redefined-outer-name
 
 from unittest.mock import Mock, patch
-from typing import Generator
+from typing import Generator, cast
 
 import pytest
 from pathlib import Path
@@ -24,7 +24,7 @@ def aws() -> Generator[Mock, None, None]:
 def timer() -> Mock:
     """Mock our periodic timer"""
     with patch("edge.edge.PeriodicTimer", autospec=True) as mock:
-        return mock.return_value
+        return cast(Mock, mock.return_value)
 
 
 @pytest.fixture
