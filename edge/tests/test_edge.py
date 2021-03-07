@@ -4,6 +4,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+from pathlib import Path
 
 from edge.config import AppConfig
 from edge.data import DeviceShadowState
@@ -19,14 +20,14 @@ def aws() -> Mock:
 
 
 @pytest.fixture
-def timer() -> None:
+def timer() -> Mock:
     """Mock our periodic timer"""
     with patch("edge.edge.PeriodicTimer", autospec=True) as mock:
         return mock.return_value
 
 
 @pytest.fixture
-def device() -> None:
+def device() -> MockDigitalInputDevice:
     """Mock digital device"""
     device = MockDigitalInputDevice(9)
     # Ensure the device is reading 'low'
@@ -35,7 +36,7 @@ def device() -> None:
 
 
 @pytest.fixture
-def config(tmp_path) -> None:
+def config(tmp_path: Path) -> AppConfig:
     """Create a configuration for the tests"""
     return AppConfig(
         aws_thing_name="",
@@ -49,7 +50,7 @@ def config(tmp_path) -> None:
     )
 
 
-def test_setup(config, aws, device) -> None:
+def test_setup(config: AppConfig, aws: Mock, device: Mock) -> None:
     """Confirm we can start the application"""
     # Create the unit under test
     with EdgeApp(device, config):

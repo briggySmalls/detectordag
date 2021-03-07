@@ -1,7 +1,7 @@
 """Module for basic data structures"""
 
 from enum import Enum
-from typing import Any
+from typing import Union
 
 from pydantic import BaseModel, validator
 from stringcase import camelcase
@@ -26,7 +26,7 @@ class DeviceShadowState(BaseModel):  # pylint: disable=too-few-public-methods
 
     @validator("status", pre=True)
     @classmethod
-    def _to_status(cls, status: Any) -> PowerStatus:
+    def _to_status(cls, status: Union[PowerStatus, bool, int]) -> PowerStatus:
         """Map a boolean input for status to the correct string"""
         if isinstance(status, bool):
             return PowerStatus.ON if status else PowerStatus.OFF

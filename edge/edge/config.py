@@ -2,10 +2,11 @@
 import base64
 import os
 from pathlib import Path
-from typing import List, Union
+from typing import List, Union, Dict, Any
 
 from environs import Env, EnvError
 from pydantic import BaseModel, ValidationError, validator
+from pydantic.fields import ModelField
 
 
 _CERTS = {
@@ -32,12 +33,12 @@ def _write_cert(cert: str, file: Path) -> None:
         output_file.write(base64.b64decode(cert))
 
 
-def _convert_cert(value: Union[str, Path], field: str, values) -> Path:
+def _convert_cert(value: Union[str, Path], field: ModelField, values: Dict[str, Any]) -> Path:
     if isinstance(value, Path):
         # Short-circuit, we're not being asked to convert from base64
         return value
     # Pull out the certs dir from the queued variables
-    certs_dir = values["certs_dir"].expanduser()
+    certs_dir: Path = values["certs_dir"].expanduser()
     certs_dir.mkdir(exist_ok=True, parents=True)
     # Establish the path of the new certificate file
     cert_path = certs_dir / _CERTS[field.name]

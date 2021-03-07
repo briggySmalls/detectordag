@@ -50,6 +50,6 @@ def test_serialize(state: DeviceShadowState, output: str) -> None:
 
 
 @pytest.mark.parametrize("output,payload", _DATA)
-def test_deserialize(payload: str, output: DeviceShadowState):
+def test_deserialize(payload: str, output: DeviceShadowState) -> None:
     """Test that we can deserialise from string to to object"""
     assert DeviceShadowState.parse_raw(payload) == output

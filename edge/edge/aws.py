@@ -4,7 +4,7 @@ from asyncio import Future
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
-from typing import Callable, Optional, Type
+from typing import Callable, Optional, Type, Any
 
 from awscrt import io
 from awscrt import mqtt as awsmqtt
@@ -12,6 +12,7 @@ from awsiot import mqtt_connection_builder
 from awsiot.iotshadow import IotShadowClient, ShadowState, UpdateShadowRequest
 
 from edge.data import DeviceShadowState
+from edge.exceptions import DetectorDagException
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,6 +33,9 @@ class CloudClient:
     """Client for interfacing with the cloud"""
 
     _OPERATION_TIMEOUT = 5
+
+    _mqtt: Optional[awsmqtt.Connection]
+    _shadow: Optional[IotShadowClient]
 
     def __init__(
         self, config: ClientConfig, status_request_callback: Callable[[], None]
@@ -73,8 +77,10 @@ class CloudClient:
     ) -> None:
         del exc_type, exc_value, traceback
         _LOGGER.info("Disconnecting MQTT")
-        future = self._mqtt.disconnect()
-        future.result()
+        assert self._mqtt != None
+        if self._mqtt is not None:
+            future = self._mqtt.disconnect()
+            future.result()
 
     def send_status_update(
         self,
@@ -95,6 +101,8 @@ class CloudClient:
             ),
         )
         # Make the request
+        if self._shadow is None:
+            raise DetectorDagException("Shadow is not started")
         future = self._shadow.publish_update_shadow(
             request, awsmqtt.QoS.AT_LEAST_ONCE
         )
@@ -135,7 +143,7 @@ class CloudClient:
     def _on_status_update_published(_: Future) -> None:
         _LOGGER.debug("Status update published")
 
-    def _on_status_requested(self, topic: str, payload: str, **kwargs) -> None:
+    def _on_status_requested(self, topic: str, payload: str, **kwargs: Any) -> None:
         del topic, payload, kwargs
         _LOGGER.debug("Status update requested")
         self._status_request_callback()

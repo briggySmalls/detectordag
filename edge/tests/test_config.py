@@ -58,7 +58,7 @@ def test_present(monkeypatch: Any, tmp_path: Path) -> None:
     config = AppConfig.from_env(dotenv=False)
 
     # Assert certificates are created
-    def calc_hash(file: Path):
+    def calc_hash(file: Path) -> bytes:
         return hashlib.md5(file.open("rb").read()).digest()
 
     aws_root_cert_path = tmp_path / "root-CA.crt"

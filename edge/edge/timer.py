@@ -1,11 +1,14 @@
 """Simple periodic timer"""
 
 from threading import Timer
-from typing import Callable
+from typing import Callable, Optional
 
 
 class PeriodicTimer:
     """Simple periodic timer"""
+    _callback: Callable[[], None]
+    _period: float
+    _timer: Optional[Timer]
 
     def __init__(self, period: float, callback: Callable[[], None]) -> None:
         self._callback = callback
