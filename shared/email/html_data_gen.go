@@ -1,7 +1,7 @@
-package email 
+package email
 
 const (
-updateHTMLTemplateSource = `<!doctype html>
+	updateHTMLTemplateSource = `<!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 
 <head>
@@ -114,9 +114,9 @@ updateHTMLTemplateSource = `<!doctype html>
             <td style="direction:ltr;font-size:0px;padding:0;text-align:center;">
               <!--[if mso | IE]>
                   <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                
+
         <tr>
-      
+
             <td
                class="" style="width:600px;"
             >
@@ -127,7 +127,7 @@ updateHTMLTemplateSource = `<!doctype html>
            border="0" cellpadding="0" cellspacing="0" role="presentation"
         >
           <tr>
-        
+
               <td
                  style="vertical-align:middle;width:300px;"
               >
@@ -151,7 +151,7 @@ updateHTMLTemplateSource = `<!doctype html>
                 </div>
                 <!--[if mso | IE]>
               </td>
-              
+
               <td
                  style="vertical-align:middle;width:300px;"
               >
@@ -167,16 +167,16 @@ updateHTMLTemplateSource = `<!doctype html>
                 </div>
                 <!--[if mso | IE]>
               </td>
-              
+
           </tr>
           </table>
         <![endif]-->
               </div>
               <!--[if mso | IE]>
             </td>
-          
+
         </tr>
-      
+
                   </table>
                 <![endif]-->
             </td>
@@ -204,9 +204,9 @@ updateHTMLTemplateSource = `<!doctype html>
             <td style="direction:ltr;font-size:0px;padding:20px 0;padding-bottom:5px;text-align:center;">
               <!--[if mso | IE]>
                   <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                
+
         <tr>
-      
+
             <td
                class="" style="vertical-align:top;width:600px;"
             >
@@ -222,9 +222,9 @@ updateHTMLTemplateSource = `<!doctype html>
               </div>
               <!--[if mso | IE]>
             </td>
-          
+
         </tr>
-      
+
                   </table>
                 <![endif]-->
             </td>
@@ -252,9 +252,9 @@ updateHTMLTemplateSource = `<!doctype html>
             <td style="direction:ltr;font-size:0px;padding:20px 0;padding-top:0;text-align:center;">
               <!--[if mso | IE]>
                   <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                
+
         <tr>
-      
+
             <td
                class="" style="vertical-align:top;width:600px;"
             >
@@ -270,9 +270,9 @@ updateHTMLTemplateSource = `<!doctype html>
               </div>
               <!--[if mso | IE]>
             </td>
-          
+
         </tr>
-      
+
                   </table>
                 <![endif]-->
             </td>
@@ -300,9 +300,9 @@ updateHTMLTemplateSource = `<!doctype html>
             <td style="direction:ltr;font-size:0px;padding:20px 0;text-align:center;">
               <!--[if mso | IE]>
                   <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                
+
         <tr>
-      
+
             <td
                class="" style="vertical-align:top;width:420px;"
             >
@@ -341,9 +341,9 @@ updateHTMLTemplateSource = `<!doctype html>
               </div>
               <!--[if mso | IE]>
             </td>
-          
+
         </tr>
-      
+
                   </table>
                 <![endif]-->
             </td>
@@ -371,9 +371,9 @@ updateHTMLTemplateSource = `<!doctype html>
             <td style="direction:ltr;font-size:0px;padding:20px 0;text-align:center;">
               <!--[if mso | IE]>
                   <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                
+
         <tr>
-      
+
             <td
                class="" style="vertical-align:top;width:600px;"
             >
@@ -400,9 +400,9 @@ updateHTMLTemplateSource = `<!doctype html>
               </div>
               <!--[if mso | IE]>
             </td>
-          
+
         </tr>
-      
+
                   </table>
                 <![endif]-->
             </td>
@@ -430,9 +430,9 @@ updateHTMLTemplateSource = `<!doctype html>
             <td style="direction:ltr;font-size:0px;padding:20px 0;text-align:center;">
               <!--[if mso | IE]>
                   <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                
+
         <tr>
-      
+
             <td
                class="" style="vertical-align:top;width:600px;"
             >
@@ -448,9 +448,9 @@ updateHTMLTemplateSource = `<!doctype html>
               </div>
               <!--[if mso | IE]>
             </td>
-          
+
         </tr>
-      
+
                   </table>
                 <![endif]-->
             </td>
