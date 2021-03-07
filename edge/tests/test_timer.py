@@ -1,3 +1,5 @@
+"""Tests for the timer class"""
+
 from time import sleep
 
 import pytest
@@ -6,6 +8,7 @@ from edge.timer import PeriodicTimer
 
 
 def test_timer() -> None:
+    """Test running a timer over multiple ticks"""
     # Create a timer to increment periodically
     period = 0.01
     counter = 0
@@ -14,19 +17,20 @@ def test_timer() -> None:
         nonlocal counter
         counter += 1
 
-    t = PeriodicTimer(period, increment)
+    timer = PeriodicTimer(period, increment)
     # Start
-    t.start()
+    timer.start()
     # Wait a bit
     factor = 10
     sleep(period * factor)
     # Expect roughly 'factor' number of ticks
     assert pytest.approx(factor, counter)
-    t.stop()
+    timer.stop()
 
 
 def test_stop_timer() -> None:
+    """Test stopping the timer"""
     # Create
-    t = PeriodicTimer(0.01, lambda: print("hi"))
+    timer = PeriodicTimer(0.01, lambda: print("hi"))
     # Ensure we can 'stop' it without ever starting it
-    t.stop()
+    timer.stop()

@@ -1,22 +1,14 @@
 """Logic for connecting to AWS IoT"""
 import logging
-from asyncio import Future
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
-from typing import Optional, Type, Callable
+from typing import Any, Awaitable, Callable, Optional, Type
 
 from awscrt import io
 from awscrt import mqtt as awsmqtt
 from awsiot import mqtt_connection_builder
-from awsiot.iotshadow import (
-    ErrorResponse,
-    IotShadowClient,
-    ShadowState,
-    UpdateShadowRequest,
-    UpdateShadowResponse,
-    UpdateShadowSubscriptionRequest,
-)
+from awsiot.iotshadow import IotShadowClient, ShadowState, UpdateShadowRequest
 
 from edge.data import DeviceShadowState
 
@@ -37,7 +29,11 @@ class ClientConfig:
 
 class CloudClient:
     """Client for interfacing with the cloud"""
+
     _OPERATION_TIMEOUT = 5
+
+    _mqtt: Optional[awsmqtt.Connection]
+    _shadow: Optional[IotShadowClient]
 
     def __init__(
         self, config: ClientConfig, status_request_callback: Callable[[], None]
@@ -60,7 +56,7 @@ class CloudClient:
         connected_future = self._mqtt.connect()
         # Create a shadow client
         _LOGGER.info("Creating shadow client...")
-        self._shadow = self._create_shadow_client(self._mqtt)
+        self._shadow = IotShadowClient(self._mqtt)
         # Wait for connection to be fully established.
         # Note that it's not necessary to wait, commands issued to the
         # mqtt_connection before its fully connected will simply be queued.
@@ -79,6 +75,7 @@ class CloudClient:
     ) -> None:
         del exc_type, exc_value, traceback
         _LOGGER.info("Disconnecting MQTT")
+        assert self._mqtt is not None
         future = self._mqtt.disconnect()
         future.result()
 
@@ -101,7 +98,10 @@ class CloudClient:
             ),
         )
         # Make the request
-        future = self._shadow.publish_update_shadow(request, awsmqtt.QoS.AT_LEAST_ONCE)
+        assert self._shadow is not None
+        future = self._shadow.publish_update_shadow(
+            request, awsmqtt.QoS.AT_LEAST_ONCE
+        )
         future.add_done_callback(self._on_status_update_published)
 
     def _create_mqtt_connection(
@@ -117,11 +117,6 @@ class CloudClient:
             client_id=self._config.device_id,
             keep_alive_secs=self._config.keep_alive,
         )
-
-    def _create_shadow_client(self, mqtt: awsmqtt.Connection) -> IotShadowClient:
-        # Create the client
-        shadow = IotShadowClient(mqtt)
-        return shadow
 
     def _subscribe_to_update_requests(self, mqtt: awsmqtt.Connection) -> None:
         subscribe_future, _ = mqtt.subscribe(
@@ -141,9 +136,12 @@ class CloudClient:
         return f"dags/{self._config.device_id}/status/request"
 
     @staticmethod
-    def _on_status_update_published(_: Future) -> None:
+    def _on_status_update_published(_: Awaitable[None]) -> None:
         _LOGGER.debug("Status update published")
 
-    def _on_status_requested(self, topic: str, payload: str, **kwargs) -> None:
+    def _on_status_requested(
+        self, topic: str, payload: str, **kwargs: Any
+    ) -> None:
+        del topic, payload, kwargs
         _LOGGER.debug("Status update requested")
         self._status_request_callback()

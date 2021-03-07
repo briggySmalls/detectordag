@@ -21,11 +21,16 @@ _LOGGER = logging.getLogger(__name__)
 class EdgeApp:
     """Wrapper for the entire application"""
 
+    _previous_status: Optional[DeviceShadowState]
+
     def __init__(self, device: DigitalInputDevice, config: AppConfig) -> None:
         self.config = config
         _LOGGER.info(
             "Parsed configuration:\n{\n%s\n}",
-            "\n".join([f"    {key}: {value}" for key, value in config.dict().items()]))
+            "\n".join(
+                [f"    {key}: {value}" for key, value in config.dict().items()]
+            ),
+        )
         # Prepare configuration for the client
         client_config = ClientConfig(
             device_id=config.aws_thing_name,
@@ -39,7 +44,9 @@ class EdgeApp:
         # Create the client
         self._client = CloudClient(client_config, self._publish_update)
         # Prepare to periodically check for status changes
-        self._timer = PeriodicTimer(config.power_poll_period, self._check_status)
+        self._timer = PeriodicTimer(
+            config.power_poll_period, self._check_status
+        )
         self._previous_status = None
 
     def __enter__(self) -> "EdgeApp":

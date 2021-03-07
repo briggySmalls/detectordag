@@ -1,7 +1,9 @@
 """Tests for edge application"""
 # pylint: disable=redefined-outer-name
 
-from unittest.mock import Mock, call, patch
+from pathlib import Path
+from typing import Generator, cast
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -12,19 +14,22 @@ from edge.mocks import MockDigitalInputDevice
 
 
 @pytest.fixture
-def aws() -> Mock:
+def aws() -> Generator[Mock, None, None]:
+    """Mock our mqtt client wrapper"""
     with patch("edge.edge.CloudClient", autospec=True) as mock:
         yield mock.return_value
 
 
 @pytest.fixture
-def timer() -> None:
+def timer() -> Mock:
+    """Mock our periodic timer"""
     with patch("edge.edge.PeriodicTimer", autospec=True) as mock:
-        return mock.return_value
+        return cast(Mock, mock.return_value)
 
 
 @pytest.fixture
-def device() -> None:
+def device() -> MockDigitalInputDevice:
+    """Mock digital device"""
     device = MockDigitalInputDevice(9)
     # Ensure the device is reading 'low'
     device.low()
@@ -32,7 +37,8 @@ def device() -> None:
 
 
 @pytest.fixture
-def config(tmp_path) -> None:
+def config(tmp_path: Path) -> AppConfig:
+    """Create a configuration for the tests"""
     return AppConfig(
         aws_thing_name="",
         aws_root_cert=tmp_path,
@@ -45,7 +51,8 @@ def config(tmp_path) -> None:
     )
 
 
-def test_setup(config, aws, device) -> None:
+def test_setup(config: AppConfig, aws: Mock, device: Mock) -> None:
+    """Confirm we can start the application"""
     # Create the unit under test
     with EdgeApp(device, config):
         # Check we immediately send an update

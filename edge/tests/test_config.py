@@ -1,9 +1,9 @@
 """Tests for `edge` package."""
 # pylint: disable=redefined-outer-name
 
+import hashlib
 from pathlib import Path
 from typing import Any
-import hashlib
 
 import pytest
 
@@ -56,18 +56,28 @@ def test_present(monkeypatch: Any, tmp_path: Path) -> None:
     monkeypatch.setenv("CERT_DIR", str(tmp_path))
     # Create the config
     config = AppConfig.from_env(dotenv=False)
+
     # Assert certificates are created
-    def calc_hash(file: Path):
-        return hashlib.md5(file.open('rb').read()).digest()
+    def calc_hash(file: Path) -> bytes:
+        return hashlib.md5(file.open("rb").read()).digest()
 
     aws_root_cert_path = tmp_path / "root-CA.crt"
-    assert calc_hash(aws_root_cert_path) == b"L\xb3+l\x08\xb3\xe4\xe8;%\xb0\x9d]g\x83'"
+    assert (
+        calc_hash(aws_root_cert_path)
+        == b"L\xb3+l\x08\xb3\xe4\xe8;%\xb0\x9d]g\x83'"
+    )
 
     aws_thing_cert_path = tmp_path / "thing.cert.pem"
-    assert calc_hash(aws_thing_cert_path) == b'\xc8\x8a\x9a\xfb^\xbf\x90\x8a\xf1\xd5x\x8dq\x93\x05V'
+    assert (
+        calc_hash(aws_thing_cert_path)
+        == b"\xc8\x8a\x9a\xfb^\xbf\x90\x8a\xf1\xd5x\x8dq\x93\x05V"
+    )
 
     aws_thing_key_path = tmp_path / "thing.private.key"
-    assert calc_hash(aws_thing_key_path) == b'\x15\x98\xf0\x0b\r\x9cc\x9a&\xcd6\x10\xef\\\\_'
+    assert (
+        calc_hash(aws_thing_key_path)
+        == b"\x15\x98\xf0\x0b\r\x9cc\x9a&\xcd6\x10\xef\\\\_"
+    )
 
     # Assert values
     assert config.aws_endpoint == aws_endpoint
