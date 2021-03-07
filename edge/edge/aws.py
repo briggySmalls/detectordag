@@ -4,7 +4,7 @@ from asyncio import Future
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
-from typing import Optional, Type, Callable
+from typing import Callable, Optional, Type
 
 from awscrt import io
 from awscrt import mqtt as awsmqtt
@@ -37,6 +37,7 @@ class ClientConfig:
 
 class CloudClient:
     """Client for interfacing with the cloud"""
+
     _OPERATION_TIMEOUT = 5
 
     def __init__(
@@ -101,7 +102,9 @@ class CloudClient:
             ),
         )
         # Make the request
-        future = self._shadow.publish_update_shadow(request, awsmqtt.QoS.AT_LEAST_ONCE)
+        future = self._shadow.publish_update_shadow(
+            request, awsmqtt.QoS.AT_LEAST_ONCE
+        )
         future.add_done_callback(self._on_status_update_published)
 
     def _create_mqtt_connection(
@@ -118,7 +121,9 @@ class CloudClient:
             keep_alive_secs=self._config.keep_alive,
         )
 
-    def _create_shadow_client(self, mqtt: awsmqtt.Connection) -> IotShadowClient:
+    def _create_shadow_client(
+        self, mqtt: awsmqtt.Connection
+    ) -> IotShadowClient:
         # Create the client
         shadow = IotShadowClient(mqtt)
         return shadow
