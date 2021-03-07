@@ -2,12 +2,11 @@
 import base64
 import os
 from pathlib import Path
-from typing import List, Union, Dict, Any
+from typing import Any, Dict, List, Union
 
 from environs import Env, EnvError
 from pydantic import BaseModel, ValidationError, validator
 from pydantic.fields import ModelField
-
 
 _CERTS = {
     "aws_root_cert": "root-CA.crt",
@@ -33,7 +32,9 @@ def _write_cert(cert: str, file: Path) -> None:
         output_file.write(base64.b64decode(cert))
 
 
-def _convert_cert(value: Union[str, Path], field: ModelField, values: Dict[str, Any]) -> Path:
+def _convert_cert(
+    value: Union[str, Path], field: ModelField, values: Dict[str, Any]
+) -> Path:
     if isinstance(value, Path):
         # Short-circuit, we're not being asked to convert from base64
         return value

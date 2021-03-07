@@ -20,6 +20,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class EdgeApp:
     """Wrapper for the entire application"""
+
     _previous_status: Optional[DeviceShadowState]
 
     def __init__(self, device: DigitalInputDevice, config: AppConfig) -> None:

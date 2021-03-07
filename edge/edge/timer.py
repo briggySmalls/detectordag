@@ -6,6 +6,7 @@ from typing import Callable, Optional
 
 class PeriodicTimer:
     """Simple periodic timer"""
+
     # Note: callback is not optional but mypy has a bug:
     # https://github.com/python/mypy/issues/708
     _callback: Optional[Callable[[], None]]

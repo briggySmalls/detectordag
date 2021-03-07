@@ -4,7 +4,7 @@ from asyncio import Future
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
-from typing import Callable, Optional, Type, Any
+from typing import Any, Callable, Optional, Type
 
 from awscrt import io
 from awscrt import mqtt as awsmqtt
@@ -12,7 +12,6 @@ from awsiot import mqtt_connection_builder
 from awsiot.iotshadow import IotShadowClient, ShadowState, UpdateShadowRequest
 
 from edge.data import DeviceShadowState
-from edge.exceptions import DetectorDagException
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -141,7 +140,9 @@ class CloudClient:
     def _on_status_update_published(_: Future[None]) -> None:
         _LOGGER.debug("Status update published")
 
-    def _on_status_requested(self, topic: str, payload: str, **kwargs: Any) -> None:
+    def _on_status_requested(
+        self, topic: str, payload: str, **kwargs: Any
+    ) -> None:
         del topic, payload, kwargs
         _LOGGER.debug("Status update requested")
         self._status_request_callback()
