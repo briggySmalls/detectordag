@@ -2,6 +2,7 @@
 # pylint: disable=redefined-outer-name
 
 from unittest.mock import Mock, patch
+from typing import Generator
 
 import pytest
 from pathlib import Path
@@ -13,7 +14,7 @@ from edge.mocks import MockDigitalInputDevice
 
 
 @pytest.fixture
-def aws() -> Mock:
+def aws() -> Generator[Mock, None, None]:
     """Mock our mqtt client wrapper"""
     with patch("edge.edge.CloudClient", autospec=True) as mock:
         yield mock.return_value

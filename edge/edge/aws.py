@@ -77,10 +77,9 @@ class CloudClient:
     ) -> None:
         del exc_type, exc_value, traceback
         _LOGGER.info("Disconnecting MQTT")
-        assert self._mqtt != None
-        if self._mqtt is not None:
-            future = self._mqtt.disconnect()
-            future.result()
+        assert self._mqtt is not None
+        future = self._mqtt.disconnect()
+        future.result()
 
     def send_status_update(
         self,
@@ -101,8 +100,7 @@ class CloudClient:
             ),
         )
         # Make the request
-        if self._shadow is None:
-            raise DetectorDagException("Shadow is not started")
+        assert self._shadow is not None
         future = self._shadow.publish_update_shadow(
             request, awsmqtt.QoS.AT_LEAST_ONCE
         )
