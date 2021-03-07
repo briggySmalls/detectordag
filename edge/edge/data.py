@@ -29,6 +29,6 @@ class DeviceShadowState(BaseModel):  # pylint: disable=too-few-public-methods
         """Map a boolean input for status to the correct string"""
         if isinstance(status, bool):
             return PowerStatus.ON if status else PowerStatus.OFF
-        elif isinstance(status, int):
+        if isinstance(status, int):
             return PowerStatus.ON if status == 1 else PowerStatus.OFF
         return status

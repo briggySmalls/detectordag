@@ -24,5 +24,6 @@ class PeriodicTimer:
         self._timer.start()
 
     def stop(self) -> None:
+        """Cancel the timers"""
         if self._timer is not None:
             self._timer.cancel()

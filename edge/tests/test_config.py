@@ -56,6 +56,7 @@ def test_present(monkeypatch: Any, tmp_path: Path) -> None:
     monkeypatch.setenv("CERT_DIR", str(tmp_path))
     # Create the config
     config = AppConfig.from_env(dotenv=False)
+
     # Assert certificates are created
     def calc_hash(file: Path):
         return hashlib.md5(file.open("rb").read()).digest()

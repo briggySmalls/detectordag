@@ -2,10 +2,17 @@
 import base64
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import List, Union
 
 from environs import Env, EnvError
 from pydantic import BaseModel, ValidationError, validator
+
+
+_CERTS = {
+    "aws_root_cert": "root-CA.crt",
+    "aws_thing_key": "thing.private.key",
+    "aws_thing_cert": "thing.cert.pem",
+}
 
 
 class ConfigError(Exception):
@@ -33,7 +40,7 @@ def _convert_cert(cls, value: Union[str, Path], field: str, values) -> Path:
     certs_dir = values["certs_dir"].expanduser()
     certs_dir.mkdir(exist_ok=True, parents=True)
     # Establish the path of the new certificate file
-    cert_path = certs_dir / cls._certs[field.name]
+    cert_path = certs_dir / _CERTS[field.name]
     # Create the file from the environment variable
     _write_cert(value, cert_path)
     # Replace the env variable content with the path to the certificate
@@ -65,11 +72,6 @@ class AppConfig(BaseModel):
         "keep_alive_period": ConfigMapper(
             identifier="KEEP_ALIVE_PERIOD", parser="int"
         ),
-    }
-    _certs = {
-        "aws_root_cert": "root-CA.crt",
-        "aws_thing_key": "thing.private.key",
-        "aws_thing_cert": "thing.cert.pem",
     }
 
     certs_dir: Path = Path("~/.detectordag/certs")

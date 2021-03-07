@@ -10,12 +10,9 @@ from awscrt import io
 from awscrt import mqtt as awsmqtt
 from awsiot import mqtt_connection_builder
 from awsiot.iotshadow import (
-    ErrorResponse,
     IotShadowClient,
     ShadowState,
     UpdateShadowRequest,
-    UpdateShadowResponse,
-    UpdateShadowSubscriptionRequest,
 )
 
 from edge.data import DeviceShadowState
@@ -61,7 +58,7 @@ class CloudClient:
         connected_future = self._mqtt.connect()
         # Create a shadow client
         _LOGGER.info("Creating shadow client...")
-        self._shadow = self._create_shadow_client(self._mqtt)
+        self._shadow = IotShadowClient(self._mqtt)
         # Wait for connection to be fully established.
         # Note that it's not necessary to wait, commands issued to the
         # mqtt_connection before its fully connected will simply be queued.
@@ -121,13 +118,6 @@ class CloudClient:
             keep_alive_secs=self._config.keep_alive,
         )
 
-    def _create_shadow_client(
-        self, mqtt: awsmqtt.Connection
-    ) -> IotShadowClient:
-        # Create the client
-        shadow = IotShadowClient(mqtt)
-        return shadow
-
     def _subscribe_to_update_requests(self, mqtt: awsmqtt.Connection) -> None:
         subscribe_future, _ = mqtt.subscribe(
             topic=self._status_request_topic,
@@ -150,5 +140,6 @@ class CloudClient:
         _LOGGER.debug("Status update published")
 
     def _on_status_requested(self, topic: str, payload: str, **kwargs) -> None:
+        del topic, payload, kwargs
         _LOGGER.debug("Status update requested")
         self._status_request_callback()
