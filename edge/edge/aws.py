@@ -138,7 +138,7 @@ class CloudClient:
         return f"dags/{self._config.device_id}/status/request"
 
     @staticmethod
-    def _on_status_update_published(_: Future) -> None:
+    def _on_status_update_published(_: Future[None]) -> None:
         _LOGGER.debug("Status update published")
 
     def _on_status_requested(self, topic: str, payload: str, **kwargs: Any) -> None:
