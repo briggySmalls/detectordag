@@ -3,7 +3,7 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
-from typing import Any, Callable, Optional, Type, Awaitable
+from typing import Any, Awaitable, Callable, Optional, Type
 
 from awscrt import io
 from awscrt import mqtt as awsmqtt
