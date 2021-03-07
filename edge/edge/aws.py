@@ -1,10 +1,9 @@
 """Logic for connecting to AWS IoT"""
 import logging
-from asyncio import Future
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
-from typing import Any, Callable, Optional, Type
+from typing import Any, Callable, Optional, Type, Awaitable
 
 from awscrt import io
 from awscrt import mqtt as awsmqtt
@@ -137,7 +136,7 @@ class CloudClient:
         return f"dags/{self._config.device_id}/status/request"
 
     @staticmethod
-    def _on_status_update_published(_: Future[None]) -> None:
+    def _on_status_update_published(_: Awaitable[None]) -> None:
         _LOGGER.debug("Status update published")
 
     def _on_status_requested(
