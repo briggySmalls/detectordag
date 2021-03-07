@@ -9,11 +9,7 @@ from typing import Callable, Optional, Type
 from awscrt import io
 from awscrt import mqtt as awsmqtt
 from awsiot import mqtt_connection_builder
-from awsiot.iotshadow import (
-    IotShadowClient,
-    ShadowState,
-    UpdateShadowRequest,
-)
+from awsiot.iotshadow import IotShadowClient, ShadowState, UpdateShadowRequest
 
 from edge.data import DeviceShadowState
 

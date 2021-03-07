@@ -32,7 +32,7 @@ def _write_cert(cert: str, file: Path) -> None:
         output_file.write(base64.b64decode(cert))
 
 
-def _convert_cert(cls, value: Union[str, Path], field: str, values) -> Path:
+def _convert_cert(value: Union[str, Path], field: str, values) -> Path:
     if isinstance(value, Path):
         # Short-circuit, we're not being asked to convert from base64
         return value
