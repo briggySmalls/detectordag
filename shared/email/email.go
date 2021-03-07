@@ -130,7 +130,7 @@ func ToStateType(connection string, power string) (StateType, error) {
 // NewEmailer gets a new Emailer
 func NewEmailer(ses sesiface.SESAPI, sender string) (Emailer, error) {
 	// Create templates
-	htmlTemplate, err := template.New("htmlTemplate").Parse(updateHtmlTemplateSource)
+	htmlTemplate, err := template.New("htmlTemplate").Parse(updateHTMLTemplateSource)
 	if err != nil {
 		return nil, err
 	}
