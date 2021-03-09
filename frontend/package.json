@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@types/superagent": "^4.1.7",
-    "axios": "^0.21.0",
+    "axios": "^0.21.1",
     "bootstrap": "^4.4.1",
     "bootstrap-vue": "^2.9.0",
     "core-js": "^3.6.4",
