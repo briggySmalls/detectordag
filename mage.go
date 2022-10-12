@@ -25,10 +25,10 @@ import (
 const (
 	// Directory for build outputs
 	buildDir                = "./build"
-	applicationName         = "detectordag-edge"
+	applicationName         = "detectordag-edge-rpi4"
 	awsProvisioningTemplate = "./config/thing.json"
-	balenaVersion           = "v2.54.2+rev1"
-	deviceType              = "raspberrypi"
+	balenaVersion           = "v2.108.27"
+	deviceType              = "raspberrypi4-64"
 	certFile                = "thing.cert.pem"
 	keyFile                 = "thing.private.key"
 	deviceIDEnvVar          = "DDAG_DEVICE_ID"
@@ -150,7 +150,9 @@ func ConfigureImg() error {
 		"--config-network", "ethernet",
 		"--config", configFile,
 		"--device", balenaDeviceID,
-		getDeviceImageFile(deviceID))
+		"--dev", // Deploy development images for now
+		getDeviceImageFile(deviceID),
+	)
 }
 
 // Register a new 'thing' on AWS
