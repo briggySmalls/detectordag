@@ -7,13 +7,8 @@ from edge.aws import ClientConfig, CloudClient
 from edge.config import AppConfig
 from edge.data import DeviceShadowState
 from edge.timer import PeriodicTimer
+from edge.power import Power
 
-try:
-    from gpiozero import DigitalInputDevice
-except ImportError:
-    from edge.mocks import (  # noqa: E501,  pylint: disable=ungrouped-imports
-        MockDigitalInputDevice as DigitalInputDevice,
-    )
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,7 +18,7 @@ class EdgeApp:
 
     _previous_status: Optional[DeviceShadowState]
 
-    def __init__(self, device: DigitalInputDevice, config: AppConfig) -> None:
+    def __init__(self, power: Power, config: AppConfig) -> None:
         self.config = config
         _LOGGER.info(
             "Parsed configuration:\n{\n%s\n}",
@@ -40,7 +35,7 @@ class EdgeApp:
             thing_key=config.aws_thing_key,
             keep_alive=config.keep_alive_period,
         )
-        self._device = device
+        self._power = power
         # Create the client
         self._client = CloudClient(client_config, self._publish_update)
         # Prepare to periodically check for status changes
@@ -77,7 +72,7 @@ class EdgeApp:
 
     def _get_status(self) -> DeviceShadowState:
         """Fetch the current device state"""
-        return DeviceShadowState(status=self._device.value)
+        return DeviceShadowState(status=self._power.is_powered())
 
     def _check_status(self) -> None:
         """

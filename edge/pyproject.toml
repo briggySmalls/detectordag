@@ -12,6 +12,7 @@ environs = "^9.2.0"
 pydantic = "^1.7.3"
 stringcase = "^1.2.0"
 awsiotsdk = "^1.5.3"
+smbus2 = "^0.4.2"
 
 [tool.poetry.dev-dependencies]
 invoke = "^1.4.1"

@@ -10,7 +10,7 @@ import pytest
 from edge.config import AppConfig
 from edge.data import DeviceShadowState
 from edge.edge import EdgeApp
-from edge.mocks import MockDigitalInputDevice
+from edge.mocks import MockPower
 
 
 @pytest.fixture
@@ -28,12 +28,13 @@ def timer() -> Mock:
 
 
 @pytest.fixture
-def device() -> MockDigitalInputDevice:
-    """Mock digital device"""
-    device = MockDigitalInputDevice(9)
-    # Ensure the device is reading 'low'
-    device.low()
-    return device
+def power() -> MockPower:
+    """Mock digital power"""
+    with patch("edge.ina219.INA219", autospec=True) as mock:
+        power = MockPower(mock)
+        # Ensure the power is reading 'low'
+        power.low()
+        return power
 
 
 @pytest.fixture
@@ -51,10 +52,10 @@ def config(tmp_path: Path) -> AppConfig:
     )
 
 
-def test_setup(config: AppConfig, aws: Mock, device: Mock) -> None:
+def test_setup(config: AppConfig, aws: Mock, power: Mock) -> None:
     """Confirm we can start the application"""
     # Create the unit under test
-    with EdgeApp(device, config):
+    with EdgeApp(power, config):
         # Check we immediately send an update
         aws.send_status_update.assert_called_once_with(
             DeviceShadowState(status="off")

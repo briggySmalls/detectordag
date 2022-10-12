@@ -3,15 +3,17 @@ import logging
 import sys
 from threading import Event
 from typing import Any
+from smbus2 import SMBus
 
 import click
 
 from edge.config import AppConfig
 from edge.edge import EdgeApp
+from edge.power import Power
+from edge.ina219 import INA219
 from edge.exceptions import DetectorDagException
 
-_POWER_PIN = 4
-_DEBOUNCE_DURATION = 0.2
+_I2C_BUS = 1
 
 
 @click.group()
@@ -33,17 +35,13 @@ def main(ctx: Any) -> None:
 def app(ctx: Any) -> None:
     """Run the 'production' edge software"""
     # Track power status GPIO
-    from gpiozero import (  # noqa: E501, pylint: disable=import-error,import-outside-toplevel
-        DigitalInputDevice,
-    )
-
-    power_status_device = DigitalInputDevice(
-        _POWER_PIN, bounce_time=_DEBOUNCE_DURATION
-    )
+    bus = SMBus(_I2C_BUS)
+    ina219 = INA219(bus)
+    power = Power(ina219)
 
     try:
         # Start the application
-        with EdgeApp(power_status_device, ctx.obj["config"]):
+        with EdgeApp(power, ctx.obj["config"]):
             # Sleep forever without burning clock cycles
             Event().wait()
     except DetectorDagException as err:
@@ -56,10 +54,10 @@ def mock(ctx: Any) -> None:
     """Run the mock edge software"""
     # Create a mock device
     from edge.mocks import (  # noqa: E501, pylint: disable=import-outside-toplevel
-        MockDigitalInputDevice,
+        MockPower,
     )
 
-    power_status_device = MockDigitalInputDevice(_POWER_PIN)
+    power_status_device = MockPower(_I2C_BUS)
     # Run the 'real' software
     with EdgeApp(power_status_device, ctx.obj["config"]):
         # Allow the user to toggle the power status
